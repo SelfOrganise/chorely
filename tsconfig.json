@@ -1,0 +1,25 @@
+{
+  "compilerOptions": {
+    "allowSyntheticDefaultImports": true,
+    "esModuleInterop": true,
+    "experimentalDecorators": false,
+    "outDir": "./dist/",
+    "strictNullChecks": true,
+    "inlineSourceMap": true,
+    "strict": true,
+    "module": "ESNext",
+    "jsx": "react",
+    "target": "ESNext",
+    "allowJs": true,
+    "moduleResolution": "node",
+    "resolveJsonModule": true,
+    "baseUrl": ".",
+    "skipLibCheck": true,
+    "paths": {
+      "srcRootDir/*": ["src/*"]
+    },
+    "noUnusedLocals": true
+  },
+  "include": ["./src/**/*.ts", "./src/**/*.tsx", "./src/**/*.js"],
+  "exclude": ["node_modules"]
+}
