@@ -22,7 +22,7 @@ app.use((req, res, next) => {
   if (req.url.startsWith('/login?')) {
     const userId = findUser(req.query['username']?.toString());
     if (userId) {
-      res.cookie('userId', userId, { maxAge: 90 * 24 * 60 * 60 * 1000, secure: true });
+      res.cookie('userId', userId, { maxAge: 90 * 24 * 60 * 60 * 1000, secure: true, sameSite: 'none' });
       res.sendStatus(204);
     } else {
       res.sendStatus(401);

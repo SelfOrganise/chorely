@@ -1,5 +1,4 @@
 import { pool } from './db';
-import { sendEmail } from '../services/email';
 
 interface Chore {
   id: number;
