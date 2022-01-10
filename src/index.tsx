@@ -18,7 +18,7 @@ const theme = createTheme({
 
 function Root(): JSX.Element {
   return (
-    <React.Fragment>
+    <ThemeProvider theme={theme}>
       <ToastContainer
         position="bottom-center"
         autoClose={5000}
@@ -31,11 +31,9 @@ function Root(): JSX.Element {
         pauseOnHover
       />
       <HashRouter>
-        <ThemeProvider theme={theme}>
-          <RouteDefinitions />
-        </ThemeProvider>
+        <RouteDefinitions />
       </HashRouter>
-    </React.Fragment>
+    </ThemeProvider>
   );
 }
 
