@@ -22,13 +22,12 @@ app.use((req, res, next) => {
   if (req.url.startsWith('/login?')) {
     const userId = findUser(req.query['username']?.toString());
     if (userId) {
-      res.cookie('userId', userId, { maxAge: 90 * 24 * 60 * 60 * 1000, secure: true, sameSite: 'none' });
-      res.sendStatus(204);
+      res.send({ userId });
     } else {
       res.sendStatus(401);
     }
   } else {
-    const userId = parseInt(req.cookies.userId);
+    const userId = parseInt(req.header('X-UserId')!);
     if (isNaN(userId)) {
       res.sendStatus(401);
     } else {
