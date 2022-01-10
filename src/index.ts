@@ -3,7 +3,7 @@ import bodyParser from 'body-parser';
 import cors from 'cors';
 import { completeChore, getChores } from './repository/chores';
 import cookieParser from 'cookie-parser';
-import { findUser } from './repository/users';
+import { findUser, findUserByUserId } from './repository/users';
 
 const port = process.env.PORT || 4000;
 
@@ -20,9 +20,9 @@ app.use(cookieParser());
 // auth
 app.use((req, res, next) => {
   if (req.url.startsWith('/login?')) {
-    const userId = findUser(req.query['username']?.toString());
-    if (userId) {
-      res.send({ userId });
+    const user = findUser(req.query['username']?.toString());
+    if (user) {
+      res.send({ userId: user.userId });
     } else {
       res.sendStatus(401);
     }
@@ -31,7 +31,8 @@ app.use((req, res, next) => {
     if (isNaN(userId)) {
       res.sendStatus(401);
     } else {
-      res.locals.userId = userId;
+      const user = findUserByUserId(userId);
+      res.locals.user = user;
       next();
     }
   }
@@ -43,7 +44,7 @@ app.get('/chores/current', async (req, res) => {
 });
 
 app.post('/chores/:id', async (req, res) => {
-  await completeChore(parseInt(req.params.id), res.locals.userId);
+  await completeChore(parseInt(req.params.id), res.locals.user);
   res.sendStatus(204);
 });
 
