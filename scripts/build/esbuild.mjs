@@ -1,5 +1,4 @@
 import fs from 'fs-extra';
-import path from 'path';
 import { build } from 'esbuild';
 import { updateHtmlReferences } from './update-html-references.mjs';
 

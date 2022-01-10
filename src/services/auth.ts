@@ -1,18 +1,22 @@
-import { fetcher } from 'srcRootDir/services/fetch';
+import { fetcher } from 'srcRootDir/services/fetcher';
 
 export async function login(username: string) {
   try {
     const response = await fetcher(`/login?username=${username}`);
-    return response.ok;
+
+    if (response?.userId) {
+      window.localStorage.setItem('userId', response.userId);
+      return true;
+    }
+
+    return false;
   } catch (ex) {
     return false;
   }
 }
 
 export function getCurrentUserId(): number {
-  const match = document.cookie.match(new RegExp('(^| )userId=([^;]+)'));
-
-  return parseInt(match![2]);
+  return parseInt(window.localStorage.getItem('userId')!);
 }
 
 export function logout() {

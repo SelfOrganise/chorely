@@ -1,6 +1,6 @@
 import React, { useCallback, useEffect, useMemo } from 'react';
 import useSWR from 'swr';
-import { fetcher } from 'srcRootDir/services/fetch';
+import { fetcher } from 'srcRootDir/services/fetcher';
 import List from '@mui/material/List';
 import ListItem from '@mui/material/ListItem';
 import ListItemText from '@mui/material/ListItemText';
