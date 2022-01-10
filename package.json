@@ -6,8 +6,8 @@
   "scripts": {
     "esbuild": "node scripts/build/esbuild.mjs",
     "build": "NODE_ENV=production npm run esbuild",
-    "dev": "npm-run-all -l -p build dev:type-check dev:live-server",
-    "dev:build": "npm run esbuild",
+    "dev": "npm-run-all -l -p dev:*",
+    "dev:build": "BACKEND_ORIGIN=http://localhost:4000 npm run esbuild",
     "dev:type-check": "tsc --noEmit --watch --preserveWatchOutput --pretty",
     "dev:live-server": "live-server dist/esbuild --port=3000 --no-browser --quiet"
   },
