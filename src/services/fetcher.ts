@@ -1,7 +1,7 @@
 import { getCurrentUserId } from 'srcRootDir/services/auth';
 
-const BACKEND_ORIGIN = 'http://localhost:4000';
-// const BACKEND_ORIGIN = 'https://chores-api.onrender.com';
+// const BACKEND_ORIGIN = 'http://localhost:4000';
+const BACKEND_ORIGIN = 'https://chores-api.onrender.com';
 
 export function fetcher(url: string, init?: RequestInit): any | Response {
   const userId = getCurrentUserId();

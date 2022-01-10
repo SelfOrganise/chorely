@@ -15,7 +15,7 @@ export function Login() {
     if (await login(username)) {
       navigate('/chores');
     } else {
-      toast.error('Could not login');
+      toast.error('Could not login', { toastId: 'couldNotLogin' });
     }
   }, [username]);
 
