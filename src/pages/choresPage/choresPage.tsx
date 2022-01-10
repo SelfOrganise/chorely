@@ -67,7 +67,7 @@ export function ChoresPage() {
             );
           })}
       </List>
-      <List dense={true}>
+      <List dense={true} style={{ opacity: 0.4 }}>
         {response.data
           ?.filter(ch => (userId > 0 ? ch.completionSemaphore >= 0 : ch.completionSemaphore < 0))
           .map(ch => {
