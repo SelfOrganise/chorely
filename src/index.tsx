@@ -12,7 +12,7 @@ import { createTheme, ThemeProvider } from '@mui/material';
 
 const theme = createTheme({
   typography: {
-    fontSize: 12,
+    fontSize: 14,
   },
 });
 
@@ -20,7 +20,7 @@ function Root(): JSX.Element {
   return (
     <React.Fragment>
       <ToastContainer
-        position="top-right"
+        position="bottom-center"
         autoClose={5000}
         hideProgressBar={false}
         newestOnTop={false}
