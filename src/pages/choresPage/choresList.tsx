@@ -17,10 +17,16 @@ export function ChoreList({ chores, onComplete, areDone }: ChoreListProps) {
     return (
       chores &&
       chores.sort((first, second) => {
-        const order = isAfter(parseISO(first.modifiedOnUTC), parseISO(second.modifiedOnUTC)) ? 1 : -1;
-        const areDoneMod = areDone ? -1 : 1;
+        if (first.isLate && !second.isLate) {
+          return -1;
+        } else if (!first.isLate && second.isLate) {
+          return 1;
+        } else {
+          const order = isAfter(parseISO(first.modifiedOnUTC), parseISO(second.modifiedOnUTC)) ? 1 : -1;
+          const areDoneMod = areDone ? -1 : 1;
 
-        return order * areDoneMod;
+          return order * areDoneMod;
+        }
       })
     );
   }, [chores]);

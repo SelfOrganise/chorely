@@ -2,7 +2,7 @@ import React, { useCallback } from 'react';
 import { toast } from 'react-toastify';
 import { completeChore, sendReminder, undoChore } from 'srcRootDir/services/chores';
 import styled from '@emotion/styled';
-import { Box, Button, Menu, MenuItem, Paper, IconButton } from '@mui/material';
+import { Box, Button, Menu, MenuItem, Paper, IconButton, Chip } from '@mui/material';
 import MenuIcon from '@mui/icons-material/Menu';
 import MenuOpenIcon from '@mui/icons-material/MenuOpen';
 import { formatDistance, parseISO } from 'date-fns';
@@ -58,7 +58,7 @@ export function ChoreListItem({
     <Paper elevation={3} sx={{ margin: 4 }}>
       <Box
         display="flex"
-        height="64px"
+        height="80px"
         style={{
           backgroundImage: ` linear-gradient(rgba(0, 0, 0, 0.6), rgba(0, 0, 0, 0.6)),url(images/${chore.id}.jpg)`,
           backgroundSize: 'cover',
@@ -71,9 +71,11 @@ export function ChoreListItem({
         <Box paddingLeft={1} paddingBottom={1}>
           <Title>{chore.title}</Title>
         </Box>
-        <Box display="flex" flexDirection="row" justifyContent="space-between">
-          <Box>{/*<TimeLeft>nothing</TimeLeft>*/}</Box>
-        </Box>
+        {chore.isLate && (
+          <Box position="absolute" top="0.5rem" left="0.5rem">
+            <Chip sx={{ fontSize: '0.8rem', height: '1.2rem', opacity: 0.8 }} color="error" size="small" label="Late task warning" />
+          </Box>
+        )}
         <Box position="absolute" top="0.3rem" right="0.5rem">
           <LastModified>last done {formatDistance(parseISO(chore.modifiedOnUTC), new Date())} ago</LastModified>
         </Box>

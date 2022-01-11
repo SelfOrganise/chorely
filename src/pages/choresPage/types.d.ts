@@ -4,4 +4,5 @@ interface Chore {
   description: string;
   completionSemaphore: number;
   modifiedOnUTC: string;
+  isLate?: boolean;
 }
