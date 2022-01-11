@@ -46,7 +46,7 @@ export function ChoreListItem({
         marginTop={1}
         height="100px"
         style={{
-          backgroundImage: ` linear-gradient(rgba(0, 0, 0, 0.6), rgba(0, 0, 0, 0.6)),url(/images/${chore.id}.jpg)`,
+          backgroundImage: ` linear-gradient(rgba(0, 0, 0, 0.6), rgba(0, 0, 0, 0.6)),url(images/${chore.id}.jpg)`,
           backgroundSize: 'cover',
           backgroundPosition: 'center',
         }}
