@@ -3,7 +3,8 @@ import { toast } from 'react-toastify';
 import { completeChore, sendReminder, undoChore } from 'srcRootDir/services/chores';
 import styled from '@emotion/styled';
 import { Box, Button, Menu, MenuItem, Paper, IconButton } from '@mui/material';
-import MoreVertIcon from '@mui/icons-material/MoreVert';
+import MenuIcon from '@mui/icons-material/Menu';
+import MenuOpenIcon from '@mui/icons-material/MenuOpen';
 import { formatDistance, parseISO } from 'date-fns';
 
 export function ChoreListItem({
@@ -54,45 +55,32 @@ export function ChoreListItem({
   );
 
   return (
-    <Paper elevation={3} sx={{ margin: 2 }}>
+    <Paper elevation={3} sx={{ margin: 4 }}>
       <Box
         display="flex"
-        marginTop={1}
-        height="100px"
+        height="64px"
         style={{
           backgroundImage: ` linear-gradient(rgba(0, 0, 0, 0.6), rgba(0, 0, 0, 0.6)),url(images/${chore.id}.jpg)`,
           backgroundSize: 'cover',
           backgroundPosition: 'center',
         }}
-        alignItems="center"
-        justifyContent="center"
+        alignItems="end"
+        justifyContent="start"
         position="relative"
       >
-        <Box paddingLeft={1.2} paddingRight={1.2} paddingTop={1.2}>
+        <Box paddingLeft={1} paddingBottom={1}>
           <Title>{chore.title}</Title>
         </Box>
-        <Box marginTop={0.5} display="flex" flexDirection="row" justifyContent="space-between">
+        <Box display="flex" flexDirection="row" justifyContent="space-between">
           <Box>{/*<TimeLeft>nothing</TimeLeft>*/}</Box>
         </Box>
         <Box position="absolute" top="0.3rem" right="0.5rem">
           <LastModified>last done {formatDistance(parseISO(chore.modifiedOnUTC), new Date())} ago</LastModified>
         </Box>
       </Box>
-      <Box display="flex" justifyContent="center" paddingBottom={0.2}>
-        <Button
-          variant="text"
-          onClick={(e: React.MouseEvent<HTMLElement>) => handleCompleteClick(e, chore)}
-          style={{
-            color: isDone ? 'gray' : undefined,
-          }}
-        >
-          ✔ Complete {convertCompletionSemaphoreToCount(chore.completionSemaphore)}
-        </Button>
-        <IconButton
-          sx={{ position: 'absolute', right: '0.5rem' }}
-          onClick={(e: React.MouseEvent<HTMLElement>) => setAnchorEl(e.currentTarget)}
-        >
-          <MoreVertIcon />
+      <Box display="flex" justifyContent="space-between">
+        <IconButton onClick={(e: React.MouseEvent<HTMLElement>) => setAnchorEl(e.currentTarget)}>
+          {open ? <MenuOpenIcon /> : <MenuIcon />}
           <Menu open={open} onClose={handleMenuClose} anchorEl={anchorEl}>
             <MenuItem onClick={(e: React.MouseEvent<HTMLElement>) => handleUndoClick(e, chore)}>⏪ Undo</MenuItem>
             <MenuItem
@@ -103,6 +91,15 @@ export function ChoreListItem({
             </MenuItem>
           </Menu>
         </IconButton>
+        <Button
+          variant="text"
+          onClick={(e: React.MouseEvent<HTMLElement>) => handleCompleteClick(e, chore)}
+          style={{
+            color: isDone ? 'gray' : undefined,
+          }}
+        >
+          ✔ Complete {convertCompletionSemaphoreToCount(chore.completionSemaphore)}
+        </Button>
       </Box>
     </Paper>
   );
