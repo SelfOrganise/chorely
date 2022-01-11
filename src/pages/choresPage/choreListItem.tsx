@@ -73,7 +73,7 @@ export function ChoreListItem({
             color: isDone ? 'gray' : undefined,
           }}
         >
-          Complete
+          Complete {convertCompletionSemaphoreToCount(chore.completionSemaphore)}
         </Button>
         <IconButton
           sx={{ position: 'absolute', right: '0.5rem' }}
@@ -113,8 +113,9 @@ const LastModified = styled.span`
 //   color: gray;
 // `;
 
-// function convertCompletionSemaphoreToCount(completionSemaphore: number) {
-//   const alignment = completionSemaphore >= 0 ? 1 : 0;
-//
-//   return Math.abs(completionSemaphore) + alignment;
-// }
+function convertCompletionSemaphoreToCount(completionSemaphore: number) {
+  const alignment = completionSemaphore >= 0 ? 1 : 0;
+
+  const count = Math.abs(completionSemaphore) + alignment;
+  return count > 1 ? `(${count})`: '';
+}
