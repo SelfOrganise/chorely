@@ -1,20 +1,51 @@
 import { pool } from './db';
-import { Chore, History, User } from '../types';
+import { Chore, DbChore, History, User } from '../types';
 import { sendEmail, sendReminder } from '../services/email';
+import { parseExpression } from 'cron-parser';
 
 export async function getChores(): Promise<Array<Chore>> {
   const client = await pool.connect();
-  const chores = await client.query(`
+  const choresResult = await client.query<DbChore>(`
       select id,
              title,
              description,
+             cron,
+             "hoursLeftReminder",
              "completionSemaphore",
              "modifiedOnUTC"
       from chores
   `);
   await client.release();
 
-  return chores.rows;
+  // determine if chore is late
+  return choresResult.rows.map<Chore>(chore => {
+    const lastDate = new Date(chore.modifiedOnUTC);
+    if (!chore.cron) {
+      return chore;
+    }
+
+    const nextScheduledDate = parseExpression(chore.cron, { currentDate: new Date(chore.modifiedOnUTC) })
+      .next()
+      .toDate();
+
+    const now = Date.now();
+
+    // if next scheduled date is in the past, then the chore is late
+    if (nextScheduledDate.getTime() - now < 0) {
+      return {
+        ...chore,
+        isLate: true,
+      };
+    }
+
+    // if next scheduled date is in the future and difference between then and now is less than hours left for reminder
+    // mark task as late
+    const isLate = Math.abs(nextScheduledDate.getTime() - now) / (1000 * 60 * 60) <= (chore.hoursLeftReminder || -1);
+    return {
+      ...chore,
+      isLate,
+    };
+  });
 }
 
 export async function completeChore(choreId: number, user: User): Promise<void> {
@@ -27,7 +58,7 @@ export async function completeChore(choreId: number, user: User): Promise<void> 
 
   const history = historyResult.rows[0]!;
 
-  const updateChoreResult = await client.query<Chore>(
+  const updateChoreResult = await client.query<DbChore>(
     `update chores 
         set "completionSemaphore" = "completionSemaphore" + $1, 
             "modifiedOnUTC" = $2
@@ -76,7 +107,7 @@ export async function undoChore(choreId: number, user: User): Promise<boolean> {
 
   const previousHistory = previousHistoryResult?.rows[0];
 
-  const updateChoreResult = await client.query<Chore>(
+  const updateChoreResult = await client.query<DbChore>(
     `update chores 
         set "completionSemaphore" = "completionSemaphore" - $1, 
             "modifiedOnUTC" = $2
@@ -95,7 +126,7 @@ export async function undoChore(choreId: number, user: User): Promise<boolean> {
 
 export async function remind(choreId: number, user: User): Promise<boolean> {
   const client = await pool.connect();
-  const choreResult = await client.query<Chore>(
+  const choreResult = await client.query<DbChore>(
     `select id,
             title,
             description,

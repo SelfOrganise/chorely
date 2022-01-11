@@ -3,10 +3,16 @@ export interface User {
   email: string;
 }
 
-interface Chore {
+interface Chore extends DbChore {
+  isLate?: boolean;
+}
+
+interface DbChore {
   id: number;
   title: string;
   description: string;
+  cron: string;
+  hoursLeftReminder?: number;
   completionSemaphore: number;
   modifiedOnUTC: string;
 }

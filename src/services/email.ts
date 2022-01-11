@@ -1,12 +1,12 @@
 import MailService from '@sendgrid/mail';
-import { Chore, User } from '../types';
-import { findOtherUser, findUserByUserId } from '../repository/users';
+import { DbChore, User } from '../types';
+import { findOtherUser } from '../repository/users';
 
 MailService.setApiKey(process.env.SENDGRID_API_KEY!);
 
 const from = '🦄 Chorely <chorely.no.reply@gmail.com>';
 
-export async function sendEmail(currentUser: User, chore: Chore): Promise<void> {
+export async function sendEmail(currentUser: User, chore: DbChore): Promise<void> {
   const otherUser = findOtherUser(currentUser);
 
   if (!otherUser) {
@@ -26,7 +26,7 @@ export async function sendEmail(currentUser: User, chore: Chore): Promise<void> 
   }
 }
 
-export async function sendReminder(currentUser: User, chore: Chore): Promise<void> {
+export async function sendReminder(currentUser: User, chore: DbChore): Promise<void> {
   const otherUser = findOtherUser(currentUser);
 
   if (!otherUser) {
