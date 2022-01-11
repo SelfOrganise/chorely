@@ -64,7 +64,7 @@ export function ChoreListItem({
           backgroundSize: 'cover',
           backgroundPosition: 'center',
         }}
-        alignItems="end"
+        alignItems="flex-end"
         justifyContent="start"
         position="relative"
       >
