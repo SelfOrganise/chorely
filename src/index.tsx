@@ -23,7 +23,7 @@ function Root(): JSX.Element {
         position="bottom-center"
         autoClose={5000}
         hideProgressBar={false}
-        newestOnTop={false}
+        newestOnTop={true}
         closeOnClick
         rtl={false}
         pauseOnFocusLoss

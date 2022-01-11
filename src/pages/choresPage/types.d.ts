@@ -3,4 +3,5 @@ interface Chore {
   title: string;
   description: string;
   completionSemaphore: number;
+  modifiedOnUTC: string;
 }

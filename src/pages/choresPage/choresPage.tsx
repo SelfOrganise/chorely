@@ -32,14 +32,19 @@ export function ChoresPage() {
     <Box alignItems="center" display="flex" flexDirection="column">
       <ChoreList
         chores={response.data?.filter(ch => (userId > 0 ? ch.completionSemaphore < 0 : ch.completionSemaphore >= 0))}
+        areDone={false}
         onComplete={response.mutate}
       />
-      <Button onClick={() => setShowCompletedTasks(!showCompletedTasks)} sx={{ color: 'text.secondary', opacity: 0.6 }}>
+      <Button
+        onClick={() => setShowCompletedTasks(!showCompletedTasks)}
+        sx={{ color: 'text.secondary', opacity: 0.6, marginBottom: '2rem' }}
+      >
         {showCompletedTasks ? 'Hide' : 'Show'} completed tasks
       </Button>
       {showCompletedTasks && (
         <ChoreList
           chores={response.data?.filter(ch => (userId > 0 ? ch.completionSemaphore >= 0 : ch.completionSemaphore < 0))}
+          areDone={true}
           onComplete={response.mutate}
         />
       )}

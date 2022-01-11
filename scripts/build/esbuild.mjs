@@ -30,7 +30,7 @@ export const buildConfig = {
   target: 'esnext',
   loader: { '.svg': 'file', '.png': 'file' },
   watch: isDev,
-  plugins: [copyPlugin({ from: './static/index.html', to: './dist/esbuild/index.html' })],
+  plugins: [copyPlugin({ from: './static', to: './dist/esbuild' })],
   define: {
     'process.env.NODE_ENV': JSON.stringify(process.env.NODE_ENV || 'development'),
     BACKEND_ORIGIN: JSON.stringify(process.env.BACKEND_ORIGIN),
