@@ -1,6 +1,6 @@
 import { pool } from './db';
 import { Chore, History, User } from '../types';
-import { sendEmail } from '../services/email';
+import { sendEmail, sendReminder } from '../services/email';
 
 export async function getChores(): Promise<Array<Chore>> {
   const client = await pool.connect();
@@ -39,10 +39,10 @@ export async function completeChore(choreId: number, user: User): Promise<void> 
 
   await client.release();
 
-  // await sendEmail(user, updateChoreResult.rows[0]);
+  await sendEmail(user, updateChoreResult.rows[0]);
 }
 
-export async function undoChore(choreId: number): Promise<boolean> {
+export async function undoChore(choreId: number, user: User): Promise<boolean> {
   const client = await pool.connect();
 
   const latestHistoryResult = await client.query<History>(
@@ -75,7 +75,6 @@ export async function undoChore(choreId: number): Promise<boolean> {
   );
 
   const previousHistory = previousHistoryResult?.rows[0];
-  console.log(previousHistory);
 
   const updateChoreResult = await client.query<Chore>(
     `update chores 
@@ -90,6 +89,31 @@ export async function undoChore(choreId: number): Promise<boolean> {
   await client.release();
 
   // await sendEmail(user, updateChoreResult.rows[0]);
+
+  return true;
+}
+
+export async function remind(choreId: number, user: User): Promise<boolean> {
+  const client = await pool.connect();
+  const choreResult = await client.query<Chore>(
+    `select id,
+            title,
+            description,
+            "completionSemaphore",
+            "modifiedOnUTC"
+     from chores
+     where id = $1`,
+    [choreId]
+  );
+
+  const chore = choreResult.rows[0];
+  await client.release();
+
+  if (!chore) {
+    return false;
+  }
+
+  await sendReminder(user, chore);
 
   return true;
 }

@@ -1,7 +1,7 @@
 import express from 'express';
 import bodyParser from 'body-parser';
 import cors from 'cors';
-import { completeChore, getChores, undoChore } from './repository/chores';
+import { completeChore, getChores, remind, undoChore } from './repository/chores';
 import cookieParser from 'cookie-parser';
 import { findUser, findUserByUserId } from './repository/users';
 
@@ -63,7 +63,19 @@ app.post('/chores/:id/undo', async (req, res) => {
     return;
   }
 
-  await undoChore(choreId);
+  await undoChore(choreId, res.locals.user);
+  res.sendStatus(204);
+});
+
+app.post('/chores/:id/remind', async (req, res) => {
+  const choreId = parseInt(req.params.id);
+
+  if (res.locals.user == null) {
+    console.log(`Could not send reminder for ${choreId} because user was null.`);
+    return;
+  }
+
+  await remind(choreId, res.locals.user);
   res.sendStatus(204);
 });
 
