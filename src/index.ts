@@ -1,7 +1,7 @@
 import express from 'express';
 import bodyParser from 'body-parser';
 import cors from 'cors';
-import { completeChore, getChores } from './repository/chores';
+import { completeChore, getChores, undoChore } from './repository/chores';
 import cookieParser from 'cookie-parser';
 import { findUser, findUserByUserId } from './repository/users';
 
@@ -44,7 +44,26 @@ app.get('/chores/current', async (req, res) => {
 });
 
 app.post('/chores/:id', async (req, res) => {
-  await completeChore(parseInt(req.params.id), res.locals.user);
+  const choreId = parseInt(req.params.id);
+
+  if (res.locals.user == null) {
+    console.log(`Could not complete chore ${choreId} because user was null.`);
+    return;
+  }
+
+  await completeChore(choreId, res.locals.user);
+  res.sendStatus(204);
+});
+
+app.post('/chores/:id/undo', async (req, res) => {
+  const choreId = parseInt(req.params.id);
+
+  if (res.locals.user == null) {
+    console.log(`Could not undo chore ${choreId} because user was null.`);
+    return;
+  }
+
+  await undoChore(choreId);
   res.sendStatus(204);
 });
 

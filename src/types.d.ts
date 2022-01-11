@@ -7,7 +7,8 @@ interface Chore {
   id: number;
   title: string;
   description: string;
-  completions: Array<number>;
+  completionSemaphore: number;
+  modifiedOnUTC: string;
 }
 
 interface History {
