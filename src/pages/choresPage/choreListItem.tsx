@@ -1,9 +1,8 @@
 import React, { useCallback } from 'react';
 import { toast } from 'react-toastify';
-import { completeChore, undoChore } from 'srcRootDir/services/chores';
+import { completeChore, sendReminder, undoChore } from 'srcRootDir/services/chores';
 import styled from '@emotion/styled';
 import { Box, Button, Menu, MenuItem, Paper, IconButton } from '@mui/material';
-import CheckIcon from '@mui/icons-material/Check';
 import MoreVertIcon from '@mui/icons-material/MoreVert';
 import { formatDistance, parseISO } from 'date-fns';
 
@@ -19,11 +18,16 @@ export function ChoreListItem({
   const [anchorEl, setAnchorEl] = React.useState<HTMLElement | null>(null);
   const open = Boolean(anchorEl);
 
+  const handleMenuClose = useCallback((e: React.MouseEvent<HTMLElement>) => {
+    e.stopPropagation();
+    setAnchorEl(null);
+  }, []);
+
   const handleCompleteClick = useCallback(
     async (e: React.MouseEvent<HTMLElement>, chore: Chore) => {
-      e.stopPropagation();
+      handleMenuClose(e);
       await completeChore(chore.id);
-      toast.success(`${chore.title}`);
+      toast.success(`Task completed`);
       onComplete && onComplete();
     },
     [chore]
@@ -31,9 +35,19 @@ export function ChoreListItem({
 
   const handleUndoClick = useCallback(
     async (e: React.MouseEvent<HTMLElement>, chore: Chore) => {
-      e.stopPropagation();
+      handleMenuClose(e);
       await undoChore(chore.id);
-      toast.warn(`Undo « ${chore.title} »`);
+      toast.info(`Undo complete`);
+      onComplete && onComplete();
+    },
+    [chore]
+  );
+
+  const handleSendReminderClick = useCallback(
+    async (e: React.MouseEvent<HTMLElement>, chore: Chore) => {
+      handleMenuClose(e);
+      await sendReminder(chore.id);
+      toast.success(`Reminder sent`);
       onComplete && onComplete();
     },
     [chore]
@@ -61,35 +75,32 @@ export function ChoreListItem({
           <Box>{/*<TimeLeft>nothing</TimeLeft>*/}</Box>
         </Box>
         <Box position="absolute" top="0.3rem" right="0.5rem">
-          <LastModified>last done {formatDistance(parseISO(chore.modifiedOnUTC), new Date())}</LastModified>
+          <LastModified>last done {formatDistance(parseISO(chore.modifiedOnUTC), new Date())} ago</LastModified>
         </Box>
       </Box>
       <Box display="flex" justifyContent="center" paddingBottom={0.2}>
         <Button
           variant="text"
           onClick={(e: React.MouseEvent<HTMLElement>) => handleCompleteClick(e, chore)}
-          startIcon={<CheckIcon />}
           style={{
             color: isDone ? 'gray' : undefined,
           }}
         >
-          Complete {convertCompletionSemaphoreToCount(chore.completionSemaphore)}
+          ✔ Complete {convertCompletionSemaphoreToCount(chore.completionSemaphore)}
         </Button>
         <IconButton
           sx={{ position: 'absolute', right: '0.5rem' }}
           onClick={(e: React.MouseEvent<HTMLElement>) => setAnchorEl(e.currentTarget)}
         >
           <MoreVertIcon />
-          <Menu
-            open={open}
-            onClose={(e: React.MouseEvent<HTMLElement>) => {
-              e.stopPropagation();
-              setAnchorEl(null);
-            }}
-            anchorEl={anchorEl}
-          >
-            <MenuItem onClick={(e: React.MouseEvent<HTMLElement>) => handleUndoClick(e, chore)}>Undo</MenuItem>
-            <MenuItem disabled>Send reminder</MenuItem>
+          <Menu open={open} onClose={handleMenuClose} anchorEl={anchorEl}>
+            <MenuItem onClick={(e: React.MouseEvent<HTMLElement>) => handleUndoClick(e, chore)}>⏪ Undo</MenuItem>
+            <MenuItem
+              disabled={!isDone}
+              onClick={(e: React.MouseEvent<HTMLElement>) => handleSendReminderClick(e, chore)}
+            >
+              🔔 Send reminder
+            </MenuItem>
           </Menu>
         </IconButton>
       </Box>
@@ -117,5 +128,5 @@ function convertCompletionSemaphoreToCount(completionSemaphore: number) {
   const alignment = completionSemaphore >= 0 ? 1 : 0;
 
   const count = Math.abs(completionSemaphore) + alignment;
-  return count > 1 ? `(${count})`: '';
+  return count > 1 ? `(${count})` : '';
 }
