@@ -1,3 +1,7 @@
+import { config } from 'dotenv';
+// used by prod, dev gets it from dotenv/register
+config({ path: '../.env' });
+
 import express from 'express';
 import bodyParser from 'body-parser';
 import cors from 'cors';
