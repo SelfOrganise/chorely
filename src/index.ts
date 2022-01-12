@@ -17,6 +17,11 @@ app.use(bodyParser.json());
 
 // auth
 app.use((req, res, next) => {
+  if (req.url.startsWith('/healthz')) {
+    res.sendStatus(200);
+    return;
+  }
+
   if (req.url.startsWith('/login?')) {
     const user = findUser(req.query['username']?.toString());
     if (user) {
@@ -75,10 +80,6 @@ app.post('/chores/:id/remind', async (req, res) => {
 
   await remind(choreId, res.locals.user);
   res.sendStatus(204);
-});
-
-app.get('/healthz', (req, res) => {
-  res.sendStatus(200);
 });
 
 app.listen({ port }, () => console.log(`🚀 Server ready at http://localhost:${port}`));

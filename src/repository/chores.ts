@@ -18,7 +18,7 @@ export async function getChores(): Promise<Array<Chore>> {
   await client.release();
 
   // determine if chore is late
-  return choresResult.rows.map<Chore>(chore => {
+  return choresResult.rows.map<Chore>((chore: DbChore) => {
     const lastDate = new Date(chore.modifiedOnUTC);
     if (!chore.cron) {
       return chore;
