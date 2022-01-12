@@ -1,12 +1,7 @@
-import { config } from 'dotenv';
-// used by prod, dev gets it from dotenv/register
-config({ path: '../.env' });
-
 import express from 'express';
 import bodyParser from 'body-parser';
 import cors from 'cors';
 import { completeChore, getChores, remind, undoChore } from './repository/chores';
-import cookieParser from 'cookie-parser';
 import { findUser, findUserByUserId } from './repository/users';
 
 const port = process.env.PORT || 4000;
@@ -19,7 +14,6 @@ app.use(
   })
 );
 app.use(bodyParser.json());
-app.use(cookieParser());
 
 // auth
 app.use((req, res, next) => {
