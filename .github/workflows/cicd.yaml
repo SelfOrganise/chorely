@@ -17,4 +17,4 @@ jobs:
         cache: 'yarn'
     - run: yarn install
     - run: yarn build
-    - run: sshpass -p ${{ secrets.PASSWORD }} scp -P ${{ secrets.PORT }} -r dist ${{ secrets.USERNAME }}@${{ secrets.HOST}}:/home/chores/api
+    - run: sshpass -p ${{ secrets.PASSWORD }} scp -P ${{ secrets.PORT }} -r dist ${{ secrets.USERNAME }}@${{ secrets.HOST }}:/home/chores/api
