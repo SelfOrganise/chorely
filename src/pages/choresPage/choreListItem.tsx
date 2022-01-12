@@ -1,8 +1,17 @@
-import React, { useCallback } from 'react';
+import React, { useCallback, useState } from 'react';
 import { toast } from 'react-toastify';
 import { completeChore, sendReminder, undoChore } from 'srcRootDir/services/chores';
 import styled from '@emotion/styled';
-import { Box, Button, Menu, MenuItem, Paper, IconButton, Chip } from '@mui/material';
+import {
+  Box,
+  Button,
+  Menu,
+  MenuItem,
+  Paper,
+  IconButton,
+  Chip,
+  LinearProgress,
+} from '@mui/material';
 import MenuIcon from '@mui/icons-material/Menu';
 import MenuOpenIcon from '@mui/icons-material/MenuOpen';
 import { formatDistance, parseISO } from 'date-fns';
@@ -17,6 +26,7 @@ export function ChoreListItem({
   isDone: boolean;
 }) {
   const [anchorEl, setAnchorEl] = React.useState<HTMLElement | null>(null);
+  const [isLoading, setIsLoading] = useState(false);
   const open = Boolean(anchorEl);
 
   const handleMenuClose = useCallback((e: React.MouseEvent<HTMLElement>) => {
@@ -26,8 +36,10 @@ export function ChoreListItem({
 
   const handleCompleteClick = useCallback(
     async (e: React.MouseEvent<HTMLElement>, chore: Chore) => {
+      setIsLoading(true);
       handleMenuClose(e);
       await completeChore(chore.id);
+      setIsLoading(false);
       toast.success(`Task completed`);
       onComplete && onComplete();
     },
@@ -36,8 +48,10 @@ export function ChoreListItem({
 
   const handleUndoClick = useCallback(
     async (e: React.MouseEvent<HTMLElement>, chore: Chore) => {
+      setIsLoading(true);
       handleMenuClose(e);
       await undoChore(chore.id);
+      setIsLoading(false);
       toast.info(`Undo complete`);
       onComplete && onComplete();
     },
@@ -46,8 +60,10 @@ export function ChoreListItem({
 
   const handleSendReminderClick = useCallback(
     async (e: React.MouseEvent<HTMLElement>, chore: Chore) => {
+      setIsLoading(true);
       handleMenuClose(e);
       await sendReminder(chore.id);
+      setIsLoading(false);
       toast.success(`Reminder sent`);
       onComplete && onComplete();
     },
@@ -71,9 +87,14 @@ export function ChoreListItem({
         <Box paddingLeft={1} paddingBottom={1}>
           <Title>{chore.title}</Title>
         </Box>
-        {chore.isLate && (
+        {false && chore.isLate && (
           <Box position="absolute" top="0.5rem" left="0.5rem">
-            <Chip sx={{ fontSize: '0.8rem', height: '1.2rem', opacity: 0.8 }} color="error" size="small" label="Late task warning" />
+            <Chip
+              sx={{ fontSize: '0.8rem', height: '1.2rem', opacity: 0.8 }}
+              color="error"
+              size="small"
+              label="Late task warning"
+            />
           </Box>
         )}
         <Box position="absolute" top="0.3rem" right="0.5rem">
@@ -84,9 +105,11 @@ export function ChoreListItem({
         <IconButton onClick={(e: React.MouseEvent<HTMLElement>) => setAnchorEl(e.currentTarget)}>
           {open ? <MenuOpenIcon /> : <MenuIcon />}
           <Menu open={open} onClose={handleMenuClose} anchorEl={anchorEl}>
-            <MenuItem onClick={(e: React.MouseEvent<HTMLElement>) => handleUndoClick(e, chore)}>⏪ Undo</MenuItem>
+            <MenuItem disabled={isLoading} onClick={(e: React.MouseEvent<HTMLElement>) => handleUndoClick(e, chore)}>
+              ⏪ Undo
+            </MenuItem>
             <MenuItem
-              disabled={!isDone}
+              disabled={!isDone || isLoading}
               onClick={(e: React.MouseEvent<HTMLElement>) => handleSendReminderClick(e, chore)}
             >
               🔔 Send reminder
@@ -94,6 +117,7 @@ export function ChoreListItem({
           </Menu>
         </IconButton>
         <Button
+          disabled={isLoading}
           variant="text"
           onClick={(e: React.MouseEvent<HTMLElement>) => handleCompleteClick(e, chore)}
           style={{
@@ -103,6 +127,7 @@ export function ChoreListItem({
           ✔ Complete {convertCompletionSemaphoreToCount(chore.completionSemaphore)}
         </Button>
       </Box>
+      {isLoading && <LinearProgress />}
     </Paper>
   );
 }
@@ -117,11 +142,6 @@ const LastModified = styled.span`
   font-size: 0.8rem;
   color: lightgray;
 `;
-
-// const TimeLeft = styled.span`
-//   font-size: 0.8rem;
-//   color: gray;
-// `;
 
 function convertCompletionSemaphoreToCount(completionSemaphore: number) {
   const alignment = completionSemaphore >= 0 ? 1 : 0;
