@@ -6,6 +6,8 @@ import { toast } from 'react-toastify';
 import { getCurrentUserId } from 'srcRootDir/services/auth';
 import { ChoreList } from 'srcRootDir/pages/choresPage/choresList';
 import Button from '@mui/material/Button';
+import { Alert } from '@mui/material';
+import RefreshIcon from '@mui/icons-material/Refresh';
 
 export function ChoresPage() {
   const userId = useMemo(getCurrentUserId, []);
@@ -25,7 +27,16 @@ export function ChoresPage() {
   }, [!response.isValidating]);
 
   if (response.error) {
-    return <span>{response.error.toString()}</span>;
+    return (
+      <React.Fragment>
+        <Alert severity="error">The API server is down. ({response.error.toString()})</Alert>
+        <Box height="60vh" display="flex" alignItems="center" justifyContent="center">
+          <Button onClick={() => location.reload()} startIcon={<RefreshIcon />} variant="contained">
+            Reload
+          </Button>
+        </Box>
+      </React.Fragment>
+    );
   }
 
   return (

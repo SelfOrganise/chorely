@@ -18,8 +18,6 @@ jobs:
       - name: Install dependencies
         run: npm install
       - name: Build
-        env:
-          BACKEND_ORIGIN: "https://chores-api.onrender.com"
         run: npm run build
       - name: Deploy 🚀
         uses: JamesIves/github-pages-deploy-action@v4.2.2
