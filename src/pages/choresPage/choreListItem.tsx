@@ -76,7 +76,7 @@ export function ChoreListItem({
         display="flex"
         height="80px"
         style={{
-          backgroundImage: ` linear-gradient(rgba(0, 0, 0, 0.6), rgba(0, 0, 0, 0.6)),url(images/${chore.id}.jpg)`,
+          backgroundImage: `linear-gradient(180deg, rgba(0,0,0,0.8) 0%, rgba(0,0,0,0.2) 34%, rgba(0,0,0,0.2) 43%, rgba(0,0,0,0.8) 100%), url(images/${chore.id}.jpg)`,
           backgroundSize: 'cover',
           backgroundPosition: 'center',
         }}
@@ -140,7 +140,7 @@ const Title = styled.span`
 
 const LastModified = styled.span`
   font-size: 0.8rem;
-  color: lightgray;
+  color: #ededed;
 `;
 
 function convertCompletionSemaphoreToCount(completionSemaphore: number) {
