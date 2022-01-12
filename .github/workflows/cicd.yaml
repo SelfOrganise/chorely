@@ -20,4 +20,4 @@ jobs:
     - name: deploy
       run: | 
         ssh -o StrictHostKeyChecking=no ${{ secrets.USERNAME }}@${{ secrets.HOST }} uptime
-        sshpass -p ${{ secrets.PASSWORD }} scp -P ${{ secrets.PORT }} -r dist ${{ secrets.USERNAME }}@${{ secrets.HOST }}:/home/chores/api
+        sshpass -p "${{ secrets.PASSWORD }}" scp -P ${{ secrets.PORT }} -r dist ${{ secrets.USERNAME }}@${{ secrets.HOST }}:/home/chores/api
