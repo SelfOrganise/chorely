@@ -48,7 +48,7 @@ export function ChoresPage() {
       />
       <Button
         onClick={() => setShowCompletedTasks(!showCompletedTasks)}
-        sx={{ color: 'text.secondary', opacity: 0.6, marginBottom: '2rem' }}
+        sx={{ color: 'text.secondary', opacity: 0.6, marginBottom: '2rem', marginTop: '2rem' }}
       >
         {showCompletedTasks ? 'Hide' : 'Show'} completed tasks
       </Button>

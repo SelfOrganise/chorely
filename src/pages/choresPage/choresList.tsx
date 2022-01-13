@@ -1,10 +1,10 @@
 import React, { useMemo } from 'react';
-import List from '@mui/material/List';
 import { ChoreListItem } from 'srcRootDir/pages/choresPage/choreListItem';
 import Box from '@mui/material/Box';
 import Typography from '@mui/material/Typography';
 import CircularProgress from '@mui/material/CircularProgress';
 import { parseISO, isAfter } from 'date-fns';
+import styled from '@emotion/styled';
 
 interface ChoreListProps {
   chores: Array<Chore> | undefined;
@@ -54,7 +54,7 @@ export function ChoreList({ chores, onComplete, areDone }: ChoreListProps) {
   }
 
   return (
-    <List dense={true} style={{ width: '100%' }}>
+    <StyledList>
       {sortedChores.map(ch => {
         return (
           <React.Fragment key={ch.id}>
@@ -62,6 +62,21 @@ export function ChoreList({ chores, onComplete, areDone }: ChoreListProps) {
           </React.Fragment>
         );
       })}
-    </List>
+    </StyledList>
   );
 }
+
+const StyledList = styled('div')`
+  display: grid;
+  grid-gap: 3rem;
+  padding: 2rem;
+  width: 100%;
+  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+  flex-wrap: wrap;
+  max-width: 70%;
+
+  @media (max-width: 600px) {
+    grid-gap: 2rem;
+    max-width: 100%;
+  }
+`;

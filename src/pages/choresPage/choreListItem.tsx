@@ -2,16 +2,7 @@ import React, { useCallback, useState } from 'react';
 import { toast } from 'react-toastify';
 import { completeChore, sendReminder, undoChore } from 'srcRootDir/services/chores';
 import styled from '@emotion/styled';
-import {
-  Box,
-  Button,
-  Menu,
-  MenuItem,
-  Paper,
-  IconButton,
-  Chip,
-  LinearProgress,
-} from '@mui/material';
+import { Box, Button, Menu, MenuItem, Paper, IconButton, Chip, LinearProgress } from '@mui/material';
 import MenuIcon from '@mui/icons-material/Menu';
 import MenuOpenIcon from '@mui/icons-material/MenuOpen';
 import { formatDistance, parseISO } from 'date-fns';
@@ -71,10 +62,10 @@ export function ChoreListItem({
   );
 
   return (
-    <Paper elevation={3} sx={{ margin: 4 }}>
+    <Paper elevation={3}>
       <Box
         display="flex"
-        height="80px"
+        height="5rem"
         style={{
           backgroundImage: `linear-gradient(180deg, rgba(0,0,0,0.8) 0%, rgba(0,0,0,0.2) 34%, rgba(0,0,0,0.2) 43%, rgba(0,0,0,0.8) 100%), url(images/${chore.id}.jpg)`,
           backgroundSize: 'cover',
@@ -142,6 +133,7 @@ const LastModified = styled.span`
   font-size: 0.8rem;
   color: #ededed;
 `;
+
 
 function convertCompletionSemaphoreToCount(completionSemaphore: number) {
   const alignment = completionSemaphore >= 0 ? 1 : 0;
