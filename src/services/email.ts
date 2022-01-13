@@ -18,7 +18,7 @@ export async function sendEmail(currentUser: User, chore: DbChore): Promise<void
     await MailService.send({
       to: otherUser.email,
       from,
-      subject: `« ${chore.title} » was assigned to you.`,
+      subject: `“${chore.title}” was assigned to you.`,
       text: ` `,
     });
   } catch (ex) {
@@ -38,7 +38,7 @@ export async function sendReminder(currentUser: User, chore: DbChore): Promise<v
     await MailService.send({
       to: otherUser.email,
       from,
-      subject: `« ${chore.title} » is due.`,
+      subject: `[Reminder] “${chore.title}”.`,
       text: ` `,
     });
   } catch (ex) {
