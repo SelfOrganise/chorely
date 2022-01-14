@@ -16,7 +16,7 @@ export function findUser(username: string | undefined): User | null | undefined 
     return null;
   }
 
-  return users[username];
+  return users[username.toLowerCase()];
 }
 
 export function findUserByUserId(userId: number): User | undefined {
