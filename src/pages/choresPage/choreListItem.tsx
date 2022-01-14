@@ -5,6 +5,7 @@ import styled from '@emotion/styled';
 import { Box, Button, Menu, MenuItem, Paper, IconButton, Chip, LinearProgress } from '@mui/material';
 import MenuIcon from '@mui/icons-material/Menu';
 import MenuOpenIcon from '@mui/icons-material/MenuOpen';
+import CheckIcon from '@mui/icons-material/Check';
 import { formatDistance, parseISO } from 'date-fns';
 
 export function ChoreListItem({
@@ -68,11 +69,15 @@ export function ChoreListItem({
         height="5rem"
         style={{
           background:
-            chore.id % 4 === 0
-              ? 'rgba(0, 0, 0, 0) linear-gradient(to right, rgb(20, 30, 48), rgb(36, 59, 85)) repeat scroll 0% 0%'
-              : chore.id % 3 === 0
-              ? 'rgba(0, 0, 0, 0) linear-gradient(to right, rgb(213, 51, 105), rgb(203, 173, 109)) repeat scroll 0% 0%'
-              : 'rgba(0, 0, 0, 0) linear-gradient(to right, rgb(66, 39, 90), rgb(115, 75, 109)) repeat scroll 0% 0%',
+            chore.id % 5 === 0
+              ? 'rgba(0, 0, 0, 0) linear-gradient(to right, rgb(255, 81, 47), rgb(240, 152, 25)) repeat scroll 0% 0%' //sunrise
+              : chore.id % 5 === 1
+              ? 'rgba(0, 0, 0, 0) linear-gradient(to right, rgb(57, 106, 252), rgb(41, 72, 255)) repeat scroll 0% 0%' //kimoby is the new blue
+              : chore.id % 5 === 2
+              ? 'rgba(0, 0, 0, 0) linear-gradient(to right, rgb(255, 75, 31), rgb(255, 144, 104)) repeat scroll 0% 0%' //sylvia
+              : chore.id % 5 === 3
+              ? 'rgba(0, 0, 0, 0) linear-gradient(to right, rgb(20, 136, 204), rgb(43, 50, 178)) repeat scroll 0% 0%' //skyline
+              : 'rgba(0, 0, 0, 0) linear-gradient(to right, rgb(253, 116, 108), rgb(255, 144, 104)) repeat scroll 0% 0%', //haikus
           backgroundSize: 'cover',
           backgroundPosition: 'center',
         }}
@@ -116,11 +121,12 @@ export function ChoreListItem({
           disabled={isLoading}
           variant="text"
           onClick={(e: React.MouseEvent<HTMLElement>) => handleCompleteClick(e, chore)}
+          startIcon={<CheckIcon />}
           style={{
             color: isDone ? 'gray' : undefined,
           }}
         >
-          ✔ Complete {convertCompletionSemaphoreToCount(chore.completionSemaphore)}
+          Complete {convertCompletionSemaphoreToCount(chore.completionSemaphore)}
         </Button>
       </Box>
       {isLoading && <LinearProgress />}
