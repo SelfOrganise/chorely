@@ -62,12 +62,17 @@ export function ChoreListItem({
   );
 
   return (
-    <Paper elevation={3}>
+    <Paper elevation={3} square={false}>
       <Box
         display="flex"
         height="5rem"
         style={{
-          backgroundImage: `linear-gradient(180deg, rgba(0,0,0,0.8) 0%, rgba(0,0,0,0.2) 34%, rgba(0,0,0,0.2) 43%, rgba(0,0,0,0.8) 100%), url(images/${chore.id}.jpg)`,
+          background:
+            chore.id % 4 === 0
+              ? 'rgba(0, 0, 0, 0) linear-gradient(to right, rgb(20, 30, 48), rgb(36, 59, 85)) repeat scroll 0% 0%'
+              : chore.id % 3 === 0
+              ? 'rgba(0, 0, 0, 0) linear-gradient(to right, rgb(213, 51, 105), rgb(203, 173, 109)) repeat scroll 0% 0%'
+              : 'rgba(0, 0, 0, 0) linear-gradient(to right, rgb(66, 39, 90), rgb(115, 75, 109)) repeat scroll 0% 0%',
           backgroundSize: 'cover',
           backgroundPosition: 'center',
         }}
@@ -133,7 +138,6 @@ const LastModified = styled.span`
   font-size: 0.8rem;
   color: #ededed;
 `;
-
 
 function convertCompletionSemaphoreToCount(completionSemaphore: number) {
   const alignment = completionSemaphore >= 0 ? 1 : 0;
