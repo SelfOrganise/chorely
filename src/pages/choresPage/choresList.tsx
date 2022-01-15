@@ -68,15 +68,15 @@ export function ChoreList({ chores, onComplete, areDone }: ChoreListProps) {
 
 const StyledList = styled('div')`
   display: grid;
-  grid-gap: 2rem;
+  grid-gap: 1rem;
   padding: 2rem;
   width: 100%;
-  grid-template-columns: repeat(auto-fill, minmax(270px, 1fr));
+  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
   flex-wrap: wrap;
   max-width: 70%;
 
   @media (max-width: 600px) {
-    grid-gap: 2rem;
+    grid-gap: 1.5rem;
     max-width: 100%;
   }
 `;
