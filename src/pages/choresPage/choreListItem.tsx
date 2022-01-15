@@ -101,7 +101,7 @@ export function ChoreListItem({
         justifyContent: 'space-between',
       }}
     >
-      <Typography sx={{ fontSize: 24 }} fontWeight={300} color={colors.color} paddingLeft={1} paddingTop={1}>
+      <Typography sx={{ fontSize: 24 }} fontWeight={800} color={colors.color} paddingLeft={1} paddingTop={1}>
         {chore.title}
       </Typography>
       {false && chore.isLate && (
