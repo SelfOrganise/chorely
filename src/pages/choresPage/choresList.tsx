@@ -68,7 +68,7 @@ export function ChoreList({ chores, onComplete, areDone }: ChoreListProps) {
 
 const StyledList = styled('div')`
   display: grid;
-  grid-gap: 3rem;
+  grid-gap: 2rem;
   padding: 2rem;
   width: 100%;
   grid-template-columns: repeat(auto-fill, minmax(270px, 1fr));

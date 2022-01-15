@@ -1,12 +1,37 @@
 import React, { useCallback, useState } from 'react';
 import { toast } from 'react-toastify';
 import { completeChore, sendReminder, undoChore } from 'srcRootDir/services/chores';
-import styled from '@emotion/styled';
-import { Box, Button, Menu, MenuItem, Paper, IconButton, Chip, LinearProgress } from '@mui/material';
+import {
+  Box,
+  Menu,
+  MenuItem,
+  Paper,
+  IconButton,
+  Chip,
+  LinearProgress,
+  Typography,
+  Fab,
+  darken,
+  lighten,
+} from '@mui/material';
 import MenuIcon from '@mui/icons-material/Menu';
 import MenuOpenIcon from '@mui/icons-material/MenuOpen';
 import CheckIcon from '@mui/icons-material/Check';
 import { formatDistance, parseISO } from 'date-fns';
+
+const cardColors = [
+  { background: '#ff6f75', color: 'white' },
+  { background: '#46c2a6', color: 'white' },
+  { background: '#ff70a8', color: 'white' },
+  { background: '#dd8d7f', color: 'white' },
+  { background: '#ff875d', color: 'white' },
+  { background: '#4bb7dd', color: 'white' },
+  { background: '#ffe162', color: '#857862' },
+].map(c => ({
+  ...c,
+  fabBackground: lighten(c.background, 0.85),
+  fabColor: darken(c.background, 0.3),
+}));
 
 export function ChoreListItem({
   chore,
@@ -62,92 +87,80 @@ export function ChoreListItem({
     [chore]
   );
 
+  const colors = cardColors[chore.id % cardColors.length];
+
   return (
-    <Paper elevation={3} square={false}>
-      <Box
-        display="flex"
-        height="5rem"
-        style={{
-          background:
-            chore.id % 5 === 0
-              ? 'rgba(0, 0, 0, 0) linear-gradient(to right, rgb(255, 81, 47), rgb(240, 152, 25)) repeat scroll 0% 0%' //sunrise
-              : chore.id % 5 === 1
-              ? 'rgba(0, 0, 0, 0) linear-gradient(to right, rgb(57, 106, 252), rgb(41, 72, 255)) repeat scroll 0% 0%' //kimoby is the new blue
-              : chore.id % 5 === 2
-              ? 'rgba(0, 0, 0, 0) linear-gradient(to right, rgb(255, 75, 31), rgb(255, 144, 104)) repeat scroll 0% 0%' //sylvia
-              : chore.id % 5 === 3
-              ? 'rgba(0, 0, 0, 0) linear-gradient(to right, rgb(20, 136, 204), rgb(43, 50, 178)) repeat scroll 0% 0%' //skyline
-              : 'rgba(0, 0, 0, 0) linear-gradient(to right, rgb(253, 116, 108), rgb(255, 144, 104)) repeat scroll 0% 0%', //haikus
-          backgroundSize: 'cover',
-          backgroundPosition: 'center',
-        }}
-        alignItems="flex-end"
-        justifyContent="start"
-        position="relative"
+    <Paper
+      elevation={1}
+      sx={{
+        height: '6rem',
+        background: colors.background,
+        position: 'relative',
+        display: 'flex',
+        flexDirection: 'column',
+        justifyContent: 'space-between',
+      }}
+    >
+      <Typography sx={{ fontSize: 24 }} fontWeight={300} color={colors.color} paddingLeft={1} paddingTop={1}>
+        {chore.title}
+      </Typography>
+      {false && chore.isLate && (
+        <Box position="absolute" top="0.5rem" left="0.5rem">
+          <Chip
+            sx={{ fontSize: '0.8rem', height: '1.2rem', opacity: 0.8 }}
+            color="error"
+            size="small"
+            label="Late task warning"
+          />
+        </Box>
+      )}
+      <Box display="flex" justifyContent="center">
+        <Typography sx={{ fontSize: 12 }} fontWeight={300} color={colors.color} paddingBottom={1}>
+          last done {formatDistance(parseISO(chore.modifiedOnUTC), new Date())} ago
+        </Typography>
+      </Box>
+      <IconButton
+        sx={{ position: 'absolute', bottom: 0, left: 0 }}
+        onClick={(e: React.MouseEvent<HTMLElement>) => setAnchorEl(e.currentTarget)}
       >
-        <Box paddingLeft={1} paddingBottom={1}>
-          <Title>{chore.title}</Title>
-        </Box>
-        {false && chore.isLate && (
-          <Box position="absolute" top="0.5rem" left="0.5rem">
-            <Chip
-              sx={{ fontSize: '0.8rem', height: '1.2rem', opacity: 0.8 }}
-              color="error"
-              size="small"
-              label="Late task warning"
-            />
-          </Box>
-        )}
-        <Box position="absolute" top="0.3rem" right="0.5rem">
-          <LastModified>last done {formatDistance(parseISO(chore.modifiedOnUTC), new Date())} ago</LastModified>
-        </Box>
-      </Box>
-      <Box display="flex" justifyContent="space-between">
-        <IconButton onClick={(e: React.MouseEvent<HTMLElement>) => setAnchorEl(e.currentTarget)}>
-          {open ? <MenuOpenIcon /> : <MenuIcon />}
-          <Menu open={open} onClose={handleMenuClose} anchorEl={anchorEl}>
-            <MenuItem disabled={isLoading} onClick={(e: React.MouseEvent<HTMLElement>) => handleUndoClick(e, chore)}>
-              ⏪ Undo
-            </MenuItem>
-            <MenuItem
-              disabled={!isDone || isLoading}
-              onClick={(e: React.MouseEvent<HTMLElement>) => handleSendReminderClick(e, chore)}
-            >
-              🔔 Send reminder
-            </MenuItem>
-          </Menu>
-        </IconButton>
-        <Button
-          disabled={isLoading}
-          variant="text"
-          onClick={(e: React.MouseEvent<HTMLElement>) => handleCompleteClick(e, chore)}
-          startIcon={<CheckIcon />}
-          style={{
-            color: isDone ? 'gray' : undefined,
-          }}
-        >
-          Complete {convertCompletionSemaphoreToCount(chore.completionSemaphore)}
-        </Button>
-      </Box>
+        {open ? <MenuOpenIcon sx={{ color: colors.color }} /> : <MenuIcon sx={{ color: colors.color }} />}
+        <Menu open={open} onClose={handleMenuClose} anchorEl={anchorEl}>
+          <MenuItem disabled={isLoading} onClick={(e: React.MouseEvent<HTMLElement>) => handleUndoClick(e, chore)}>
+            ⏪ Undo
+          </MenuItem>
+          <MenuItem
+            disabled={!isDone || isLoading}
+            onClick={(e: React.MouseEvent<HTMLElement>) => handleSendReminderClick(e, chore)}
+          >
+            🔔 Send reminder
+          </MenuItem>
+        </Menu>
+      </IconButton>
+      <Fab
+        onClick={(e: React.MouseEvent<HTMLElement>) => handleCompleteClick(e, chore)}
+        size="small"
+        sx={{
+          position: 'absolute',
+          color: colors.fabColor,
+          right: 0,
+          bottom: 0,
+          marginRight: 1,
+          marginBottom: 1,
+          background: `linear-gradient(0, ${colors.fabBackground} 0%, white 100%)`,
+          boxShadow: '0px 2px 2px -1px rgb(0 0 0 / 20%)',
+        }}
+        aria-label="like"
+      >
+        <CheckIcon />
+      </Fab>
       {isLoading && <LinearProgress />}
     </Paper>
   );
 }
 
-const Title = styled.span`
-  font-size: 1rem;
-  font-weight: 600;
-  color: white;
-`;
-
-const LastModified = styled.span`
-  font-size: 0.8rem;
-  color: #ededed;
-`;
-
-function convertCompletionSemaphoreToCount(completionSemaphore: number) {
-  const alignment = completionSemaphore >= 0 ? 1 : 0;
-
-  const count = Math.abs(completionSemaphore) + alignment;
-  return count > 1 ? `(${count})` : '';
-}
+// function convertCompletionSemaphoreToCount(completionSemaphore: number) {
+//   const alignment = completionSemaphore >= 0 ? 1 : 0;
+//
+//   const count = Math.abs(completionSemaphore) + alignment;
+//   return count > 1 ? `(${count})` : '';
+// }
