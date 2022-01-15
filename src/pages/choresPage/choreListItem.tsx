@@ -26,7 +26,7 @@ const cardColors = [
   { background: '#dd8d7f', color: 'white' },
   { background: '#ff875d', color: 'white' },
   { background: '#4bb7dd', color: 'white' },
-  { background: '#ffe162', color: '#857862' },
+  { background: '#ffe162', color: '#867734' },
 ].map(c => ({
   ...c,
   fabBackground: lighten(c.background, 0.85),
