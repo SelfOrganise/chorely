@@ -71,7 +71,7 @@ const StyledList = styled('div')`
   grid-gap: 1rem;
   padding: 2rem;
   width: 100%;
-  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+  grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
   flex-wrap: wrap;
   max-width: 70%;
 
