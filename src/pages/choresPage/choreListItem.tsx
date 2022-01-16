@@ -57,10 +57,15 @@ export function ChoreListItem({
     async (e: React.MouseEvent<HTMLElement>, chore: Chore) => {
       setIsLoading(true);
       handleMenuClose(e);
-      await completeChore(chore.id);
-      setIsLoading(false);
-      toast.success(`Task completed`);
-      onComplete && onComplete();
+      try {
+        await completeChore(chore.id);
+        toast.success(`Task completed`);
+        onComplete && onComplete();
+      } catch (ex: any) {
+        toast.error(`Could not complete chore (${ex?.statusText})`);
+      } finally {
+        setIsLoading(false);
+      }
     },
     [chore]
   );

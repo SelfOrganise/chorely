@@ -18,13 +18,9 @@ export function ChoresPage() {
     if (response.isValidating) {
       toast.loading('Refreshing chores...', { toastId: 'loadingChores' });
     }
-  }, [response.isValidating]);
 
-  useEffect(() => {
-    if (!response.isValidating) {
-      toast.dismiss('loadingChores');
-    }
-  }, [!response.isValidating]);
+    return () => toast.dismiss('loadingChores');
+  }, [response.isValidating]);
 
   if (response.error) {
     return (

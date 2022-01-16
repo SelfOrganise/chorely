@@ -4,7 +4,7 @@ export function fetcher(url: string, init?: RequestInit): any | Response {
   const userId = getCurrentUserId();
 
   return fetch(`${BACKEND_ORIGIN}${url}`, {
-    headers: { 'X-UserId': userId.toString() },
+    headers: { 'X-UserId': userId.toString(), 'Content-Type': 'application/json' },
     ...(init || {}),
   }).then(res => {
     if (res.status === 200) {
