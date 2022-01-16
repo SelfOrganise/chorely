@@ -1,3 +1,5 @@
+import { ChoreActions } from "./routes/chores";
+
 export interface User {
   userId: number;
   email: string;
@@ -21,4 +23,15 @@ interface History {
   choreId: number;
   completedOnUTC: string;
   completedById: number;
+}
+
+declare module 'fastify' {
+  interface FastifyRequest {
+    user: User;
+    choreId: number;
+  }
+
+  interface FastifyRequestBody {
+
+  }
 }

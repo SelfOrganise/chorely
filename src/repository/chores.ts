@@ -1,7 +1,6 @@
 import { pool } from './db';
 import { Chore, DbChore, History, User } from '../types';
 import { sendEmail, sendReminder } from '../services/email';
-import { parseExpression } from 'cron-parser';
 
 export async function getChores(): Promise<Array<Chore>> {
   const client = await pool.connect();
@@ -23,26 +22,9 @@ export async function getChores(): Promise<Array<Chore>> {
       return chore;
     }
 
-    const nextScheduledDate = parseExpression(chore.cron, { currentDate: new Date(chore.modifiedOnUTC) })
-      .next()
-      .toDate();
-
-    const now = Date.now();
-
-    // if next scheduled date is in the past, then the chore is late
-    if (nextScheduledDate.getTime() - now < 0) {
-      return {
-        ...chore,
-        isLate: true,
-      };
-    }
-
-    // if next scheduled date is in the future and difference between then and now is less than hours left for reminder
-    // mark task as late
-    const isLate = Math.abs(nextScheduledDate.getTime() - now) / (1000 * 60 * 60) <= (chore.hoursLeftReminder || -1);
     return {
       ...chore,
-      isLate,
+      isLate: false,
     };
   });
 }
@@ -51,7 +33,7 @@ export async function completeChore(choreId: number, user: User): Promise<void> 
   const client = await pool.connect();
 
   const historyResult = await client.query<History>(
-    `insert into history("choreId", "completedById")values($1, $2) returning *`,
+    `insert into history("choreId", "completedById") values($1, $2) returning *`,
     [choreId, user.userId]
   );
 
@@ -123,7 +105,7 @@ export async function undoChore(choreId: number, user: User): Promise<boolean> {
   return true;
 }
 
-export async function remind(choreId: number, user: User): Promise<boolean> {
+export async function remindChore(choreId: number, user: User): Promise<boolean> {
   const client = await pool.connect();
   const choreResult = await client.query<DbChore>(
     `select id,
