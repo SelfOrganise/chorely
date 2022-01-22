@@ -1,0 +1,66 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`Chores routes should return correctly assigned tasks 1`] = `
+Array [
+  Object {
+    "assigned_to_user_id": 118,
+    "due_by_utc": "2022-01-23T00:46:14.148Z",
+    "id": 242,
+    "title": "submissive hotdog",
+  },
+  Object {
+    "assigned_to_user_id": 116,
+    "due_by_utc": "2022-01-22T18:31:44.736Z",
+    "id": 244,
+    "title": "sneaky scrutiny",
+  },
+  Object {
+    "assigned_to_user_id": 120,
+    "due_by_utc": "2022-01-22T19:44:25.244Z",
+    "id": 246,
+    "title": "creamy dolman",
+  },
+  Object {
+    "assigned_to_user_id": 118,
+    "due_by_utc": "2022-01-23T11:14:17.778Z",
+    "id": 248,
+    "title": "well-lit chord",
+  },
+  Object {
+    "assigned_to_user_id": 116,
+    "due_by_utc": "2022-01-22T17:30:52.605Z",
+    "id": 250,
+    "title": "grotesque affair",
+  },
+  Object {
+    "assigned_to_user_id": 120,
+    "due_by_utc": "2022-01-23T11:46:07.995Z",
+    "id": 252,
+    "title": "giddy query",
+  },
+  Object {
+    "assigned_to_user_id": 118,
+    "due_by_utc": "2022-01-22T21:58:23.358Z",
+    "id": 254,
+    "title": "buoyant mileage",
+  },
+  Object {
+    "assigned_to_user_id": 116,
+    "due_by_utc": "2022-01-23T00:50:00.354Z",
+    "id": 256,
+    "title": "insubstantial afterlife",
+  },
+  Object {
+    "assigned_to_user_id": 120,
+    "due_by_utc": "2022-01-23T09:00:11.260Z",
+    "id": 258,
+    "title": "uncomfortable defeat",
+  },
+  Object {
+    "assigned_to_user_id": 118,
+    "due_by_utc": "2022-01-22T21:52:18.137Z",
+    "id": 260,
+    "title": "peaceful tavern",
+  },
+]
+`;

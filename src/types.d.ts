@@ -1,22 +1,22 @@
-import { ChoreActions } from "./routes/chores";
+export interface User extends Pick<DbUser, 'id'> {}
 
-export interface User {
-  userId: number;
+interface Assignment extends DbAssignment {}
+
+interface DbUser {
+  id: number;
+  name: string;
   email: string;
+  created_at_utc: string;
+  is_admin: boolean;
+  rota_order: number;
+  organisation_id: number;
 }
 
-interface Chore extends DbChore {
-  isLate?: boolean;
-}
-
-interface DbChore {
+interface DbAssignment {
   id: number;
   title: string;
-  description: string;
-  cron: string;
-  hoursLeftReminder?: number;
-  completionSemaphore: number;
-  modifiedOnUTC: string;
+  due_by_utc: string;
+  assigned_to_user_id: number;
 }
 
 interface History {
@@ -27,11 +27,9 @@ interface History {
 
 declare module 'fastify' {
   interface FastifyRequest {
-    user: User;
+    user: DbUser;
     choreId: number;
   }
 
-  interface FastifyRequestBody {
-
-  }
+  interface FastifyRequestBody {}
 }

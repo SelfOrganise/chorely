@@ -1,52 +1,47 @@
 import { pool } from './db';
-import { Chore, DbChore, History, User } from '../types';
+import { Assignment, DbAssignment, DbUser, History, User } from '../types';
 import { sendEmail, sendReminder } from '../services/email';
 
-export async function getChores(): Promise<Array<Chore>> {
+export async function getChores(organisationId: number): Promise<Array<Assignment>> {
   const client = await pool.connect();
-  const choresResult = await client.query<DbChore>(`
-      select id,
-             title,
-             description,
-             cron,
-             "hoursLeftReminder",
-             "completionSemaphore",
-             "modifiedOnUTC"
-      from chores
-  `);
+  const choresResult = await client.query<DbAssignment>(
+    `
+      select a.id,
+             t.title,
+             a.assigned_to_user_id,
+             a.due_by_utc
+      from assignments a
+               inner join tasks t on
+          a.task_id = t.id
+               inner join users u on
+          a.assigned_to_user_id = u.id
+      where t.organisation_id = $1`,
+    [organisationId]
+  );
+
   await client.release();
 
-  // determine if chore is late
-  return choresResult.rows.map<Chore>((chore: DbChore) => {
-    if (!chore.cron) {
-      return chore;
-    }
-
-    return {
-      ...chore,
-      isLate: false,
-    };
-  });
+  return choresResult.rows;
 }
 
-export async function completeChore(choreId: number, user: User): Promise<void> {
+export async function completeChore(choreId: number, user: DbUser): Promise<void> {
   const client = await pool.connect();
 
   const historyResult = await client.query<History>(
     `insert into history("choreId", "completedById") values($1, $2) returning *`,
-    [choreId, user.userId]
+    [choreId, user.id]
   );
 
   const history = historyResult.rows[0]!;
 
-  const updateChoreResult = await client.query<DbChore>(
+  const updateChoreResult = await client.query<DbAssignment>(
     `update chores 
         set "completionSemaphore" = "completionSemaphore" + $1, 
             "modifiedOnUTC" = $2
        where id = $3
        returning *
   `,
-    [user.userId, history?.completedOnUTC, choreId]
+    [user.id, history?.completedOnUTC, choreId]
   );
 
   await client.release();
@@ -88,7 +83,7 @@ export async function undoChore(choreId: number, user: User): Promise<boolean> {
 
   const previousHistory = previousHistoryResult?.rows[0];
 
-  const updateChoreResult = await client.query<DbChore>(
+  const updateChoreResult = await client.query<DbAssignment>(
     `update chores 
         set "completionSemaphore" = "completionSemaphore" - $1, 
             "modifiedOnUTC" = $2
@@ -107,7 +102,7 @@ export async function undoChore(choreId: number, user: User): Promise<boolean> {
 
 export async function remindChore(choreId: number, user: User): Promise<boolean> {
   const client = await pool.connect();
-  const choreResult = await client.query<DbChore>(
+  const choreResult = await client.query<DbAssignment>(
     `select id,
             title,
             description,

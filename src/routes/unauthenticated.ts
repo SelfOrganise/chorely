@@ -3,17 +3,17 @@ import { FastifyPluginCallback } from 'fastify/types/plugin';
 
 export const unauthenticated: FastifyPluginCallback = (server, opts, done) => {
   server.get('/healthz', (req, reply) => {
-    reply.status(200);
+    reply.status(200).send();
   });
 
-  server.get<{ Querystring: { username?: string } }>('/login', async (req, res) => {
-    const user = findUser(req.query?.username?.toString());
+  server.post<{ Body: { username?: string } }>('/login', async (req, res) => {
+    const user = await findUser(req.body?.username?.toString());
     if (!user) {
       res.status(401).send();
       return;
     }
 
-    return { userId: user.userId };
+    return { id: user.id };
   });
 
   done();

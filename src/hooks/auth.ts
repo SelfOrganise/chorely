@@ -7,7 +7,7 @@ export async function auth(req: FastifyRequest<{ Headers: { 'x-userid'?: string 
     res.status(401).send('Invalid userId');
     return;
   } else {
-    const user = findUserByUserId(userId);
+    const user = await findUserByUserId(userId);
     if (!user) {
       res.status(401);
       return;

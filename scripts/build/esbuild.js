@@ -1,5 +1,5 @@
 require('esbuild').buildSync({
-  entryPoints: ['src/index.ts'],
+  entryPoints: ['src/index.mts'],
   bundle: true,
   minify: true,
   platform: 'node',

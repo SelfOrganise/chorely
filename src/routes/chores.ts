@@ -14,11 +14,11 @@ interface ChoreIdQueryParam {
 }
 
 export const chores: FastifyPluginCallback = (server, opts, done) => {
-  server.get('/chores/current', async () => {
-    return await getChores();
+  server.get('/tasks/current', async req => {
+    return await getChores(req.user.organisation_id);
   });
 
-  server.post<ChoreIdQueryParam>('/chores/:id', {
+  server.post<ChoreIdQueryParam>('/tasks/:id', {
     schema: {
       params: S.object().prop('id', S.number()).required(['id']),
       body: S.object()
