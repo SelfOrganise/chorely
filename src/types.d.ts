@@ -12,6 +12,13 @@ interface DbUser {
   organisation_id: number;
 }
 
+interface DbTask {
+  id: number;
+  title: string;
+  frequency: number;
+  organisation_id: number;
+}
+
 interface DbAssignment {
   id: number;
   task_id: number;

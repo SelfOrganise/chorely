@@ -1,5 +1,5 @@
 import { pool } from './db';
-import { Assignment, DbAssignment, DbUser, History, User } from '../types';
+import { Assignment, DbAssignment, DbTask, DbUser, History, User } from '../types';
 import { sendEmail, sendReminder } from '../services/email';
 import { Response, response } from '../utilities/response';
 import { getUsersByOrganisation } from './users';
@@ -39,14 +39,16 @@ export async function getTasks(organisationId: number): Promise<Array<Assignment
 export async function completeAssignment(assignmentId: number, user: DbUser): Promise<Response | void> {
   const client = await pool.connect();
 
-  const assignmentResult = await client.query<DbAssignment>(
+  const assignmentResult = await client.query<DbAssignment & Pick<DbTask, 'title'>>(
     `select a.id,
             a.task_id,
             a.assigned_to_user_id,
             a.assigned_by_user_id,
             a.due_by_utc,
-            a.assigned_on_utc
+            a.assigned_on_utc,
+            t.title
      from assignments a
+     inner join tasks t on a.task_id = t.id
      where a.id = $1 and a.assigned_to_user_id = $2`,
     [assignmentId, user.id]
   );
@@ -55,16 +57,17 @@ export async function completeAssignment(assignmentId: number, user: DbUser): Pr
     return response(400, `Cannot find assignment with id '${assignmentId}'.`);
   }
 
-  const latestAssignment = await client.query<DbAssignment>(
+  const latestAssignmentForTask = await client.query<DbAssignment>(
     `select a.id
      from assignments a
      where task_id = (select task_id from assignments where id = $1)
      order by due_by_utc desc
      fetch first 1 rows only
-    `, [assignmentId]
+    `,
+    [assignmentId]
   );
 
-  if (latestAssignment.rowCount !== 1 || assignmentResult.rows[0].id != latestAssignment.rows[0].id) {
+  if (latestAssignmentForTask.rowCount !== 1 || assignmentResult.rows[0].id != latestAssignmentForTask.rows[0].id) {
     return response(400, `Cannot process assignment with id '${assignmentId}' because it is outdated.`);
   }
 
@@ -88,9 +91,9 @@ export async function completeAssignment(assignmentId: number, user: DbUser): Pr
 
   await client.release();
 
-  return response(200); // todo message if it was assigned back to you
+  await sendEmail(nextUser, assignmentResult.rows[0].title);
 
-  // await sendEmail(user, updateChoreResult.rows[0]);
+  return response(200); // todo message if it was assigned back to you
 }
 
 export async function undoChore(choreId: number, user: User): Promise<boolean> {

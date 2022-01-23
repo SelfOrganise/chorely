@@ -13,16 +13,17 @@ const { Alice, Bob, Jane, Alex, Mark } = require('../fixtures/users');
 const { CleanToilet, WashDishes, CallAssociates, WeeklyRevision, LeadClientMeeting } = require('../fixtures/tasks');
 const { Assignment } = require('../fixtures/assignments');
 const { useApi } = require('../util/useApi');
-const { differenceInDays, intervalToDuration } = require('date-fns');
+const FakeMailService = require('@sendgrid/mail');
 
-describe('Tasks routes', () => {
+describe('Assignments routes', () => {
   const api = useApi();
+  jest.fn();
 
   beforeEach(async () => {
     await clearTables();
   });
 
-  it('should return correctly assigned tasks', async () => {
+  it('should return assignments for current organisation only', async () => {
     const [aDatum, adventureWorks] = await provisionOrganisation(ADatumCorporation(), AdventureWorks());
 
     // aDatum
@@ -96,7 +97,7 @@ describe('Tasks routes', () => {
   });
 
   it('should return 400 when assignment is outdated', async () => {
-    const [aDatum] = await provisionOrganisation(ADatumCorporation(), AdventureWorks());
+    const [aDatum] = await provisionOrganisation(ADatumCorporation());
     const [cleanToilet] = await provisionTasks(CleanToilet(aDatum.id), WashDishes(aDatum.id));
     const [bob, alice] = await provisionUsers(Bob(aDatum.id), Alice(aDatum.id));
     const assignments = await provisionAssignments(
@@ -115,17 +116,16 @@ describe('Tasks routes', () => {
     expect(response.body).toBe(`Cannot process assignment with id '${assignments[0].id}' because it is outdated.`);
   });
 
-  it('should return 400 when assignment is outdateda', async () => {
-    const [aDatum] = await provisionOrganisation(ADatumCorporation(), AdventureWorks());
+  it('should return 200 and assign the task to the next user in rota', async () => {
+    const [aDatum] = await provisionOrganisation(ADatumCorporation());
     const [cleanToilet] = await provisionTasks(CleanToilet(aDatum.id), WashDishes(aDatum.id));
-    const [alice, bob] = await provisionUsers(Alice(aDatum.id, 1), Bob(aDatum.id, 2));
+    const [alice, bob] = await provisionUsers(Alice(aDatum.id, 1), Bob(aDatum.id, 2)); // bob would roll-over to alice
     const assignments = await provisionAssignments(
       Assignment(cleanToilet.id, bob.id, alice.id, t(-2), t(-1)),
       Assignment(cleanToilet.id, alice.id, bob.id, t(-1), t(0)),
       Assignment(cleanToilet.id, bob.id, alice.id, t(0), t(1))
     );
 
-    // verify response
     const response = await api()
       .post(`${apiBase}/assignments/${assignments[2].id}`)
       .headers({ 'x-userid': bob.id })
@@ -133,26 +133,62 @@ describe('Tasks routes', () => {
       .end();
 
     expect(response.statusCode).toBe(200);
-
-    // verify db
-    const result = await query(
-      tableNames.assignments,
-      `select * from assignments where task_id = ${cleanToilet.id} order by due_by_utc desc fetch first 1 rows only`
-    );
-
-    expect(result).toHaveLength(1);
-    expect(result[0].assigned_to_user_id).toBe(alice.id); // because of rota order
-    expect(result[0].assigned_by_user_id).toBe(bob.id);
-    expect(result[0].assigned_on_utc);
-
-    expect(new Date(result[0].assigned_on_utc).getTime() - new Date().getTime()).toBeLessThan(1000);
-
-    expect(intervalToDuration({ start: new Date(), end: new Date(result[0].due_by_utc) })).toEqual(
+    await verifyLatestAssignment(cleanToilet.id, alice.id, bob.id, 13.99);
+    expect(FakeMailService.send).toHaveBeenCalledTimes(1);
+    expect(FakeMailService.send.mock.calls[0][0]).toEqual(
       expect.objectContaining({
-        days: 13,
-        hours: 23,
-        minutes: 59,
+        to: alice.email,
+        subject: `“${cleanToilet.title}” was assigned to you.`,
+        text: ` `,
+      })
+    );
+  });
+
+  it('should return 200 and assign it to the same user when only 1 user exists', async () => {
+    const [aDatum] = await provisionOrganisation(ADatumCorporation());
+    const [cleanToilet] = await provisionTasks(CleanToilet(aDatum.id));
+    const [alice] = await provisionUsers(Alice(aDatum.id, 1));
+    const assignments = await provisionAssignments(Assignment(cleanToilet.id, alice.id, alice.id, t(-2), t(-1)));
+
+    const response = await api()
+      .post(`${apiBase}/assignments/${assignments[0].id}`)
+      .headers({ 'x-userid': alice.id })
+      .body({ action: 'complete' })
+      .end();
+
+    expect(response.statusCode).toBe(200);
+    await verifyLatestAssignment(cleanToilet.id, alice.id, alice.id, 13.99);
+    expect(FakeMailService.send).toHaveBeenCalledTimes(1);
+    expect(FakeMailService.send.mock.calls[0][0]).toEqual(
+      expect.objectContaining({
+        to: alice.email,
+        subject: `“${cleanToilet.title}” was assigned to you.`,
+        text: ` `,
       })
     );
   });
 });
+
+// helpers
+async function verifyLatestAssignment(
+  taskId,
+  assigned_to_user_id,
+  assigned_by_user_id,
+  dueDaysLeft,
+  assignedOn = 1000
+) {
+  const result = await query(
+    tableNames.assignments,
+    `select * from assignments where task_id = ${taskId} order by due_by_utc desc fetch first 1 rows only`
+  );
+
+  expect(result[0].assigned_to_user_id).toBe(assigned_to_user_id);
+  expect(result[0].assigned_by_user_id).toBe(assigned_by_user_id);
+  expect(new Date(result[0].assigned_on_utc).getTime() - new Date().getTime()).toBeLessThan(1000);
+  expect((new Date(result[0].due_by_utc).getTime() - new Date().getTime()) / 1000 / 60 / 60 / 24).toBeCloseTo(
+    dueDaysLeft,
+    1
+  );
+
+  expect(result).toHaveLength(1);
+}
