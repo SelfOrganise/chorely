@@ -1,21 +1,52 @@
-const faker = require('@faker-js/faker');
+const Alice = (organisation_id, rota_order = 1) => ({
+  name: 'alice',
+  email: 'alice@home.com',
+  created_at_utc: new Date().toISOString(),
+  is_admin: false,
+  rota_order,
+  organisation_id,
+});
 
-function getDefaultUsers(organisations) {
-  const users = [];
-  for (let i = 0; i < organisations.length * 3; i++) {
-    users.push({
-      name: faker.name.findName(),
-      email: faker.internet.email(),
-      created_at_utc: faker.date.past(1),
-      is_admin: false,
-      rota_order: Math.floor(i / organisations.length),
-      organisation_id: organisations[i % organisations.length]['id'],
-    });
-  }
+const Bob = (organisation_id, rota_order = 1) => ({
+  name: 'bob',
+  email: 'bob@home.com',
+  created_at_utc: new Date().toISOString(),
+  is_admin: false,
+  rota_order,
+  organisation_id,
+});
 
-  return users;
-}
+const Mark = (organisation_id, rota_order = 1) => ({
+  name: 'mark',
+  email: 'mark@office.com',
+  created_at_utc: new Date().toISOString(),
+  is_admin: false,
+  rota_order,
+  organisation_id,
+});
+
+const Jane = (organisation_id, rota_order = 1) => ({
+  name: 'Jane',
+  email: 'jane@office.com',
+  created_at_utc: new Date().toISOString(),
+  is_admin: false,
+  rota_order,
+  organisation_id,
+});
+
+const Alex = (organisation_id, rota_order = 1) => ({
+  name: 'Alex',
+  email: 'alex@office.com',
+  created_at_utc: new Date().toISOString(),
+  is_admin: false,
+  rota_order,
+  organisation_id,
+});
 
 module.exports = {
-  getDefaultUsers,
+  Bob,
+  Alice,
+  Mark,
+  Jane,
+  Alex,
 };

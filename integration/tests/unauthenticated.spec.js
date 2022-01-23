@@ -8,7 +8,7 @@ describe('Unauthenticated routes', () => {
   const api = useApi();
 
   beforeEach(async () => {
-    await clearTables(tableNames.users, tableNames.organisations);
+    await clearTables();
   });
 
   it('should response 200 on healthz endpoint', async () => {

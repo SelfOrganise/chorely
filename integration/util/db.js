@@ -1,4 +1,6 @@
-const { Pool } = require('pg');
+const { Pool, types } = require('pg');
+
+const { tableNames } = require('./constants');
 
 const pool = new Pool({
   host: process.env.DB_HOST,
@@ -18,19 +20,20 @@ function withDbClient(callback) {
   };
 }
 
-const clearTables = withDbClient(async (client, ...tableNames) => {
-  for (const tableName of tableNames) {
-    await client.query(`delete from ${tableName} where true`);
-  }
+const clearTables = withDbClient(async client => {
+  await client.query(`delete from ${tableNames.assignments} where true`);
+  await client.query(`delete from ${tableNames.tasks} where true`);
+  await client.query(`delete from ${tableNames.users} where true`);
+  await client.query(`delete from ${tableNames.organisations} where true`);
 });
 
 // eg for [{ name: 'a' }, { name: 'b' }]
 const provision = withDbClient(async (client, tableName, data) => {
   // ["name"]
-  const columnNames = Object.keys(data[0]);
+  const columnNames = Object.keys(data[0]).filter(key => typeof data[0][key] !== 'function');
 
   // ['a', 'b']
-  const allValues = data.flatMap(d => Object.values(d));
+  const allValues = data.flatMap(d => columnNames.map(col => d[col]));
 
   // '"name"'
   const columnNameList = columnNames.map(c => `"${c}"`).join(',');
@@ -47,8 +50,30 @@ const provision = withDbClient(async (client, tableName, data) => {
   return result.rows;
 });
 
+const query = withDbClient(async (client, tableName, query, queryValues) => {
+  const result = await client.query(query, queryValues);
+
+  return result.rows;
+});
+
+function provisionOrganisation(...data) {
+  return provision(tableNames.organisations, data);
+}
+
+function provisionUsers(...data) {
+  return provision(tableNames.users, data);
+}
+
+function provisionTasks(...data) {
+  return provision(tableNames.tasks, data);
+}
+
+function provisionAssignments(...data) {
+  return provision(tableNames.assignments, data);
+}
+
 function expand(items) {
-  const columnCount = Object.values(items[0]).length;
+  const columnCount = Object.keys(items[0]).filter(key => typeof items[0][key] !== 'function').length;
   let index = 1;
   return Array(items.length)
     .fill(0)
@@ -62,4 +87,4 @@ function expand(items) {
     .join(', ');
 }
 
-module.exports = { pool, provision, clearTables };
+module.exports = { query, clearTables, provisionOrganisation, provisionTasks, provisionAssignments, provisionUsers };

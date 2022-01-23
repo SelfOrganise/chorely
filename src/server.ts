@@ -2,7 +2,7 @@ import fastify from 'fastify';
 import fastify_cors from 'fastify-cors';
 import { unauthenticated } from './routes/unauthenticated';
 import { auth } from './hooks/auth';
-import { chores } from './routes/chores';
+import { assignments } from './routes/assignments';
 
 export function buildServer(opts = {}) {
 
@@ -19,7 +19,7 @@ export function buildServer(opts = {}) {
   server.register((server, opt, done) => {
     server.addHook('preHandler', auth);
 
-    server.register(chores);
+    server.register(assignments);
     done();
   });
 

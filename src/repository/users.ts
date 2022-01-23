@@ -48,3 +48,25 @@ export async function findUserByUserId(userId: number): Promise<DbUser | undefin
 
   return result.rows[0];
 }
+
+export async function getUsersByOrganisation(organisationId: number): Promise<Array<DbUser>> {
+  const client = await pool.connect();
+  const result = await client.query<DbUser>(
+    `
+      select u.id,
+             u."name",
+             u.email,
+             u.created_at_utc,
+             u.is_admin,
+             u.rota_order,
+             u.organisation_id
+      from users u
+      where u.organisation_id = $1 
+  `,
+    [organisationId]
+  );
+
+  await client.release();
+
+  return result.rows;
+}

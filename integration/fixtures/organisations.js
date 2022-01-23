@@ -1,12 +1,9 @@
-function getDefaultOrganisations() {
-  return [
-    {
-      name: 'Buckingham Palace',
-    },
-    {
-      name: 'White house',
-    },
-  ];
-}
+const ADatumCorporation = () => ({
+  name: 'A. Datum Corporation',
+});
 
-module.exports = { getDefaultOrganisations };
+const AdventureWorks = () => ({
+  name: 'Adventure Works',
+});
+
+module.exports = { ADatumCorporation, AdventureWorks };

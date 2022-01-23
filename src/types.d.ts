@@ -14,9 +14,11 @@ interface DbUser {
 
 interface DbAssignment {
   id: number;
-  title: string;
-  due_by_utc: string;
+  task_id: number;
   assigned_to_user_id: number;
+  assigned_by_user_id: number;
+  due_by_utc: string;
+  assigned_on_utc: string;
 }
 
 interface History {

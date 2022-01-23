@@ -1,7 +1,7 @@
 import { buildServer } from '../../src/server';
 
 function useApi() {
-  const result = { api: null };
+  const result: any = { api: null };
 
   beforeAll(() => (result.api = buildServer()));
 

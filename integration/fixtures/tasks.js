@@ -1,16 +1,37 @@
-const faker = require('@faker-js/faker');
+const WashDishes = organisation_id => ({
+  title: 'Wash dishes',
+  frequency: null,
+  organisation_id,
+});
 
-function getDefaultTasks(organisations) {
-  const tasks = [];
-  for (let i = 0; i < organisations.length * 10; i++) {
-    tasks.push({
-      title: `${faker.word.adjective()} ${faker.word.noun()}`,
-      frequency: i % 5 === 0 ? faker.datatype.number({ min: 1, max: 7 }) : null,
-      organisation_id: organisations[i % organisations.length]['id'],
-    });
-  }
+const CleanToilet = organisation_id => ({
+  title: 'Clean toilet',
+  frequency: 7,
+  organisation_id,
+});
 
-  return tasks;
-}
+const HooverHouse = organisation_id => ({
+  title: 'Hoover house',
+  frequency: 4,
+  organisation_id,
+});
 
-module.exports = { getDefaultTasks };
+const WeeklyRevision = organisation_id => ({
+  title: 'Weekly revision',
+  frequency: 7,
+  organisation_id,
+});
+
+const CallAssociates = organisation_id => ({
+  title: 'Call associates',
+  frequency: null,
+  organisation_id,
+});
+
+const LeadClientMeeting = organisation_id => ({
+  title: 'Lead client meeting',
+  frequency: null,
+  organisation_id,
+});
+
+module.exports = { CallAssociates, CleanToilet, HooverHouse, LeadClientMeeting, WashDishes, WeeklyRevision };
