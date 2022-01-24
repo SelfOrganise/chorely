@@ -1,16 +1,16 @@
 import { fetcher } from 'srcRootDir/services/fetcher';
-export async function baseChoreAction(choreId: number, body: any) {
-  await fetcher(`/chores/${choreId}`, { method: 'POST', body: JSON.stringify(body) });
+export async function baseAssignmentAction(assignmentId: number, body: any) {
+  await fetcher(`/assignments/${assignmentId}`, { method: 'POST', body: JSON.stringify(body) });
 }
 
-export async function completeChore(choreId: number) {
-  await baseChoreAction(choreId, { action: 'complete' });
+export async function completeAssignment(assignment: number) {
+  await baseAssignmentAction(assignment, { action: 'complete' });
 }
 
-export async function undoChore(choreId: number) {
-  await baseChoreAction(choreId, { action: 'undo' });
+export async function undoAssignment(assignment: number) {
+  await baseAssignmentAction(assignment, { action: 'undo' });
 }
 
-export async function sendReminder(choreId: number) {
-  await baseChoreAction(choreId, { action: 'remind' });
+export async function sendReminder(assignment: number) {
+  await baseAssignmentAction(assignment, { action: 'remind' });
 }

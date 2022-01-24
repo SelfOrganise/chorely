@@ -9,7 +9,7 @@
     "dev": "npm-run-all -l -p dev:*",
     "dev:build": "BACKEND_ORIGIN=http://localhost:4000 npm run esbuild",
     "dev:type-check": "tsc --noEmit --watch --preserveWatchOutput --pretty",
-    "dev:live-server": "live-server dist/esbuild --port=3000 --no-browser --quiet"
+    "dev:live-server": "live-server dist/esbuild --port=5000 --no-browser --quiet"
   },
   "repository": {
     "type": "git",

@@ -2,10 +2,10 @@ import { fetcher } from 'srcRootDir/services/fetcher';
 
 export async function login(username: string) {
   try {
-    const response = await fetcher(`/login?username=${username}`);
+    const response = await fetcher(`/login`, { method: 'POST', body: JSON.stringify({ username }) });
 
-    if (response?.userId) {
-      window.localStorage.setItem('userId', response.userId);
+    if (response?.id) {
+      window.localStorage.setItem('userId', response.id);
       return true;
     }
 

@@ -5,9 +5,10 @@ import Typography from '@mui/material/Typography';
 import CircularProgress from '@mui/material/CircularProgress';
 import { parseISO, isAfter } from 'date-fns';
 import styled from '@emotion/styled';
+import Fade from '@mui/material/Fade';
 
 interface ChoreListProps {
-  chores: Array<Chore> | undefined;
+  chores: Array<Assignment> | undefined;
   onComplete?: () => void;
   areDone: boolean;
 }
@@ -17,16 +18,10 @@ export function ChoreList({ chores, onComplete, areDone }: ChoreListProps) {
     return (
       chores &&
       chores.sort((first, second) => {
-        if (first.isLate && !second.isLate) {
-          return -1;
-        } else if (!first.isLate && second.isLate) {
-          return 1;
-        } else {
-          const order = isAfter(parseISO(first.modifiedOnUTC), parseISO(second.modifiedOnUTC)) ? 1 : -1;
-          const areDoneMod = areDone ? -1 : 1;
+        const order = isAfter(parseISO(first.due_by_utc), parseISO(second.due_by_utc)) ? 1 : -1;
+        const areDoneMod = areDone ? -1 : 1;
 
-          return order * areDoneMod;
-        }
+        return order * areDoneMod;
       })
     );
   }, [chores]);
@@ -57,9 +52,9 @@ export function ChoreList({ chores, onComplete, areDone }: ChoreListProps) {
     <StyledList>
       {sortedChores.map(ch => {
         return (
-          <React.Fragment key={ch.id}>
+          <Fade key={ch.id} in={true}>
             <ChoreListItem chore={ch} onComplete={onComplete} isDone={areDone} />
-          </React.Fragment>
+          </Fade>
         );
       })}
     </StyledList>

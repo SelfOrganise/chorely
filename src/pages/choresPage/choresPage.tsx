@@ -12,7 +12,7 @@ import RefreshIcon from '@mui/icons-material/Refresh';
 export function ChoresPage() {
   const userId = useMemo(getCurrentUserId, []);
   const [showCompletedTasks, setShowCompletedTasks] = useState(false);
-  const response = useSWR<Array<Chore>>('/chores/current', fetcher);
+  const response = useSWR<Array<Assignment>>('/assignments/current', fetcher);
 
   useEffect(() => {
     if (response.isValidating) {
@@ -38,7 +38,7 @@ export function ChoresPage() {
   return (
     <Box alignItems="center" display="flex" flexDirection="column">
       <ChoreList
-        chores={response.data?.filter(ch => (userId > 0 ? ch.completionSemaphore < 0 : ch.completionSemaphore >= 0))}
+        chores={response.data?.filter(ch => ch.assigned_to_user_id == userId)}
         areDone={false}
         onComplete={response.mutate}
       />
@@ -50,7 +50,7 @@ export function ChoresPage() {
       </Button>
       {showCompletedTasks && (
         <ChoreList
-          chores={response.data?.filter(ch => (userId > 0 ? ch.completionSemaphore >= 0 : ch.completionSemaphore < 0))}
+          chores={response.data?.filter(ch => ch.assigned_to_user_id != userId)}
           areDone={true}
           onComplete={response.mutate}
         />
