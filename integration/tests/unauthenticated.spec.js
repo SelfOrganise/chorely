@@ -28,5 +28,6 @@ describe('Unauthenticated routes', () => {
   it('should return 401 on invalid user', async () => {
     const result = await api().post(`${apiBase}/login`).body({ username: 'unknown' });
     expect(result.statusCode).toBe(401);
+    expect(result.text()).toBe('ab')
   });
 });

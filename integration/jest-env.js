@@ -1,9 +1,16 @@
 const env = {
+  // DB_HOST: 'localhost',
+  // DB_PORT: 5433,
+  // DB_USER: 'postgres',
+  // DB_DATABASE: 'postgres',
+  // DB_PASSWORD: 'test',
+
   DB_HOST: 'localhost',
-  DB_PORT: 5433,
+  DB_PORT: 5432,
   DB_USER: 'postgres',
   DB_DATABASE: 'postgres',
-  DB_PASSWORD: 'test',
+  DB_PASSWORD: 'local',
+
 
   SENDGRID_API_KEY: 'SG.notset',
 

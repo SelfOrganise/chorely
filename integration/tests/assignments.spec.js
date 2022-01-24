@@ -17,10 +17,13 @@ const FakeMailService = require('@sendgrid/mail');
 
 describe('Assignments routes', () => {
   const api = useApi();
-  jest.fn();
 
   beforeEach(async () => {
     await clearTables();
+  });
+
+  afterEach(() => {
+    FakeMailService.send.mockClear();
   });
 
   it('should return assignments for current organisation only', async () => {
@@ -28,7 +31,7 @@ describe('Assignments routes', () => {
 
     // aDatum
     const [cleanToilet, washDishes] = await provisionTasks(CleanToilet(aDatum.id), WashDishes(aDatum.id));
-    const [bob, alice] = await provisionUsers(Bob(aDatum.id), Alice(aDatum.id));
+    const [bob, alice] = await provisionUsers(Bob(aDatum.id, 0), Alice(aDatum.id, 1));
     const aDatumAssignments = await provisionAssignments(
       Assignment(cleanToilet.id, bob.id, alice.id, t(-2), t(-1)),
       Assignment(cleanToilet.id, alice.id, bob.id, t(-1), t(0)),
@@ -81,44 +84,54 @@ describe('Assignments routes', () => {
     expect(response.statusCode).toBe(400);
   });
 
-  it('should return 400 when assignment id is invalid', async () => {
+  //region common
+  it.each(['complete', 'undo', 'remind'])(
+    'should return 400 when trying to "%s" a non-existent assignment',
+    async action => {
+      const [aDatum] = await provisionOrganisation(ADatumCorporation());
+      const [bob] = await provisionUsers(Bob(aDatum.id), Alice(aDatum.id));
+      const invalidAssignmentId = 192134;
+
+      const response = await api()
+        .post(`${apiBase}/assignments/${invalidAssignmentId}`)
+        .headers({ 'x-userid': bob.id })
+        .body({ action })
+        .end();
+
+      expect(response.statusCode).toBe(400);
+      expect(response.body).toBe(`Cannot find assignment with id '${invalidAssignmentId}'.`);
+    }
+  );
+
+  it.each(['complete', 'undo', 'remind'])(
+    'should return 400 when trying to "%s" an assignment that is outdated',
+    async action => {
+      const [aDatum] = await provisionOrganisation(ADatumCorporation());
+      const [cleanToilet] = await provisionTasks(CleanToilet(aDatum.id));
+      const [bob, alice] = await provisionUsers(Bob(aDatum.id), Alice(aDatum.id));
+      const assignments = await provisionAssignments(
+        Assignment(cleanToilet.id, alice.id, bob.id, t(-2), t(-1)),
+        Assignment(cleanToilet.id, bob.id, alice.id, t(-1), t(0)),
+        Assignment(cleanToilet.id, alice.id, bob.id, t(0), t(1))
+      );
+
+      const response = await api()
+        .post(`${apiBase}/assignments/${assignments[0].id}`)
+        // hack: can complete only own assignment and cannot undo own assignment
+        .headers({ 'x-userid': action === 'complete' ? alice.id : bob.id })
+        .body({ action })
+        .end();
+
+      expect(response.statusCode).toBe(400);
+      expect(response.body).toBe(`Cannot process assignment with id '${assignments[0].id}' because it is outdated.`);
+    }
+  );
+  //endregion
+
+  //region complete
+  it('should return 200 and assign the task to the next user in rota when completing an assignment', async () => {
     const [aDatum] = await provisionOrganisation(ADatumCorporation());
-    const [bob] = await provisionUsers(Bob(aDatum.id), Alice(aDatum.id));
-    const invalidAssignmentId = 192134;
-
-    const response = await api()
-      .post(`${apiBase}/assignments/${invalidAssignmentId}`)
-      .headers({ 'x-userid': bob.id })
-      .body({ action: 'complete' })
-      .end();
-
-    expect(response.statusCode).toBe(400);
-    expect(response.body).toBe(`Cannot find assignment with id '${invalidAssignmentId}'.`);
-  });
-
-  it('should return 400 when assignment is outdated', async () => {
-    const [aDatum] = await provisionOrganisation(ADatumCorporation());
-    const [cleanToilet] = await provisionTasks(CleanToilet(aDatum.id), WashDishes(aDatum.id));
-    const [bob, alice] = await provisionUsers(Bob(aDatum.id), Alice(aDatum.id));
-    const assignments = await provisionAssignments(
-      Assignment(cleanToilet.id, bob.id, alice.id, t(-2), t(-1)),
-      Assignment(cleanToilet.id, alice.id, bob.id, t(-1), t(0)),
-      Assignment(cleanToilet.id, bob.id, alice.id, t(0), t(1))
-    );
-
-    const response = await api()
-      .post(`${apiBase}/assignments/${assignments[0].id}`)
-      .headers({ 'x-userid': bob.id })
-      .body({ action: 'complete' })
-      .end();
-
-    expect(response.statusCode).toBe(400);
-    expect(response.body).toBe(`Cannot process assignment with id '${assignments[0].id}' because it is outdated.`);
-  });
-
-  it('should return 200 and assign the task to the next user in rota', async () => {
-    const [aDatum] = await provisionOrganisation(ADatumCorporation());
-    const [cleanToilet] = await provisionTasks(CleanToilet(aDatum.id), WashDishes(aDatum.id));
+    const [cleanToilet] = await provisionTasks(CleanToilet(aDatum.id));
     const [alice, bob] = await provisionUsers(Alice(aDatum.id, 1), Bob(aDatum.id, 2)); // bob would roll-over to alice
     const assignments = await provisionAssignments(
       Assignment(cleanToilet.id, bob.id, alice.id, t(-2), t(-1)),
@@ -132,7 +145,7 @@ describe('Assignments routes', () => {
       .body({ action: 'complete' })
       .end();
 
-    expect(response.statusCode).toBe(200);
+    expect(response.statusCode).toBe(204);
     await verifyLatestAssignment(cleanToilet.id, alice.id, bob.id, 13.99);
     expect(FakeMailService.send).toHaveBeenCalledTimes(1);
     expect(FakeMailService.send.mock.calls[0][0]).toEqual(
@@ -156,7 +169,7 @@ describe('Assignments routes', () => {
       .body({ action: 'complete' })
       .end();
 
-    expect(response.statusCode).toBe(200);
+    expect(response.statusCode).toBe(204);
     await verifyLatestAssignment(cleanToilet.id, alice.id, alice.id, 13.99);
     expect(FakeMailService.send).toHaveBeenCalledTimes(1);
     expect(FakeMailService.send.mock.calls[0][0]).toEqual(
@@ -167,6 +180,74 @@ describe('Assignments routes', () => {
       })
     );
   });
+  //endregion
+
+  //region undo
+  it('should return 400 when trying to undo an assignment that is assigned to the same user', async () => {
+    const [aDatum] = await provisionOrganisation(ADatumCorporation());
+    const [cleanToilet] = await provisionTasks(CleanToilet(aDatum.id));
+    const [alice, bob] = await provisionUsers(Alice(aDatum.id, 1), Bob(aDatum.id, 2));
+    const assignments = await provisionAssignments(
+      Assignment(cleanToilet.id, bob.id, alice.id, t(-1), t(0)),
+      Assignment(cleanToilet.id, alice.id, bob.id, t(0), t(1))
+    );
+
+    const response = await api()
+      .post(`${apiBase}/assignments/${assignments[0].id}`)
+      .headers({ 'x-userid': alice.id })
+      .body({ action: 'undo' })
+      .end();
+
+    expect(response.statusCode).toBe(400);
+    await verifyLatestAssignment(cleanToilet.id, alice.id, bob.id, 1);
+    expect(FakeMailService.send).toHaveBeenCalledTimes(0);
+  });
+
+  it('should return 200 and undo the assignment to the previous user (deletes latest assignment)', async () => {
+    const [aDatum] = await provisionOrganisation(ADatumCorporation());
+    const [cleanToilet] = await provisionTasks(CleanToilet(aDatum.id));
+    const [alice, bob] = await provisionUsers(Alice(aDatum.id, 1), Bob(aDatum.id, 2));
+    const assignments = await provisionAssignments(
+      Assignment(cleanToilet.id, alice.id, bob.id, t(-2), t(-1)),
+      Assignment(cleanToilet.id, bob.id, alice.id, t(-1), t(0)),
+      Assignment(cleanToilet.id, alice.id, bob.id, t(0), t(1))
+    );
+
+    const response = await api()
+      .post(`${apiBase}/assignments/${assignments[2].id}`)
+      .headers({ 'x-userid': bob.id })
+      .body({ action: 'undo' })
+      .end();
+
+    expect(response.statusCode).toBe(204);
+    await verifyLatestAssignment(cleanToilet.id, bob.id, alice.id, 0);
+    expect(FakeMailService.send).toHaveBeenCalledTimes(0);
+  });
+  //endregion
+
+  //region reminder
+  it('should return 200 and send an email to the user currently assigned ', async () => {
+    const [aDatum] = await provisionOrganisation(ADatumCorporation());
+    const [cleanToilet] = await provisionTasks(CleanToilet(aDatum.id));
+    const [alice, bob] = await provisionUsers(Alice(aDatum.id, 1), Bob(aDatum.id, 2));
+    const assignments = await provisionAssignments(Assignment(cleanToilet.id, bob.id, alice.id, t(-2), t(-1)));
+
+    const response = await api()
+      .post(`${apiBase}/assignments/${assignments[0].id}`)
+      .headers({ 'x-userid': bob.id })
+      .body({ action: 'remind' })
+      .end();
+
+    expect(response.statusCode).toBe(204);
+    expect(FakeMailService.send.mock.calls[0][0]).toEqual(
+      expect.objectContaining({
+        to: bob.email,
+        subject: `[Reminder] “${cleanToilet.title}”.`,
+        text: ` `,
+      })
+    );
+  });
+  //endregion
 });
 
 // helpers

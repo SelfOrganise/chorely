@@ -1,4 +1,4 @@
-const Alice = (organisation_id, rota_order = 1) => ({
+const Alice = (organisation_id, rota_order = 0) => ({
   name: 'alice',
   email: 'alice@home.com',
   created_at_utc: new Date().toISOString(),
@@ -7,7 +7,7 @@ const Alice = (organisation_id, rota_order = 1) => ({
   organisation_id,
 });
 
-const Bob = (organisation_id, rota_order = 1) => ({
+const Bob = (organisation_id, rota_order = 0) => ({
   name: 'bob',
   email: 'bob@home.com',
   created_at_utc: new Date().toISOString(),
@@ -16,7 +16,7 @@ const Bob = (organisation_id, rota_order = 1) => ({
   organisation_id,
 });
 
-const Mark = (organisation_id, rota_order = 1) => ({
+const Mark = (organisation_id, rota_order = 0) => ({
   name: 'mark',
   email: 'mark@office.com',
   created_at_utc: new Date().toISOString(),
@@ -25,7 +25,7 @@ const Mark = (organisation_id, rota_order = 1) => ({
   organisation_id,
 });
 
-const Jane = (organisation_id, rota_order = 1) => ({
+const Jane = (organisation_id, rota_order = 0) => ({
   name: 'Jane',
   email: 'jane@office.com',
   created_at_utc: new Date().toISOString(),
@@ -34,7 +34,7 @@ const Jane = (organisation_id, rota_order = 1) => ({
   organisation_id,
 });
 
-const Alex = (organisation_id, rota_order = 1) => ({
+const Alex = (organisation_id, rota_order = 0) => ({
   name: 'Alex',
   email: 'alex@office.com',
   created_at_utc: new Date().toISOString(),

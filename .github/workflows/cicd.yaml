@@ -15,7 +15,7 @@ jobs:
       with:
         node-version: 16.x
         cache: 'yarn'
-    - run: yarn install
+    - run: yarn install --prod
     - run: yarn build
     - name: deploy to upcloud
       uses: appleboy/scp-action@master

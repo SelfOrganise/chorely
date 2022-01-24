@@ -9,7 +9,7 @@ export async function auth(req: FastifyRequest<{ Headers: { 'x-userid'?: string 
   } else {
     const user = await findUserByUserId(userId);
     if (!user) {
-      res.status(401);
+      res.status(401).send('Invalid user.');
       return;
     }
     req.user = user;
