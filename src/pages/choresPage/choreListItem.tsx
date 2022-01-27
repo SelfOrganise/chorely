@@ -58,8 +58,12 @@ export const ChoreListItem = React.forwardRef(
         setIsLoading(true);
         handleMenuClose(e);
         try {
-          await completeAssignment(chore.id);
-          toast.success(`Task completed`);
+          const result = await completeAssignment(chore.id);
+          if (result) {
+            toast.success(result);
+          } else {
+            toast.success(`Task completed`);
+          }
           onComplete && onComplete();
         } catch (ex: any) {
           toast.error(`Could not complete chore (${ex?.statusText})`);
@@ -74,10 +78,16 @@ export const ChoreListItem = React.forwardRef(
       async (e: React.MouseEvent<HTMLElement>, chore: Assignment) => {
         setIsLoading(true);
         handleMenuClose(e);
-        await undoAssignment(chore.id);
-        setIsLoading(false);
-        toast.info(`Undo complete`);
-        onComplete && onComplete();
+        try {
+          await undoAssignment(chore.id);
+          toast.info(`Undo complete`);
+          onComplete && onComplete();
+        } catch (ex: any) {
+          const message = await ex?.text();
+          toast.error(message);
+        } finally {
+          setIsLoading(false);
+        }
       },
       [chore]
     );

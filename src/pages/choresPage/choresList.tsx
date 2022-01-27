@@ -52,7 +52,7 @@ export function ChoreList({ chores, onComplete, areDone }: ChoreListProps) {
     <StyledList>
       {sortedChores.map(ch => {
         return (
-          <Fade key={ch.id} in={true}>
+          <Fade timeout={800} key={ch.id} in={true}>
             <ChoreListItem chore={ch} onComplete={onComplete} isDone={areDone} />
           </Fade>
         );

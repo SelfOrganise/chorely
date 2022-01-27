@@ -48,13 +48,12 @@ export function ChoresPage() {
       >
         {showCompletedTasks ? 'Hide' : 'Show'} completed tasks
       </Button>
-      {showCompletedTasks && (
-        <ChoreList
-          chores={response.data?.filter(ch => ch.assigned_to_user_id != userId)}
-          areDone={true}
-          onComplete={response.mutate}
-        />
-      )}
+      {/*<Slide direction="right" in={showCompletedTasks}>*/}
+      {showCompletedTasks && <ChoreList
+        chores={response.data?.filter(ch => ch.assigned_to_user_id != userId)}
+        areDone={true}
+        onComplete={response.mutate}
+      />}
     </Box>
   );
 }
