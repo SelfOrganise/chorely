@@ -5,12 +5,14 @@ const {
   provisionAssignments,
   provisionUsers,
   query,
+  provisionExemptions,
 } = require('../util/db');
 const { apiBase, tableNames } = require('../util/constants');
 const { t } = require('../util/t');
 const { ADatumCorporation, AdventureWorks } = require('../fixtures/organisations');
 const { Alice, Bob, Jane, Alex, Mark } = require('../fixtures/users');
 const { CleanToilet, WashDishes, CallAssociates, WeeklyRevision, LeadClientMeeting } = require('../fixtures/tasks');
+const { Exemption } = require('../fixtures/exemptions');
 const { Assignment } = require('../fixtures/assignments');
 const { useApi } = require('../util/useApi');
 const FakeMailService = require('@sendgrid/mail');
@@ -99,7 +101,7 @@ describe('Assignments routes', () => {
         .end();
 
       expect(response.statusCode).toBe(400);
-      expect(response.body).toBe(`Cannot find assignment with id '${invalidAssignmentId}'.`);
+      expect(response.body).toBe(`Cannot find a valid assignment with id '${invalidAssignmentId}'.`);
     }
   );
 
@@ -123,7 +125,7 @@ describe('Assignments routes', () => {
         .end();
 
       expect(response.statusCode).toBe(400);
-      expect(response.body).toBe(`Cannot process assignment with id '${assignments[0].id}' because it is outdated.`);
+      expect(response.body).toBe(`Cannot find a valid assignment with id '${assignments[0].id}'.`);
     }
   );
   //endregion
@@ -132,7 +134,7 @@ describe('Assignments routes', () => {
   it('should return 200 and assign the task to the next user in rota when completing an assignment', async () => {
     const [aDatum] = await provisionOrganisation(ADatumCorporation());
     const [cleanToilet] = await provisionTasks(CleanToilet(aDatum.id));
-    const [alice, bob] = await provisionUsers(Alice(aDatum.id, 1), Bob(aDatum.id, 2)); // bob would roll-over to alice
+    const [alice, bob] = await provisionUsers(Alice(aDatum.id, 0), Bob(aDatum.id, 1)); // bob would roll-over to alice
     const assignments = await provisionAssignments(
       Assignment(cleanToilet.id, bob.id, alice.id, t(-2), t(-1)),
       Assignment(cleanToilet.id, alice.id, bob.id, t(-1), t(0)),
@@ -160,7 +162,7 @@ describe('Assignments routes', () => {
   it('should return 200 and assign it to the same user when only 1 user exists', async () => {
     const [aDatum] = await provisionOrganisation(ADatumCorporation());
     const [cleanToilet] = await provisionTasks(CleanToilet(aDatum.id));
-    const [alice] = await provisionUsers(Alice(aDatum.id, 1));
+    const [alice] = await provisionUsers(Alice(aDatum.id, 0));
     const assignments = await provisionAssignments(Assignment(cleanToilet.id, alice.id, alice.id, t(-2), t(-1)));
 
     const response = await api()
@@ -169,24 +171,93 @@ describe('Assignments routes', () => {
       .body({ action: 'complete' })
       .end();
 
-    expect(response.statusCode).toBe(204);
+    expect(response.statusCode).toBe(200);
+    expect(response.body).toBe('Due to exemptions the task has been reassigned to you.');
     await verifyLatestAssignment(cleanToilet.id, alice.id, alice.id, 13.99);
-    expect(FakeMailService.send).toHaveBeenCalledTimes(1);
-    expect(FakeMailService.send.mock.calls[0][0]).toEqual(
+    expect(FakeMailService.send).toHaveBeenCalledTimes(0);
+  });
+
+  //region exemptions
+  it('should return 200 and create an exemption when completing a task assigned to another user', async () => {
+    const [aDatum] = await provisionOrganisation(ADatumCorporation());
+    const [cleanToilet] = await provisionTasks(CleanToilet(aDatum.id));
+    const [alice, bob] = await provisionUsers(Alice(aDatum.id, 0), Bob(aDatum.id, 1));
+    const assignments = await provisionAssignments(Assignment(cleanToilet.id, bob.id, alice.id, t(-2), t(-1)));
+
+    const response = await api()
+      .post(`${apiBase}/assignments/${assignments[0].id}`)
+      .headers({ 'x-userid': alice.id })
+      .body({ action: 'complete' })
+      .end();
+
+    expect(response.statusCode).toBe(200);
+    expect(response.body).toBe('You will be exempted the next time this task gets assigned to you.');
+    expect(await getExemptions(cleanToilet.id)).toEqual([
       expect.objectContaining({
-        to: alice.email,
-        subject: `“${cleanToilet.title}” was assigned to you.`,
-        text: ` `,
+        user_id: alice.id,
+        task_id: cleanToilet.id,
+      }),
+    ]);
+  });
+
+  it('should return 200 use the exemption and assign the task to the next user in rota when completing an assignment', async () => {
+    const [aDatum] = await provisionOrganisation(ADatumCorporation());
+    const [cleanToilet] = await provisionTasks(CleanToilet(aDatum.id));
+    const [alice, bob] = await provisionUsers(Alice(aDatum.id, 0), Bob(aDatum.id, 1));
+    const [ex1] = await provisionExemptions(Exemption(alice.id, cleanToilet.id));
+    const assignments = await provisionAssignments(
+      Assignment(cleanToilet.id, bob.id, alice.id, t(-2), t(-1)),
+      Assignment(cleanToilet.id, alice.id, bob.id, t(-1), t(0)),
+      Assignment(cleanToilet.id, bob.id, alice.id, t(0), t(1))
+    );
+
+    const response = await api()
+      .post(`${apiBase}/assignments/${assignments[2].id}`)
+      .headers({ 'x-userid': bob.id })
+      .body({ action: 'complete' })
+      .end();
+
+    expect(response.statusCode).toBe(200);
+    expect(response.body).toBe('Due to exemptions the task has been reassigned to you.');
+    await verifyLatestAssignment(cleanToilet.id, bob.id, bob.id, 13.99);
+    expect(FakeMailService.send).toHaveBeenCalledTimes(0);
+    let actual = await getAssignmentsAfter(assignments[2].id);
+    expect(actual[0]).toEqual(
+      expect.objectContaining({
+        assigned_at_utc: ex1.created_at_utc.toISOString(),
+        assigned_by_user_id: null,
+        assigned_to_user_id: ex1.user_id,
+        task_id: cleanToilet.id,
       })
     );
   });
+
+  it('should return 200 use multiple exemption and assign the task to the next user in rota when completing an assignment', async () => {
+    const [aDatum] = await provisionOrganisation(ADatumCorporation());
+    const [cleanToilet] = await provisionTasks(CleanToilet(aDatum.id));
+    const [alice, bob, jane] = await provisionUsers(Alice(aDatum.id, 0), Bob(aDatum.id, 1), Jane(aDatum.id, 2));
+    await provisionExemptions(Exemption(alice.id, cleanToilet.id), Exemption(jane.id, cleanToilet.id));
+    const assignments = await provisionAssignments(Assignment(cleanToilet.id, bob.id, null, t(-1), t(1)));
+
+    const response = await api()
+      .post(`${apiBase}/assignments/${assignments[0].id}`)
+      .headers({ 'x-userid': bob.id })
+      .body({ action: 'complete' })
+      .end();
+
+    expect(response.statusCode).toBe(200);
+    expect(response.body).toBe('Due to exemptions the task has been reassigned to you.');
+    await verifyLatestAssignment(cleanToilet.id, bob.id, bob.id, 13.99);
+    expect(FakeMailService.send).toHaveBeenCalledTimes(0);
+  });
+  //endregion
   //endregion
 
   //region undo
   it('should return 400 when trying to undo an assignment that is assigned to the same user', async () => {
     const [aDatum] = await provisionOrganisation(ADatumCorporation());
     const [cleanToilet] = await provisionTasks(CleanToilet(aDatum.id));
-    const [alice, bob] = await provisionUsers(Alice(aDatum.id, 1), Bob(aDatum.id, 2));
+    const [alice, bob] = await provisionUsers(Alice(aDatum.id, 0), Bob(aDatum.id, 1));
     const assignments = await provisionAssignments(
       Assignment(cleanToilet.id, bob.id, alice.id, t(-1), t(0)),
       Assignment(cleanToilet.id, alice.id, bob.id, t(0), t(1))
@@ -206,7 +277,7 @@ describe('Assignments routes', () => {
   it('should return 200 and undo the assignment to the previous user (deletes latest assignment)', async () => {
     const [aDatum] = await provisionOrganisation(ADatumCorporation());
     const [cleanToilet] = await provisionTasks(CleanToilet(aDatum.id));
-    const [alice, bob] = await provisionUsers(Alice(aDatum.id, 1), Bob(aDatum.id, 2));
+    const [alice, bob] = await provisionUsers(Alice(aDatum.id, 0), Bob(aDatum.id, 1));
     const assignments = await provisionAssignments(
       Assignment(cleanToilet.id, alice.id, bob.id, t(-2), t(-1)),
       Assignment(cleanToilet.id, bob.id, alice.id, t(-1), t(0)),
@@ -223,13 +294,34 @@ describe('Assignments routes', () => {
     await verifyLatestAssignment(cleanToilet.id, bob.id, alice.id, 0);
     expect(FakeMailService.send).toHaveBeenCalledTimes(0);
   });
+
+  it('should return 204 and undo the task to the task to the previous assignment when previous assignment is an exemption', async () => {
+    const [aDatum] = await provisionOrganisation(ADatumCorporation());
+    const [cleanToilet] = await provisionTasks(CleanToilet(aDatum.id));
+    const [alice, bob] = await provisionUsers(Alice(aDatum.id, 0), Bob(aDatum.id, 1));
+    const assignments = await provisionAssignments(
+      Assignment(cleanToilet.id, alice.id, bob.id, t(-2), t(-1)),
+      Assignment(cleanToilet.id, bob.id, null, t(-1), t(0)),
+      Assignment(cleanToilet.id, alice.id, bob.id, t(0), t(1))
+    );
+
+    const response = await api()
+      .post(`${apiBase}/assignments/${assignments[2].id}`)
+      .headers({ 'x-userid': bob.id })
+      .body({ action: 'undo' })
+      .end();
+
+    expect(response.statusCode).toBe(204);
+    await verifyLatestAssignment(cleanToilet.id, bob.id, null, 0);
+    expect(FakeMailService.send).toHaveBeenCalledTimes(0);
+  })
   //endregion
 
   //region reminder
   it('should return 200 and send an email to the user currently assigned ', async () => {
     const [aDatum] = await provisionOrganisation(ADatumCorporation());
     const [cleanToilet] = await provisionTasks(CleanToilet(aDatum.id));
-    const [alice, bob] = await provisionUsers(Alice(aDatum.id, 1), Bob(aDatum.id, 2));
+    const [alice, bob] = await provisionUsers(Alice(aDatum.id, 0), Bob(aDatum.id, 1));
     const assignments = await provisionAssignments(Assignment(cleanToilet.id, bob.id, alice.id, t(-2), t(-1)));
 
     const response = await api()
@@ -259,17 +351,32 @@ async function verifyLatestAssignment(
   assignedOn = 1000
 ) {
   const result = await query(
-    tableNames.assignments,
     `select * from assignments where task_id = ${taskId} order by due_by_utc desc fetch first 1 rows only`
   );
 
   expect(result[0].assigned_to_user_id).toBe(assigned_to_user_id);
   expect(result[0].assigned_by_user_id).toBe(assigned_by_user_id);
-  expect(new Date(result[0].assigned_on_utc).getTime() - new Date().getTime()).toBeLessThan(1000);
+  expect(new Date(result[0].assigned_at_utc).getTime() - new Date().getTime()).toBeLessThan(1000);
   expect((new Date(result[0].due_by_utc).getTime() - new Date().getTime()) / 1000 / 60 / 60 / 24).toBeCloseTo(
     dueDaysLeft,
     1
   );
 
   expect(result).toHaveLength(1);
+}
+
+async function getAssignmentsAfter(index) {
+  const result = await query(
+    `select id, assigned_by_user_id, assigned_to_user_id, task_id, due_by_utc, assigned_at_utc::text from assignments where id > ${index}`
+  );
+
+  return result.map(r => ({
+    ...r,
+    assigned_at_utc: new Date(r.assigned_at_utc).toISOString(),
+    due_by_utc: new Date(r.due_by_utc).toISOString(),
+  }));
+}
+
+async function getExemptions(taskId) {
+  return await query(`select * from exemptions where task_id = $1`, [taskId]);
 }

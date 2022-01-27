@@ -1,5 +1,5 @@
 import { pool } from './db';
-import { Assignment, DbAssignment, DbTask, DbUser, History, User } from '../types';
+import { Assignment, DbAssignment, DbExemption, DbTask, DbUser, User } from '../types';
 import { sendEmail, sendReminder } from '../services/email';
 import { Response, response } from '../utilities/response';
 import { getUsersByOrganisation } from './users';
@@ -40,69 +40,42 @@ export async function getTasks(organisationId: number): Promise<Array<Assignment
 export async function completeAssignment(assignmentId: number, user: DbUser): Promise<Response | void> {
   const client = await pool.connect();
 
-  const assignmentResult = await client.query<DbAssignment & Pick<DbTask, 'title'>>(
-    `select a.id,
-            a.task_id,
-            a.assigned_to_user_id,
-            a.assigned_by_user_id,
-            a.due_by_utc,
-            a.assigned_on_utc,
-            t.title
-     from assignments a
-     inner join tasks t on a.task_id = t.id
-     where a.id = $1 and a.assigned_to_user_id = $2`,
-    [assignmentId, user.id]
-  );
+  const latestAssignment = await getLatestAssignmentForTask(client, assignmentId);
 
-  if (assignmentResult.rowCount !== 1) {
-    return response(400, `Cannot find assignment with id '${assignmentId}'.`);
+  if (!latestAssignment || latestAssignment.id !== assignmentId) {
+    return response(400, `Cannot find a valid assignment with id '${assignmentId}'.`);
   }
 
-  const latestAssignmentForTask = await getLatestAssignmentForTask(client, assignmentId);
-
-  if (latestAssignmentForTask.rowCount !== 1 || assignmentId != latestAssignmentForTask.rows[0].id) {
-    return response(400, `Cannot process assignment with id '${assignmentId}' because it is outdated.`);
+  if (latestAssignment.assigned_to_user_id != user.id) {
+    await client.query(`insert into exemptions(user_id, task_id) values ($1, $2)`, [user.id, latestAssignment.task_id]);
+    return response(200, `You will be exempted the next time this task gets assigned to you.`);
   }
 
   const orgUsers = await getUsersByOrganisation(user.organisation_id);
+  const exemptions = await getExemptions(client, latestAssignment.task_id);
 
-  const nextRotaIndex = (user.rota_order + 1) % orgUsers.length;
-  const nextUser = orgUsers.find(u => u.rota_order === nextRotaIndex) || user;
+  const nextUser = await determineNextUser(client, user, latestAssignment.task_id, orgUsers, exemptions);
 
-  const result = await client.query<DbAssignment>(
-    `insert into assignments(task_id, assigned_to_user_id, assigned_by_user_id, assigned_on_utc, due_by_utc)
-                     values ($1, $2, $3, $4, $5)
-    `,
-    [
-      assignmentResult.rows[0].task_id,
-      nextUser.id,
-      user.id,
-      new Date(),
-      new Date(Date.now() + 1000 * 60 * 60 * 24 * 14), // default 14 days in the future TODO frequency
-    ]
-  );
+  const result = await createAssignment(client, {
+    task_id: latestAssignment.task_id,
+    assigned_to_user_id: nextUser.id,
+    assigned_by_user_id: user.id,
+    assigned_at_utc: new Date().toISOString(),
+    due_by_utc: new Date(Date.now() + 1000 * 60 * 60 * 24 * 14).toISOString(), // default 14 days in the future TODO frequency
+  });
 
   await client.release();
 
-  await sendEmail(nextUser.email, assignmentResult.rows[0].title);
-
-  return response(204); // todo message if it was assigned back to you
+  if (nextUser.id === user.id) {
+    return response(200, 'Due to exemptions the task has been reassigned to you.');
+  } else {
+    await sendEmail(nextUser.email, latestAssignment.title);
+    return response(204); // todo message if it was assigned back to you
+  }
 }
 
 export async function undoAssignment(assignmentId: number, user: User): Promise<Response> {
   const client = await pool.connect();
-
-  const assignmentResult = await client.query<DbAssignment & Pick<DbTask, 'title'>>(
-    `select a.id,
-            a.assigned_to_user_id
-     from assignments a
-     where a.id = $1 and a.assigned_to_user_id != $2`,
-    [assignmentId, user.id]
-  );
-
-  if (assignmentResult.rowCount !== 1) {
-    return response(400, `Cannot find assignment with id '${assignmentId}'.`);
-  }
 
   const latestTwoAssignmentsForTask = await client.query<DbAssignment>(
     `select a.id
@@ -118,11 +91,13 @@ export async function undoAssignment(assignmentId: number, user: User): Promise<
     return response(400, 'Cannot undo if there were no previous assignments.');
   }
 
+  const latestAssignment = latestTwoAssignmentsForTask.rows[0];
+
   if (
     latestTwoAssignmentsForTask.rowCount !== 2 ||
-    assignmentResult.rows[0].id != latestTwoAssignmentsForTask.rows[0].id
+    latestAssignment.id != assignmentId && latestAssignment.assigned_to_user_id != user.id
   ) {
-    return response(400, `Cannot process assignment with id '${assignmentId}' because it is outdated.`);
+    return response(400, `Cannot find a valid assignment with id '${assignmentId}'.`);
   }
 
   const result = await client.query(
@@ -150,13 +125,13 @@ export async function remindAssignment(assignmentId: number): Promise<Response> 
   const details = getAssignmentDetails.rows[0];
 
   if (!details) {
-    return response(400, `Cannot find assignment with id '${assignmentId}'.`);
+    return response(400, `Cannot find a valid assignment with id '${assignmentId}'.`);
   }
 
-  const latestAssignmentForTask = await getLatestAssignmentForTask(client, assignmentId);
+  const latestAssignment = await getLatestAssignmentForTask(client, assignmentId);
 
-  if (latestAssignmentForTask.rowCount !== 1 || assignmentId != latestAssignmentForTask.rows[0].id) {
-    return response(400, `Cannot process assignment with id '${assignmentId}' because it is outdated.`);
+  if (!latestAssignment || assignmentId != latestAssignment.id) {
+    return response(400, `Cannot find a valid assignment with id '${assignmentId}'.`);
   }
 
   await client.release();
@@ -168,13 +143,84 @@ export async function remindAssignment(assignmentId: number): Promise<Response> 
 
 // helpers
 async function getLatestAssignmentForTask(client: PoolClient, assignmentId: number) {
-  return await client.query<DbAssignment>(
-    `select a.id
-     from assignments a
-     where task_id = (select task_id from assignments where id = $1)
-     order by due_by_utc desc
-     fetch first 1 rows only
+  const result = await client.query<DbAssignment & Pick<DbTask, 'title'>>(
+    `
+        select a.id,
+               a.task_id,
+               a.assigned_to_user_id,
+               a.due_by_utc,
+               a.assigned_by_user_id,
+               a.assigned_at_utc,
+               t.title
+        from assignments a
+            inner join tasks t on a.task_id = t.id
+        where task_id = (
+            select task_id
+            from assignments
+            where id = $1)
+        order by due_by_utc desc
+            fetch first 1 rows only
     `,
     [assignmentId]
   );
+
+  return result.rows[0];
+}
+
+async function createAssignment(client: PoolClient, assignment: Omit<DbAssignment, 'id'>) {
+  return await client.query<DbAssignment>(
+    `insert into assignments(task_id, assigned_to_user_id, assigned_by_user_id, due_by_utc, assigned_at_utc)
+                                           values ($1, $2, $3, $4, $5)`,
+    [assignment.task_id, assignment.assigned_to_user_id, assignment.assigned_by_user_id, assignment.due_by_utc, assignment.assigned_at_utc]
+  );
+}
+
+async function getExemptions(client: PoolClient, taskId: number) {
+  const result = await client.query<DbExemption>(`select * from exemptions where task_id = $1`, [taskId]);
+  return result.rows;
+}
+
+async function deleteExemptions(client: PoolClient, exemptionsIds: Array<number>) {
+  if (exemptionsIds.length === 0) {
+    return;
+  }
+
+  return await client.query<DbAssignment>(`delete from exemptions where id = ANY($1::int[])`, [exemptionsIds]);
+}
+
+async function determineNextUser(
+  client: PoolClient,
+  currentUser: DbUser,
+  task_id: number,
+  users: Array<DbUser>,
+  exemptions: Array<DbExemption>
+) {
+  let nextUser: DbUser | null = null;
+  const usedExemptions = [];
+  const exemptionsCopy = [...exemptions];
+  let nextRotaNumber = currentUser.rota_order;
+
+  do {
+    nextRotaNumber = (nextRotaNumber + 1) % users.length;
+    const user = users.find(u => u.rota_order === nextRotaNumber)!;
+    const exemptionIndex = exemptionsCopy.findIndex(e => e.user_id === user.id);
+    if (exemptionIndex > -1) {
+      usedExemptions.push(exemptionsCopy[exemptionIndex].id);
+      // create a past assignment for the exemption to have a flat history in assignments table
+      await createAssignment(client, {
+        task_id,
+        assigned_by_user_id: null,
+        assigned_to_user_id: user.id,
+        assigned_at_utc: exemptionsCopy[exemptionIndex].created_at_utc,
+        due_by_utc: new Date(Date.now() + 1000 * 60 * 60 * 24 * 14).toISOString(), // default 14 days in the future TODO frequency
+      });
+      exemptionsCopy.splice(exemptionIndex, 1); // remove used exemption
+    } else {
+      nextUser = user;
+    }
+  } while (!nextUser);
+
+  await deleteExemptions(client, usedExemptions);
+
+  return nextUser;
 }

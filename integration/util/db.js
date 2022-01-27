@@ -50,7 +50,7 @@ const provision = withDbClient(async (client, tableName, data) => {
   return result.rows;
 });
 
-const query = withDbClient(async (client, tableName, query, queryValues) => {
+const query = withDbClient(async (client, query, queryValues = []) => {
   const result = await client.query(query, queryValues);
 
   return result.rows;
@@ -62,6 +62,10 @@ function provisionOrganisation(...data) {
 
 function provisionUsers(...data) {
   return provision(tableNames.users, data);
+}
+
+function provisionExemptions(...data) {
+  return provision(tableNames.exemptions, data);
 }
 
 function provisionTasks(...data) {
@@ -87,4 +91,4 @@ function expand(items) {
     .join(', ');
 }
 
-module.exports = { query, clearTables, provisionOrganisation, provisionTasks, provisionAssignments, provisionUsers };
+module.exports = { query, clearTables, provisionOrganisation, provisionTasks, provisionAssignments, provisionUsers, provisionExemptions };

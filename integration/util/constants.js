@@ -5,5 +5,6 @@ module.exports = {
     users: 'users',
     tasks: 'tasks',
     assignments: 'assignments',
+    exemptions: 'exemptions'
   },
 };

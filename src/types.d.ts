@@ -23,15 +23,16 @@ interface DbAssignment {
   id: number;
   task_id: number;
   assigned_to_user_id: number;
-  assigned_by_user_id: number;
+  assigned_by_user_id: number | null;
   due_by_utc: string;
-  assigned_on_utc: string;
+  assigned_at_utc: string;
 }
 
-interface History {
-  choreId: number;
-  completedOnUTC: string;
-  completedById: number;
+interface DbExemption {
+  id: number;
+  task_id: number;
+  user_id: number;
+  created_at_utc: string;
 }
 
 declare module 'fastify' {

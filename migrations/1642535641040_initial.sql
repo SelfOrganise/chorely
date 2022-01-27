@@ -34,15 +34,24 @@ CREATE TABLE assignments (
    task_id serial4 NOT NULL,
    assigned_to_user_id serial4 NOT NULL,
    due_by_utc timestamptz NULL,
-   assigned_by_user_id serial4 NOT NULL,
-   assigned_on_utc timestamptz NOT NULL DEFAULT CURRENT_TIMESTAMP,
-   times_left int2 NOT NULL DEFAULT 1,
+   assigned_by_user_id int NULL references users (id),
+   assigned_at_utc timestamptz NOT NULL DEFAULT CURRENT_TIMESTAMP,
    CONSTRAINT assignments_pk PRIMARY KEY (id),
    CONSTRAINT assignments_tasks_fk FOREIGN KEY (task_id) REFERENCES tasks(id),
-   CONSTRAINT assignments_users_fk FOREIGN KEY (assigned_to_user_id) REFERENCES users(id),
-   CONSTRAINT assignments_users_after_fk FOREIGN KEY (assigned_by_user_id) REFERENCES users(id)
+   CONSTRAINT assignments_users_fk FOREIGN KEY (assigned_to_user_id) REFERENCES users(id)
 );
+
+CREATE TABLE public.exemptions (
+   user_id serial4 NOT NULL,
+   task_id serial4 NOT NULL,
+   created_at_utc timestamptz NOT NULL DEFAULT CURRENT_TIMESTAMP,
+   id serial4 NOT NULL,
+   CONSTRAINT exemptions_pk PRIMARY KEY (id)
+);
+CREATE INDEX exemptions_user_id_idx ON public.exemptions USING btree (user_id, task_id);
+
 -- Down Migration
+drop table public.exemptions;
 DROP TABLE public.assignments;
 DROP TABLE public.tasks;
 DROP TABLE public.users;
