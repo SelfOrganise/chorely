@@ -24,6 +24,7 @@ CREATE TABLE tasks (
    id serial4 NOT NULL,
    title varchar(100) NOT NULL,
    frequency int2 NULL,
+   preferred_time int2 NULL,
    organisation_id serial4 NOT NULL,
    CONSTRAINT tasks_pk PRIMARY KEY (id),
    CONSTRAINT tasks_organisation_fk FOREIGN KEY (organisation_id) REFERENCES organisations(id)

@@ -1,37 +1,43 @@
-const WashDishes = organisation_id => ({
+const WashDishes = (organisation_id, frequency = null, preferred_time = 9) => ({
   title: 'Wash dishes',
-  frequency: null,
+  frequency,
   organisation_id,
+  preferred_time,
 });
 
-const CleanToilet = organisation_id => ({
+const CleanToilet = (organisation_id, frequency = null, preferred_time = 9) => ({
   title: 'Clean toilet',
-  frequency: 7,
+  frequency: frequency || 168,
   organisation_id,
+  preferred_time,
 });
 
-const HooverHouse = organisation_id => ({
+const HooverHouse = (organisation_id, frequency = null, preferred_time = 9) => ({
   title: 'Hoover house',
-  frequency: 4,
+  frequency: frequency || 96,
   organisation_id,
+  preferred_time,
 });
 
-const WeeklyRevision = organisation_id => ({
+const WeeklyRevision = (organisation_id, frequency = null, preferred_time = 9) => ({
   title: 'Weekly revision',
-  frequency: 7,
+  frequency: frequency || 168,
   organisation_id,
+  preferred_time,
 });
 
-const CallAssociates = organisation_id => ({
+const CallAssociates = (organisation_id, frequency = null, preferred_time = 9) => ({
   title: 'Call associates',
-  frequency: null,
+  frequency,
   organisation_id,
+  preferred_time,
 });
 
-const LeadClientMeeting = organisation_id => ({
+const LeadClientMeeting = (organisation_id, frequency = null, preferred_time = 9) => ({
   title: 'Lead client meeting',
-  frequency: null,
+  frequency,
   organisation_id,
+  preferred_time,
 });
 
 module.exports = { CallAssociates, CleanToilet, HooverHouse, LeadClientMeeting, WashDishes, WeeklyRevision };

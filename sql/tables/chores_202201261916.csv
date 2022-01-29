@@ -1,0 +1,22 @@
+"id","title","description","completionSemaphore","modifiedOnUTC","cron","hoursLeftReminder"
+5,🚮 Take out bins,Take out bins and replace bin bags,0,2022-01-24 08:37:07.240 +0000,"",
+18,🍽️ Wash loose dishes,Wash random dishes that can't go in the dishwasher,-1,2022-01-25 06:43:43.864 +0000,"",
+8,🍳 Tidy after cooking,,-1,2022-01-25 06:43:45.617 +0000,"",
+6,🧺 Washy clothes,"Load washing machine
+Unload and hang clothing outside
+Collect clothing and leave on bedroom bed",0,2022-01-25 06:43:53.002 +0000,"",
+7,✨ Wipe surfaces,,0,2022-01-25 06:56:58.146 +0000,"",
+2,🍽️ Start dishwasher,Start dishwasher,0,2022-01-25 22:39:48.515 +0000,"",
+15,💩 Clean morning truffles,,0,2022-01-26 06:15:29.117 +0000,"0 9 */1 * *",1
+11,🍽️ Empty the dishwasher,From dishwasher and drying rack,0,2022-01-26 06:29:45.099 +0000,"",
+4,🧹 Hoover bedroom,,0,2022-01-11 18:47:45.269 +0000,"0 21 */7 * *",12
+9,😷 Empty hoover,,0,2022-01-11 18:47:49.078 +0000,"",
+17,🛌️ Make bed,,0,2022-01-26 07:00:36.044 +0000,"0 10 */1 * *",1
+13,🌊 Refill bun-bun water,,0,2022-01-20 05:48:36.239 +0000,"",
+14,🐰 Brushy brushy bunnies,,-1,2022-01-20 21:28:13.590 +0000,"0 21 */7 * *",8
+1,🐇 Clean litter trays,"Use boiling water & boiling water
+Hoover around the trays
+Take litter to bin",0,2022-01-21 20:57:56.052 +0000,"0 21 */3 * *",8
+12,🌾 Refill hay hay hay,All hay containers,0,2022-01-21 20:57:57.678 +0000,"",
+16,🚽 Empty bathroom bin,Take out trash and replace the bag,-1,2022-01-22 19:42:29.675 +0000,"",
+3,🧹 Hoover around house,"Living room, corridor, bathroom",-1,2022-01-22 19:42:36.901 +0000,"0 21 */3 * *",8

@@ -1,23 +1,28 @@
 ### Config
 
-Create an .env file with the following: 
+1. Create an .env file with the following:
+    ```
+    DB_HOST=
+    DB_PORT=
+    DB_USER=
+    DB_DATABASE=
+    DB_PASSWORD=
 
+    SENDGRID_API_KEY=
+    ```
 
-```
-DB_HOST=
-DB_PORT=
-DB_USER=
-DB_DATABASE=
-DB_PASSWORD=
+2. Start DB
 
-SENDGRID_API_KEY=
+    `docker compose up`
 
-USER_1_SEMAPHORE_VALUE=1
-USER_1_USERNAME=user1
-USER_1_EMAIL=user1@gmail.com
+3. Run DB migrations
 
-USER_2_SEMAPHORE_VALUE=-1
-USER_2_USERNAME=user2
-USER_2_EMAIL=user2@gmail.com
-```
+    `DATABASE_URL=postgres://postgres:local@localhost:5432/postgres npm run migrate up`
 
+4. Start local dev
+
+    `yarn dev`
+
+5. Open browser
+
+   http://localhost:5000

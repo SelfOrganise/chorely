@@ -15,7 +15,8 @@ interface DbUser {
 interface DbTask {
   id: number;
   title: string;
-  frequency: number;
+  frequency: number | null;
+  preferred_time: numer | null;
   organisation_id: number;
 }
 
@@ -24,7 +25,7 @@ interface DbAssignment {
   task_id: number;
   assigned_to_user_id: number;
   assigned_by_user_id: number | null;
-  due_by_utc: string;
+  due_by_utc: string | null;
   assigned_at_utc: string;
 }
 

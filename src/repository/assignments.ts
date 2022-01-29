@@ -4,6 +4,7 @@ import { sendEmail, sendReminder } from '../services/email';
 import { Response, response } from '../utilities/response';
 import { getUsersByOrganisation } from './users';
 import { PoolClient } from 'pg';
+import { setHours, setMinutes, setSeconds, addHours } from 'date-fns';
 
 export async function getTasks(organisationId: number): Promise<Array<Assignment>> {
   const client = await pool.connect();
@@ -12,16 +13,18 @@ export async function getTasks(organisationId: number): Promise<Array<Assignment
         select extended.id,
                t.title,
                extended.due_by_utc,
-               extended.assigned_to_user_id
+               extended.assigned_to_user_id,
+               extended.assigned_at_utc
         from (
                  select a.id,
                         a.due_by_utc,
+                        a.assigned_at_utc,
                         a.task_id,
                         a.assigned_to_user_id,
                         row_number() over (
                             partition by a.task_id
                             order by
-                                due_by_utc desc
+                                id desc
                             ) as row_number
                  from assignments a) as extended
                  inner join tasks t on
@@ -54,14 +57,14 @@ export async function completeAssignment(assignmentId: number, user: DbUser): Pr
   const orgUsers = await getUsersByOrganisation(user.organisation_id);
   const exemptions = await getExemptions(client, latestAssignment.task_id);
 
-  const nextUser = await determineNextUser(client, user, latestAssignment.task_id, orgUsers, exemptions);
+  const nextUser = await determineNextUser(client, user, latestAssignment, orgUsers, exemptions);
 
   const result = await createAssignment(client, {
     task_id: latestAssignment.task_id,
     assigned_to_user_id: nextUser.id,
     assigned_by_user_id: user.id,
     assigned_at_utc: new Date().toISOString(),
-    due_by_utc: new Date(Date.now() + 1000 * 60 * 60 * 24 * 14).toISOString(), // default 14 days in the future TODO frequency
+    due_by_utc: determineDueDate(latestAssignment.frequency, latestAssignment.preferred_time),
   });
 
   await client.release();
@@ -81,7 +84,7 @@ export async function undoAssignment(assignmentId: number, user: User): Promise<
     `select a.id
      from assignments a
      where task_id = (select task_id from assignments where id = $1)
-     order by due_by_utc desc
+     order by id desc
      fetch first 2 rows only
     `,
     [assignmentId]
@@ -95,7 +98,7 @@ export async function undoAssignment(assignmentId: number, user: User): Promise<
 
   if (
     latestTwoAssignmentsForTask.rowCount !== 2 ||
-    latestAssignment.id != assignmentId && latestAssignment.assigned_to_user_id != user.id
+    (latestAssignment.id != assignmentId && latestAssignment.assigned_to_user_id != user.id)
   ) {
     return response(400, `Cannot find a valid assignment with id '${assignmentId}'.`);
   }
@@ -143,7 +146,7 @@ export async function remindAssignment(assignmentId: number): Promise<Response> 
 
 // helpers
 async function getLatestAssignmentForTask(client: PoolClient, assignmentId: number) {
-  const result = await client.query<DbAssignment & Pick<DbTask, 'title'>>(
+  const result = await client.query<DbAssignment & Pick<DbTask, 'title' | 'frequency' | 'preferred_time'>>(
     `
         select a.id,
                a.task_id,
@@ -151,14 +154,16 @@ async function getLatestAssignmentForTask(client: PoolClient, assignmentId: numb
                a.due_by_utc,
                a.assigned_by_user_id,
                a.assigned_at_utc,
-               t.title
+               t.title,
+               t.frequency,
+               t.preferred_time
         from assignments a
             inner join tasks t on a.task_id = t.id
         where task_id = (
             select task_id
             from assignments
             where id = $1)
-        order by due_by_utc desc
+        order by id desc
             fetch first 1 rows only
     `,
     [assignmentId]
@@ -171,7 +176,13 @@ async function createAssignment(client: PoolClient, assignment: Omit<DbAssignmen
   return await client.query<DbAssignment>(
     `insert into assignments(task_id, assigned_to_user_id, assigned_by_user_id, due_by_utc, assigned_at_utc)
                                            values ($1, $2, $3, $4, $5)`,
-    [assignment.task_id, assignment.assigned_to_user_id, assignment.assigned_by_user_id, assignment.due_by_utc, assignment.assigned_at_utc]
+    [
+      assignment.task_id,
+      assignment.assigned_to_user_id,
+      assignment.assigned_by_user_id,
+      assignment.due_by_utc,
+      assignment.assigned_at_utc,
+    ]
   );
 }
 
@@ -191,7 +202,7 @@ async function deleteExemptions(client: PoolClient, exemptionsIds: Array<number>
 async function determineNextUser(
   client: PoolClient,
   currentUser: DbUser,
-  task_id: number,
+  assignment: Awaited<ReturnType<typeof getLatestAssignmentForTask>>,
   users: Array<DbUser>,
   exemptions: Array<DbExemption>
 ) {
@@ -208,11 +219,11 @@ async function determineNextUser(
       usedExemptions.push(exemptionsCopy[exemptionIndex].id);
       // create a past assignment for the exemption to have a flat history in assignments table
       await createAssignment(client, {
-        task_id,
+        task_id: assignment.task_id,
         assigned_by_user_id: null,
         assigned_to_user_id: user.id,
         assigned_at_utc: exemptionsCopy[exemptionIndex].created_at_utc,
-        due_by_utc: new Date(Date.now() + 1000 * 60 * 60 * 24 * 14).toISOString(), // default 14 days in the future TODO frequency
+        due_by_utc: determineDueDate(assignment.frequency, assignment.preferred_time),
       });
       exemptionsCopy.splice(exemptionIndex, 1); // remove used exemption
     } else {
@@ -223,4 +234,12 @@ async function determineNextUser(
   await deleteExemptions(client, usedExemptions);
 
   return nextUser;
+}
+
+function determineDueDate(frequency: number | null, preferred_time: number | null) {
+  if (!frequency || !preferred_time) {
+    return null;
+  }
+
+  return setSeconds(setMinutes(setHours(addHours(new Date(), frequency), preferred_time), 0), 0).toISOString();
 }

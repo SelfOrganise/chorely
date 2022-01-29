@@ -28,6 +28,7 @@ describe('Assignments routes', () => {
     FakeMailService.send.mockClear();
   });
 
+  //region get
   it('should return assignments for current organisation only', async () => {
     const [aDatum, adventureWorks] = await provisionOrganisation(ADatumCorporation(), AdventureWorks());
 
@@ -38,6 +39,7 @@ describe('Assignments routes', () => {
       Assignment(cleanToilet.id, bob.id, alice.id, t(-2), t(-1)),
       Assignment(cleanToilet.id, alice.id, bob.id, t(-1), t(0)),
       Assignment(cleanToilet.id, bob.id, alice.id, t(0), t(1)),
+      Assignment(washDishes.id, bob.id, alice.id, t(-1), null),
       Assignment(washDishes.id, alice.id, bob.id, t(-1), t(2))
     );
 
@@ -67,12 +69,14 @@ describe('Assignments routes', () => {
         title: cleanToilet.title,
         assigned_to_user_id: bob.id,
         due_by_utc: aDatumAssignments[2].due_by_utc.toISOString(),
+        assigned_at_utc: aDatumAssignments[2].assigned_at_utc.toISOString(),
       },
       {
-        id: aDatumAssignments[3].id,
+        id: aDatumAssignments[4].id,
         title: washDishes.title,
         assigned_to_user_id: alice.id,
-        due_by_utc: aDatumAssignments[3].due_by_utc.toISOString(),
+        due_by_utc: aDatumAssignments[4].due_by_utc.toISOString(),
+        assigned_at_utc: aDatumAssignments[4].assigned_at_utc.toISOString(),
       },
     ]);
   });
@@ -85,6 +89,7 @@ describe('Assignments routes', () => {
 
     expect(response.statusCode).toBe(400);
   });
+  //endregion
 
   //region common
   it.each(['complete', 'undo', 'remind'])(
@@ -148,7 +153,7 @@ describe('Assignments routes', () => {
       .end();
 
     expect(response.statusCode).toBe(204);
-    await verifyLatestAssignment(cleanToilet.id, alice.id, bob.id, 13.99);
+    await verifyLatestAssignment(cleanToilet.id, alice.id, bob.id, 7);
     expect(FakeMailService.send).toHaveBeenCalledTimes(1);
     expect(FakeMailService.send.mock.calls[0][0]).toEqual(
       expect.objectContaining({
@@ -173,8 +178,32 @@ describe('Assignments routes', () => {
 
     expect(response.statusCode).toBe(200);
     expect(response.body).toBe('Due to exemptions the task has been reassigned to you.');
-    await verifyLatestAssignment(cleanToilet.id, alice.id, alice.id, 13.99);
+    await verifyLatestAssignment(cleanToilet.id, alice.id, alice.id, 7);
     expect(FakeMailService.send).toHaveBeenCalledTimes(0);
+  });
+
+  it('should return 200 and set due_by_utc to null when task does not have a frequency set', async () => {
+    const [aDatum] = await provisionOrganisation(ADatumCorporation());
+    const [washDishes] = await provisionTasks(WashDishes(aDatum.id));
+    const [alice, bob] = await provisionUsers(Alice(aDatum.id, 0), Bob(aDatum.id, 1));
+    const assignments = await provisionAssignments(Assignment(washDishes.id, alice.id, bob.id, t(-1), null));
+
+    const response = await api()
+      .post(`${apiBase}/assignments/${assignments[0].id}`)
+      .headers({ 'x-userid': alice.id })
+      .body({ action: 'complete' })
+      .end();
+
+    expect(response.statusCode).toBe(204);
+    await verifyLatestAssignment(washDishes.id, bob.id, alice.id, null);
+    expect(FakeMailService.send).toHaveBeenCalledTimes(1);
+    expect(FakeMailService.send.mock.calls[0][0]).toEqual(
+      expect.objectContaining({
+        to: bob.email,
+        subject: `“${washDishes.title}” was assigned to you.`,
+        text: ` `,
+      })
+    );
   });
 
   //region exemptions
@@ -219,7 +248,7 @@ describe('Assignments routes', () => {
 
     expect(response.statusCode).toBe(200);
     expect(response.body).toBe('Due to exemptions the task has been reassigned to you.');
-    await verifyLatestAssignment(cleanToilet.id, bob.id, bob.id, 13.99);
+    await verifyLatestAssignment(cleanToilet.id, bob.id, bob.id, 7);
     expect(FakeMailService.send).toHaveBeenCalledTimes(0);
     let actual = await getAssignmentsAfter(assignments[2].id);
     expect(actual[0]).toEqual(
@@ -247,7 +276,7 @@ describe('Assignments routes', () => {
 
     expect(response.statusCode).toBe(200);
     expect(response.body).toBe('Due to exemptions the task has been reassigned to you.');
-    await verifyLatestAssignment(cleanToilet.id, bob.id, bob.id, 13.99);
+    await verifyLatestAssignment(cleanToilet.id, bob.id, bob.id, 7);
     expect(FakeMailService.send).toHaveBeenCalledTimes(0);
   });
   //endregion
@@ -314,7 +343,7 @@ describe('Assignments routes', () => {
     expect(response.statusCode).toBe(204);
     await verifyLatestAssignment(cleanToilet.id, bob.id, null, 0);
     expect(FakeMailService.send).toHaveBeenCalledTimes(0);
-  })
+  });
   //endregion
 
   //region reminder
@@ -342,25 +371,23 @@ describe('Assignments routes', () => {
   //endregion
 });
 
-// helpers
-async function verifyLatestAssignment(
-  taskId,
-  assigned_to_user_id,
-  assigned_by_user_id,
-  dueDaysLeft,
-  assignedOn = 1000
-) {
+//region helpers
+async function verifyLatestAssignment(taskId, assigned_to_user_id, assigned_by_user_id, dueDaysLeft) {
   const result = await query(
-    `select * from assignments where task_id = ${taskId} order by due_by_utc desc fetch first 1 rows only`
+    `select * from assignments where task_id = ${taskId} order by id desc fetch first 1 rows only`
   );
 
-  expect(result[0].assigned_to_user_id).toBe(assigned_to_user_id);
-  expect(result[0].assigned_by_user_id).toBe(assigned_by_user_id);
-  expect(new Date(result[0].assigned_at_utc).getTime() - new Date().getTime()).toBeLessThan(1000);
-  expect((new Date(result[0].due_by_utc).getTime() - new Date().getTime()) / 1000 / 60 / 60 / 24).toBeCloseTo(
-    dueDaysLeft,
-    1
-  );
+  let assignment = result[0];
+
+  expect(assignment.assigned_to_user_id).toBe(assigned_to_user_id);
+  expect(assignment.assigned_by_user_id).toBe(assigned_by_user_id);
+  expect(new Date(assignment.assigned_at_utc).getTime() - new Date().getTime()).toBeLessThan(1000);
+  if (dueDaysLeft === null) {
+    expect(assignment.due_by_utc).toBeNull();
+  } else {
+    let actual = Math.ceil((new Date(assignment.due_by_utc).getTime() - new Date().getTime()) / 1000 / 60 / 60 / 24);
+    expect(actual).toBeCloseTo(dueDaysLeft);
+  }
 
   expect(result).toHaveLength(1);
 }
@@ -380,3 +407,4 @@ async function getAssignmentsAfter(index) {
 async function getExemptions(taskId) {
   return await query(`select * from exemptions where task_id = $1`, [taskId]);
 }
+//endregion
