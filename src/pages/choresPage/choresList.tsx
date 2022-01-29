@@ -18,10 +18,19 @@ export function ChoreList({ chores, onComplete, areDone }: ChoreListProps) {
     return (
       chores &&
       chores.sort((first, second) => {
-        const order = isAfter(parseISO(first.due_by_utc), parseISO(second.due_by_utc)) ? 1 : -1;
-        const areDoneMod = areDone ? -1 : 1;
+        if (!first.due_by_utc && second.due_by_utc) {
+          return 1;
+        }
 
-        return order * areDoneMod;
+        if (first.due_by_utc && !second.due_by_utc) {
+          return -1;
+        }
+
+        if (first.due_by_utc && second.due_by_utc) {
+          return isAfter(parseISO(first.due_by_utc), parseISO(second.due_by_utc)) ? 1 : -1;
+        }
+
+        return isAfter(parseISO(first.assigned_at_utc), parseISO(second.assigned_at_utc)) ? -1 : 1;
       })
     );
   }, [chores]);

@@ -1,4 +1,4 @@
-import React, { useCallback, useState } from 'react';
+import React, { useCallback, useMemo, useState } from 'react';
 import { toast } from 'react-toastify';
 import { completeAssignment, sendReminder, undoAssignment } from 'srcRootDir/services/chores';
 import {
@@ -106,6 +106,21 @@ export const ChoreListItem = React.forwardRef(
 
     const colors = cardColors[chore.id % cardColors.length];
 
+    const dueDateMessage = useMemo(() => {
+      if (!chore.due_by_utc) {
+        return;
+      }
+
+      const now = new Date();
+      const parsedDate = parseISO(chore.due_by_utc);
+      const distance = formatDistance(parsedDate, new Date());
+      if (parsedDate < now) {
+        return `${distance} late`;
+      } else {
+        return `due in ${distance}`;
+      }
+    }, [chore.due_by_utc]);
+
     return (
       <Paper
         style={style}
@@ -124,9 +139,11 @@ export const ChoreListItem = React.forwardRef(
           {chore.title}
         </Typography>
         <Box display="flex" justifyContent="center">
-          <Typography sx={{ fontSize: 12 }} fontWeight={300} color={colors.color} paddingBottom={1}>
-            last done {formatDistance(parseISO(chore.due_by_utc), new Date())} ago
-          </Typography>
+          {chore.due_by_utc && (
+            <Typography sx={{ fontSize: 12 }} fontWeight={300} color={colors.color} paddingBottom={1}>
+              {dueDateMessage}
+            </Typography>
+          )}
         </Box>
         <IconButton
           sx={{ position: 'absolute', bottom: 0, left: 0 }}
