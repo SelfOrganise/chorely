@@ -160,7 +160,7 @@ export const ChoreListItem = React.forwardRef(
           {assignment.title}
         </Typography>
         <Collapse in={subtasksVisible}>
-          <Box padding="1rem 2rem 1rem 2rem">
+          <Box padding="0.5rem 1rem 0 1rem">
             {assignment.subtasks &&
               assignment.subtasks.map((subtask, i) => {
                 return (
@@ -184,7 +184,7 @@ export const ChoreListItem = React.forwardRef(
           </Typography>
         </Box>
         <IconButton
-          sx={{ position: 'absolute', bottom: 0, left: 0 }}
+          sx={{ position: 'absolute', top: 0, right: 0 }}
           onClick={(e: React.MouseEvent<HTMLElement>) => setAnchorEl(e.currentTarget)}
         >
           {open ? <MenuOpenIcon sx={{ color: colors.color }} /> : <MenuIcon sx={{ color: colors.color }} />}
