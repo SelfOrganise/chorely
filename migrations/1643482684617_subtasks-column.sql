@@ -1,3 +1,4 @@
+-- Up Migration
 ALTER TABLE tasks ADD subtasks varchar[] NULL;
 
 UPDATE public.tasks
@@ -23,6 +24,4 @@ WHERE id=16;
 UPDATE tasks
 SET subtasks='{"Living room","Bathroom","Corridor"}'
 WHERE id=17;
--- Up Migration
-
 -- Down Migration
