@@ -74,6 +74,10 @@ export const ChoreListItem = React.forwardRef(
           }
 
           if (allSubtasksCompleted) {
+            if (isDone && !confirm(`"${assignment.title}" is not assigned to you. Are you sure you want to complete it?`)) {
+              return;
+            }
+
             const result = await completeAssignment(chore.id);
             if (result) {
               toast.success(result);
@@ -127,12 +131,13 @@ export const ChoreListItem = React.forwardRef(
 
     const colors = cardColors[assignment.id % cardColors.length];
 
-    const dueDateMessage = useMemo(() => {
+    const dateMessage = useMemo(() => {
+      const now = new Date();
       if (!assignment.due_by_utc) {
-        return;
+        let lastCompleted = formatDistance(parseISO(assignment.assigned_at_utc), now);
+        return `completed ${lastCompleted} ago`;
       }
 
-      const now = new Date();
       const parsedDate = parseISO(assignment.due_by_utc);
       const distance = formatDistance(parsedDate, new Date());
       if (parsedDate < now) {
@@ -180,14 +185,18 @@ export const ChoreListItem = React.forwardRef(
         </Collapse>
         <Box display="flex" justifyContent="center">
           <Typography sx={{ fontSize: 12 }} fontWeight={300} color={colors.color} paddingBottom={1}>
-            {dueDateMessage}
+            {dateMessage}
           </Typography>
         </Box>
         <IconButton
           sx={{ position: 'absolute', top: 0, right: 0 }}
           onClick={(e: React.MouseEvent<HTMLElement>) => setAnchorEl(e.currentTarget)}
         >
-          {open ? <MenuOpenIcon sx={{ color: colors.color }} /> : <MenuIcon sx={{ color: colors.color }} />}
+          {open ? (
+            <MenuOpenIcon sx={{ color: colors.color }} />
+          ) : (
+            <MenuIcon sx={{ color: colors.color, opacity: 0.7 }} />
+          )}
           <Menu open={open} onClose={handleMenuClose} anchorEl={anchorEl}>
             <MenuItem
               disabled={!isDone || isLoading}
@@ -202,10 +211,11 @@ export const ChoreListItem = React.forwardRef(
               🔔 Send reminder
             </MenuItem>
             <MenuItem
-              disabled={isLoading}
+              disabled={!hasSubtasks || isLoading}
               onClick={(e: React.MouseEvent<HTMLElement>) => {
                 handleMenuClose(e);
                 subtasks.clear();
+                setSubtasksVisible(false);
               }}
             >
               🧽 Clear subtasks
