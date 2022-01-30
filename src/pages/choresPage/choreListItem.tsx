@@ -74,7 +74,10 @@ export const ChoreListItem = React.forwardRef(
           }
 
           if (allSubtasksCompleted) {
-            if (isDone && !confirm(`"${assignment.title}" is not assigned to you. Are you sure you want to complete it?`)) {
+            if (
+              isDone &&
+              !confirm(`"${assignment.title}" is not assigned to you. Are you sure you want to complete it?`)
+            ) {
               return;
             }
 
@@ -169,7 +172,14 @@ export const ChoreListItem = React.forwardRef(
             {assignment.subtasks &&
               assignment.subtasks.map((subtask, i) => {
                 return (
-                  <Box key={subtask} display="flex" alignItems="center" paddingBottom="0.4rem">
+                  <Box
+                    key={subtask}
+                    display="flex"
+                    alignItems="center"
+                    paddingBottom="0.4rem"
+                    onClick={() => subtasks.complete(i >= subtasks.lastIndex ? i + 1 : i)}
+                    sx={{ cursor: 'pointer' }}
+                  >
                     {i >= subtasks.lastIndex ? (
                       <CircleIcon color="disabled" />
                     ) : (
