@@ -18,6 +18,7 @@ interface DbTask {
   frequency: number | null;
   preferred_time: numer | null;
   organisation_id: number;
+  subtasks: string[] | null;
 }
 
 interface DbAssignment {

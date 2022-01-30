@@ -1,8 +1,8 @@
 -- Up Migration
-insert into postgres.public.organisations(name, created_at_utc)
+insert into organisations(name, created_at_utc)
 values ('Homely home', CURRENT_TIMESTAMP);
 
-insert into postgres.public.tasks( title, frequency, preferred_time, organisation_id)
+insert into tasks( title, frequency, preferred_time, organisation_id)
 values ('🚮 Take out bins',          null, null, 1), -- 1
        ('🍽️ Wash loose dishes',      null, null, 1), -- 2
        ('🍳 Tidy after cooking',     null, null, 1), -- 3
@@ -21,11 +21,11 @@ values ('🚮 Take out bins',          null, null, 1), -- 1
        ('🚽 Empty bathroom bin',     null, null, 1), -- 16
        ('🧹 Hoover around house',   72,   21,   1); -- 17
 
-insert into postgres.public.users(name, email, created_at_utc, is_admin, rota_order, organisation_id)
+insert into users(name, email, created_at_utc, is_admin, rota_order, organisation_id)
 values ('User1', 'replace1@gmail.com', CURRENT_TIMESTAMP, true, 0, 1),
        ('User2', 'replace2@gmail.com', CURRENT_TIMESTAMP, true, 1, 1);
 
-insert into postgres.public.assignments(task_id, assigned_to_user_id, due_by_utc, assigned_by_user_id, assigned_at_utc)
+insert into assignments(task_id, assigned_to_user_id, due_by_utc, assigned_by_user_id, assigned_at_utc)
 values (1, 1, null, null, current_timestamp),
        (2, 2, null, null, current_timestamp),
        (3, 2, null, null, current_timestamp),

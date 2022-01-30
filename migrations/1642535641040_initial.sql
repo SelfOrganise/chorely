@@ -42,7 +42,7 @@ CREATE TABLE assignments (
    CONSTRAINT assignments_users_fk FOREIGN KEY (assigned_to_user_id) REFERENCES users(id)
 );
 
-CREATE TABLE public.exemptions (
+CREATE TABLE exemptions (
    user_id serial4 NOT NULL,
    task_id serial4 NOT NULL,
    created_at_utc timestamptz NOT NULL DEFAULT CURRENT_TIMESTAMP,

@@ -14,7 +14,8 @@ export async function getTasks(organisationId: number): Promise<Array<Assignment
                t.title,
                extended.due_by_utc,
                extended.assigned_to_user_id,
-               extended.assigned_at_utc
+               extended.assigned_at_utc,
+               t.subtasks
         from (
                  select a.id,
                         a.due_by_utc,
