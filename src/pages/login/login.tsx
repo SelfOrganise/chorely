@@ -25,7 +25,7 @@ export function Login() {
         <StyledTextField
           label="Username"
           required={true}
-          onChange={v => setUsername(v.target.value)}
+          onChange={v => setUsername(v.target.value?.toLowerCase())}
           value={username}
         />
         <Button disabled={!username} variant="contained" onClick={handleLogin}>

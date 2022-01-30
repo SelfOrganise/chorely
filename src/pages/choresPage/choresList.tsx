@@ -4,8 +4,9 @@ import Box from '@mui/material/Box';
 import Typography from '@mui/material/Typography';
 import CircularProgress from '@mui/material/CircularProgress';
 import { parseISO, isAfter } from 'date-fns';
-import styled from '@emotion/styled';
 import Fade from '@mui/material/Fade';
+import Masonry from '@mui/lab/Masonry';
+import { useMediaQuery, useTheme } from '@mui/material';
 
 interface ChoreListProps {
   chores: Array<Assignment> | undefined;
@@ -14,6 +15,9 @@ interface ChoreListProps {
 }
 
 export function ChoreList({ chores, onComplete, areDone }: ChoreListProps) {
+  const theme = useTheme();
+  const matches = useMediaQuery(theme.breakpoints.up('md'));
+
   const sortedChores = useMemo(() => {
     return (
       chores &&
@@ -58,29 +62,16 @@ export function ChoreList({ chores, onComplete, areDone }: ChoreListProps) {
   }
 
   return (
-    <StyledList>
-      {sortedChores.map(ch => {
-        return (
-          <Fade timeout={800} key={ch.id} in={true}>
-            <ChoreListItem chore={ch} onComplete={onComplete} isDone={areDone} />
-          </Fade>
-        );
-      })}
-    </StyledList>
+    <Box display="flex" width="100%" justifyContent="center" padding="1rem 0.5rem 1rem 0.5rem">
+      <Masonry columns={matches ? 3 : 1} spacing={3}>
+        {sortedChores.map(ch => {
+          return (
+            <Fade timeout={800} key={ch.id} in={true}>
+              <ChoreListItem assignment={ch} onComplete={onComplete} isDone={areDone} />
+            </Fade>
+          );
+        })}
+      </Masonry>
+    </Box>
   );
 }
-
-const StyledList = styled('div')`
-  display: grid;
-  grid-gap: 1rem;
-  padding: 2rem;
-  width: 100%;
-  grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
-  flex-wrap: wrap;
-  max-width: 70%;
-
-  @media (max-width: 600px) {
-    grid-gap: 1.5rem;
-    max-width: 100%;
-  }
-`;
