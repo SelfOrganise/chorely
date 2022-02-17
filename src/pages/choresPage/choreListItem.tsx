@@ -20,8 +20,8 @@ import CircleIcon from '@mui/icons-material/Circle';
 import Collapse from '@mui/material/Collapse';
 import CheckCircleIcon from '@mui/icons-material/CheckCircle';
 import KeyboardDoubleArrowDownIcon from '@mui/icons-material/KeyboardDoubleArrowDown';
-import { formatDistance, parseISO } from 'date-fns';
 import { useLastCompletedSubtask } from 'srcRootDir/hooks/useLastCompletedSubtask';
+import { parseDueDate } from 'srcRootDir/services/utilts';
 
 const cardColors = [
   { background: '#ff6f75', color: 'white' },
@@ -134,21 +134,7 @@ export const ChoreListItem = React.forwardRef(
 
     const colors = cardColors[assignment.id % cardColors.length];
 
-    const dateMessage = useMemo(() => {
-      const now = new Date();
-      if (!assignment.due_by_utc) {
-        let lastCompleted = formatDistance(parseISO(assignment.assigned_at_utc), now);
-        return `completed ${lastCompleted} ago`;
-      }
-
-      const parsedDate = parseISO(assignment.due_by_utc);
-      const distance = formatDistance(parsedDate, new Date());
-      if (parsedDate < now) {
-        return `${distance} late`;
-      } else {
-        return `due in ${distance}`;
-      }
-    }, [assignment.due_by_utc]);
+    const { dueString, isLate } = useMemo(() => parseDueDate(assignment), [assignment]);
 
     return (
       <Paper
@@ -194,8 +180,14 @@ export const ChoreListItem = React.forwardRef(
           </Box>
         </Collapse>
         <Box display="flex" justifyContent="center">
-          <Typography sx={{ fontSize: 12 }} fontWeight={300} color={colors.color} paddingBottom={1}>
-            {dateMessage}
+          <Typography
+            padding="0 1rem"
+            sx={{ fontSize: isLate ? 16 : 12, backgroundColor: isLate ? 'red' : null }}
+            fontWeight={isLate ? 800 : 300}
+            color={colors.color}
+            paddingBottom={1}
+          >
+            {dueString}
           </Typography>
         </Box>
         <IconButton
