@@ -1,4 +1,4 @@
-import { formatDistance, parseISO } from 'date-fns';
+import { formatDistance, parseISO, differenceInHours } from 'date-fns';
 
 export const parseDueDate = (assignment: Assignment): { dueString: string; isLate?: boolean } => {
   const now = new Date();
@@ -11,10 +11,11 @@ export const parseDueDate = (assignment: Assignment): { dueString: string; isLat
   }
 
   const parsedDate = parseISO(assignment.due_by_utc);
-  const distance = formatDistance(parsedDate, new Date());
+  const hoursLeft = differenceInHours(parsedDate, now);
+  const distance = formatDistance(parsedDate, now);
   if (parsedDate < now) {
     return { dueString: `${distance} late`, isLate: true };
   } else {
-    return { dueString: `due in ${distance}` };
+    return { dueString: `due in ${distance}`, isLate: hoursLeft < 2 };
   }
 };

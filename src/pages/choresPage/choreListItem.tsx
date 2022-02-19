@@ -179,13 +179,12 @@ export const ChoreListItem = React.forwardRef(
               })}
           </Box>
         </Collapse>
-        <Box display="flex" justifyContent="center">
+        <Box display="flex" justifyContent="center" paddingBottom={1}>
           <Typography
             padding="0 1rem"
             sx={{ fontSize: isLate ? 16 : 12, backgroundColor: isLate ? 'red' : null }}
             fontWeight={isLate ? 800 : 300}
             color={colors.color}
-            paddingBottom={1}
           >
             {dueString}
           </Typography>
