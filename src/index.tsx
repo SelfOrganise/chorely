@@ -1,14 +1,18 @@
+import 'react-toastify/dist/ReactToastify.css';
 import React from 'react';
 import ReactDOM from 'react-dom';
+import { createTheme, CssBaseline, ThemeProvider } from '@mui/material';
 import { HashRouter, Route, Routes, useNavigate } from 'react-router-dom';
-import { Login } from 'srcRootDir/pages/login';
-import { ChoresPage } from 'srcRootDir/pages/chores';
 import { ProviderConfiguration, SWRConfiguration } from 'swr/dist/types';
 import { SWRConfig } from 'swr';
 import { ToastContainer, toast } from 'react-toastify';
 
-import 'react-toastify/dist/ReactToastify.css';
-import { createTheme, CssBaseline, ThemeProvider } from '@mui/material';
+import { Login } from 'srcRootDir/pages/login';
+import { ChoresPage } from 'srcRootDir/pages/chores';
+import { ShoppingPage } from 'srcRootDir/pages/shopping/ShoppingPage';
+import { GroceriesPage } from 'srcRootDir/pages/shopping/GroceriesPage';
+import { RecipesPage } from 'srcRootDir/pages/shopping/RecipesPage';
+import { ShoppingWrapper } from 'srcRootDir/pages/shopping/ShoppingRoot';
 
 const theme = createTheme({
   typography: {
@@ -20,7 +24,7 @@ function Root(): JSX.Element {
   return (
     <ThemeProvider theme={theme}>
       <ToastContainer
-        position="bottom-center"
+        position="top-center"
         autoClose={5000}
         hideProgressBar={false}
         newestOnTop={true}
@@ -56,7 +60,11 @@ function RouteDefinitions() {
       <Routes>
         <Route index element={<Login />} />
         <Route path="/chores" element={<ChoresPage />} />
-        {/*<Route path="/shopping" element={}*/}
+        <Route path="/shopping" element={<ShoppingWrapper />}>
+          <Route index element={<ShoppingPage />} />
+          <Route path="groceries" element={<GroceriesPage />} />
+          <Route path="recipes" element={<RecipesPage />} />
+        </Route>
       </Routes>
     </SWRConfig>
   );

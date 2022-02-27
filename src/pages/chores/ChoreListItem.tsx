@@ -1,18 +1,6 @@
 import React, { useCallback, useMemo, useState } from 'react';
 import { toast } from 'react-toastify';
-import { completeAssignment, sendReminder, undoAssignment } from 'srcRootDir/services/chores';
-import {
-  Box,
-  Menu,
-  MenuItem,
-  Paper,
-  IconButton,
-  LinearProgress,
-  Typography,
-  Fab,
-  darken,
-  lighten,
-} from '@mui/material';
+import { Box, Menu, MenuItem, Paper, IconButton, LinearProgress, Typography, Fab } from '@mui/material';
 import MenuIcon from '@mui/icons-material/Menu';
 import MenuOpenIcon from '@mui/icons-material/MenuOpen';
 import CheckIcon from '@mui/icons-material/Check';
@@ -20,24 +8,11 @@ import CircleIcon from '@mui/icons-material/Circle';
 import Collapse from '@mui/material/Collapse';
 import CheckCircleIcon from '@mui/icons-material/CheckCircle';
 import KeyboardDoubleArrowDownIcon from '@mui/icons-material/KeyboardDoubleArrowDown';
-import { useLastCompletedSubtask } from 'srcRootDir/hooks/useLastCompletedSubtask';
-import { parseDueDate } from 'srcRootDir/services/utilts';
 
-const cardColors = [
-  { background: '#ff6f75', color: 'white' },
-  { background: '#46c2a6', color: 'white' },
-  { background: '#ff70a8', color: 'white' },
-  { background: '#dd8d7f', color: 'white' },
-  { background: '#ff875d', color: 'white' },
-  { background: '#4bb7dd', color: 'white' },
-  { background: '#ffe162', color: '#867734' },
-  { background: '#9ccc65', color: 'white' },
-  { background: '#ba68c8', color: 'white' },
-].map(c => ({
-  ...c,
-  fabBackground: lighten(c.background, 0.85),
-  fabColor: darken(c.background, 0.3),
-}));
+import { completeAssignment, sendReminder, undoAssignment } from 'srcRootDir/services/chores';
+import { useLastCompletedSubtask } from 'srcRootDir/hooks/useLastCompletedSubtask';
+import { parseDueDate } from 'srcRootDir/services/parseDueDate';
+import { cardColors } from 'srcRootDir/services/cardColors';
 
 interface ChoreListItemProps {
   assignment: Assignment;
