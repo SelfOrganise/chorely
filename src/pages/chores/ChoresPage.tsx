@@ -4,7 +4,7 @@ import { fetcher } from 'srcRootDir/services/fetcher';
 import Box from '@mui/material/Box';
 import { toast } from 'react-toastify';
 import { getCurrentUserId } from 'srcRootDir/services/auth';
-import { ChoreList } from 'srcRootDir/pages/choresPage/choresList';
+import { ChoreList } from 'srcRootDir/pages/chores/ChoresList';
 import Button from '@mui/material/Button';
 import { Alert } from '@mui/material';
 import RefreshIcon from '@mui/icons-material/Refresh';
@@ -49,11 +49,13 @@ export function ChoresPage() {
         {showCompletedTasks ? 'Hide' : 'Show'} completed tasks
       </Button>
       {/*<Slide direction="right" in={showCompletedTasks}>*/}
-      {showCompletedTasks && <ChoreList
-        chores={response.data?.filter(ch => ch.assigned_to_user_id != userId)}
-        areDone={true}
-        onComplete={response.mutate}
-      />}
+      {showCompletedTasks && (
+        <ChoreList
+          chores={response.data?.filter(ch => ch.assigned_to_user_id != userId)}
+          areDone={true}
+          onComplete={response.mutate}
+        />
+      )}
     </Box>
   );
 }

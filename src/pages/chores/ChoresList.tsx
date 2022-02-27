@@ -1,5 +1,5 @@
 import React, { useMemo } from 'react';
-import { ChoreListItem } from 'srcRootDir/pages/choresPage/choreListItem';
+import { ChoreListItem } from 'srcRootDir/pages/chores/ChoreListItem';
 import Box from '@mui/material/Box';
 import Typography from '@mui/material/Typography';
 import CircularProgress from '@mui/material/CircularProgress';

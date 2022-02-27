@@ -2,7 +2,7 @@ import React from 'react';
 import ReactDOM from 'react-dom';
 import { HashRouter, Route, Routes, useNavigate } from 'react-router-dom';
 import { Login } from 'srcRootDir/pages/login';
-import { ChoresPage } from 'srcRootDir/pages/choresPage';
+import { ChoresPage } from 'srcRootDir/pages/chores';
 import { ProviderConfiguration, SWRConfiguration } from 'swr/dist/types';
 import { SWRConfig } from 'swr';
 import { ToastContainer, toast } from 'react-toastify';
@@ -56,6 +56,7 @@ function RouteDefinitions() {
       <Routes>
         <Route index element={<Login />} />
         <Route path="/chores" element={<ChoresPage />} />
+        {/*<Route path="/shopping" element={}*/}
       </Routes>
     </SWRConfig>
   );
