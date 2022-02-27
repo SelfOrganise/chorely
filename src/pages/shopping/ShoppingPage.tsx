@@ -1,4 +1,4 @@
-import { styled } from '@mui/material';
+import { styled, Tabs, Tab } from '@mui/material';
 import React, { useState } from 'react';
 import { GroceryItem } from 'srcRootDir/pages/shopping/GroceryItem';
 
@@ -55,25 +55,35 @@ export function ShoppingPage() {
 
   const [addedItems, setAddedItems] = useState<Array<Grocery>>([]);
 
-  return (
-    <StyledList>
-      <StyledAdded>
-        {addedItems.map(g => (
-          <GroceryItem key={g.id} item={g} onAdd={() => null} />
-        ))}
-      </StyledAdded>
+  const [value, setValue] = React.useState(0);
 
-      {shoppingList.map(g => (
-        <GroceryItem key={g.id} item={g} onAdd={item => setAddedItems(old => [...old, item])} />
-      ))}
-    </StyledList>
+  const handleChange = (event: any, newValue: any) => {
+    setValue(newValue);
+  };
+
+  return (
+    <div>
+      <Tabs value={value} onChange={handleChange}>
+        <Tab label="List" />
+        <Tab label="Basket" />
+      </Tabs>
+      {value == 0 && (
+        <StyledList>
+          {shoppingList.map(g => (
+            <GroceryItem key={g.id} item={g} onAdd={item => setAddedItems(old => [...old, item])} />
+          ))}
+        </StyledList>
+      )}
+      {value == 1 && (
+        <StyledList>
+          {addedItems.map(g => (
+            <GroceryItem key={g.id} item={g} onAdd={() => null} />
+          ))}
+        </StyledList>
+      )}
+    </div>
   );
 }
-
-const StyledAdded = styled('div')`
-  border-bottom: 2px solid black;
-  padding-bottom: 10px;
-`;
 
 const StyledList = styled('div')`
   display: flex;
