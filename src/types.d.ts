@@ -37,6 +37,11 @@ interface DbExemption {
   created_at_utc: string;
 }
 
+interface Grocery {
+  id: number;
+  name: string;
+}
+
 declare module 'fastify' {
   interface FastifyRequest {
     user: DbUser;

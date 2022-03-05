@@ -3,6 +3,7 @@ import fastify_cors from 'fastify-cors';
 import { unauthenticated } from './routes/unauthenticated';
 import { auth } from './hooks/auth';
 import { assignments } from './routes/assignments';
+import { shopping } from "./routes/shopping";
 
 export function buildServer(opts = {}) {
 
@@ -20,6 +21,7 @@ export function buildServer(opts = {}) {
     server.addHook('preHandler', auth);
 
     server.register(assignments);
+    server.register(shopping);
     done();
   });
 
