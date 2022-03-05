@@ -13,6 +13,7 @@ import { ShoppingPage } from 'srcRootDir/pages/shopping/ShoppingPage';
 import { GroceriesPage } from 'srcRootDir/pages/shopping/GroceriesPage';
 import { RecipesPage } from 'srcRootDir/pages/shopping/RecipesPage';
 import { ShoppingWrapper } from 'srcRootDir/pages/shopping/ShoppingRoot';
+import { StorePage } from 'srcRootDir/pages/shopping/StorePage';
 
 const theme = createTheme({
   typography: {
@@ -64,6 +65,7 @@ function RouteDefinitions() {
           <Route index element={<ShoppingPage />} />
           <Route path="groceries" element={<GroceriesPage />} />
           <Route path="recipes" element={<RecipesPage />} />
+          <Route path="map" element={<StorePage />} />
         </Route>
       </Routes>
     </SWRConfig>

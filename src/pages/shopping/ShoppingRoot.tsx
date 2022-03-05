@@ -32,7 +32,7 @@ export function ShoppingWrapper() {
         <BottomNavigationAction value="/shopping" label="List" icon={<ListAltIcon />} />
         <BottomNavigationAction value="/shopping/groceries" label="Groceries" icon={<LocalGroceryStoreIcon />} />
         <BottomNavigationAction value="/shopping/recipes" label="Recipes" icon={<LocalGroceryStoreIcon />} />
-        <BottomNavigationAction value="/shopping/recipes" label="Recipes" icon={<LocalGroceryStoreIcon />} />
+        <BottomNavigationAction value="/shopping/map" label="Recipes" icon={<LocalGroceryStoreIcon />} />
       </BottomNavigation>
     </RootWrapper>
   );
