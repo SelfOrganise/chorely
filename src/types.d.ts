@@ -37,10 +37,14 @@ interface DbExemption {
   created_at_utc: string;
 }
 
-interface Grocery {
+interface DbGrocery {
   id: number;
   name: string;
+  organisation_id: number;
+  created_at_utc: string;
 }
+
+type Grocery = Pick<DbGrocery, 'id' | 'name'>;
 
 declare module 'fastify' {
   interface FastifyRequest {

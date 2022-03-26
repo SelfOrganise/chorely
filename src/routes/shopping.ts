@@ -1,7 +1,7 @@
 import { FastifyPluginCallback } from 'fastify/types/plugin';
 import S from 'fluent-json-schema';
 import { exec } from 'child_process';
-import { getGroceries } from "../repository/groceries";
+import { addGrocery, getGroceries } from "../repository/groceries";
 
 interface SolveParam {
   Body: {
@@ -35,28 +35,21 @@ export const shopping: FastifyPluginCallback = (server, opts, done) => {
     return await getGroceries(req.user.organisation_id);
   })
 
-  // server.post<ChoreIdQueryParam>('/assignments/:id', {
-  //   schema: {
-  //     params: S.object().prop('id', S.number()).required(['id']),
-  //     body: S.object()
-  //       .prop('action', S.string().enum(Object.keys(AssignmentActions)))
-  //       .required(['action']),
-  //   },
-  //   handler: async (req, res) => {
-  //     const assignmentId = parseInt(req.params.id);
-  //     const action = AssignmentActions[req.body.action];
-  //     if (action === null) {
-  //       res.status(400).send(`Cannot process unsupported action "${req.body.action}".`);
-  //     }
-  //
-  //     const response = await action(assignmentId, req.user);
-  //     if (response) {
-  //       res.status(response.code).send(response.data);
-  //     } else {
-  //       res.status(204);
-  //     }
-  //   },
-  // });
+  interface AddGroceryRequest {
+    Body: { name: string }
+  }
+
+  server.post<AddGroceryRequest>('/shopping/groceries', {
+    schema: {
+      body: S.object()
+        .prop('name', S.string().minLength(1).maxLength(50))
+        .required(['name'])
+    },
+    handler: async (req, res) => {
+      const response = await addGrocery({ name: req.body.name }, req.user);
+      res.status(200).send(response);
+    },
+  });
 
   done();
 };

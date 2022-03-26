@@ -1,9 +1,14 @@
-export interface Response {
+export interface BaseResponse<T> {
   code: number;
-  data?: string | Object;
+  data?: T;
 }
 
-export function response(code: number, data?: string | Object): Response {
+type EmptyResponse = BaseResponse<void>;
+type StringResponse = BaseResponse<string>;
+
+export type Response<T> = EmptyResponse | StringResponse | BaseResponse<T>;
+
+export function response<T = void>(code: number, data?: T): Response<T> {
   return {
     code,
     data,

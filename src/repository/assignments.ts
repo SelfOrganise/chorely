@@ -1,7 +1,7 @@
 import { pool } from './db';
 import { Assignment, DbAssignment, DbExemption, DbTask, DbUser, User } from '../types';
 import { sendEmail, sendReminder } from '../services/email';
-import { Response, response } from '../utilities/response';
+import { Response, response } from "../utilities/response";
 import { getUsersByOrganisation } from './users';
 import { PoolClient } from 'pg';
 import { setHours, setMinutes, setSeconds, addHours } from 'date-fns';
@@ -41,7 +41,7 @@ export async function getTasks(organisationId: number): Promise<Array<Assignment
   return choresResult.rows;
 }
 
-export async function completeAssignment(assignmentId: number, user: DbUser): Promise<Response | void> {
+export async function completeAssignment(assignmentId: number, user: DbUser): Promise<Response<Assignment>> {
   const client = await pool.connect();
 
   const latestAssignment = await getLatestAssignmentForTask(client, assignmentId);
@@ -78,7 +78,7 @@ export async function completeAssignment(assignmentId: number, user: DbUser): Pr
   }
 }
 
-export async function undoAssignment(assignmentId: number, user: User): Promise<Response> {
+export async function undoAssignment(assignmentId: number, user: User): Promise<Response<string>> {
   const client = await pool.connect();
 
   const latestTwoAssignmentsForTask = await client.query<DbAssignment>(
@@ -115,7 +115,7 @@ export async function undoAssignment(assignmentId: number, user: User): Promise<
   return response(204);
 }
 
-export async function remindAssignment(assignmentId: number): Promise<Response> {
+export async function remindAssignment(assignmentId: number): Promise<Response<string>> {
   const client = await pool.connect();
   const getAssignmentDetails = await client.query<Pick<DbUser, 'email'> & Pick<DbTask, 'title'>>(
     `select u.email, t.title

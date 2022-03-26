@@ -8,16 +8,16 @@ const AssignmentActions = {
   remind: remindAssignment,
 };
 
-interface ChoreIdQueryParam {
-  Params: { id: string };
-  Body: { action: keyof typeof AssignmentActions };
-}
 
 export const assignments: FastifyPluginCallback = (server, opts, done) => {
   server.get('/assignments/current', async req => {
     return await getTasks(req.user.organisation_id);
   });
 
+  interface ChoreIdQueryParam {
+    Params: { id: string };
+    Body: { action: keyof typeof AssignmentActions };
+  }
   server.post<ChoreIdQueryParam>('/assignments/:id', {
     schema: {
       params: S.object().prop('id', S.number()).required(['id']),

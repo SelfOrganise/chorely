@@ -7,6 +7,7 @@
     DB_USER=
     DB_DATABASE=
     DB_PASSWORD=
+    DB_MAX_CONNECTIONS=
 
     SENDGRID_API_KEY=
     ```
