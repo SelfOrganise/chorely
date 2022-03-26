@@ -1,8 +1,12 @@
-import React, { useEffect, useRef, useState } from 'react';
+import React, { useCallback, useEffect, useRef, useState } from 'react';
 import styled from '@emotion/styled';
-import { StoreMap } from './services/StoreMap';
+import { StoreMap } from '../services/StoreMap';
 import { Item, Selector } from './components/Selector';
-import { Types } from './services/constants';
+import { Types } from '../services/constants';
+import useSWR from 'swr';
+import { fetcher } from 'srcRootDir/services/fetcher';
+import { updateOrCreateMap } from 'srcRootDir/pages/shopping/services/shopping';
+import { toast } from 'react-toastify';
 
 const items: Array<Item> = [
   { name: 'milk' },
@@ -14,11 +18,17 @@ const items: Array<Item> = [
   { name: 'water' },
 ];
 
-export function StorePage() {
+export function StoreMapPage() {
   const canvasElement = useRef<HTMLCanvasElement | null>(null);
   const storeMap = useRef<StoreMap>();
 
-  const [addedItems, setAddedItems] = useState<Array<string>>([]);
+  const response = useSWR<Array<MapData>>('/shopping/maps', {
+    fetcher,
+    refreshInterval: 0,
+    revalidateOnFocus: false,
+    revalidateOnReconnect: false,
+    revalidateOnMount: false,
+  });
 
   useEffect(() => {
     if (!canvasElement.current) {
@@ -26,10 +36,28 @@ export function StorePage() {
     }
 
     storeMap.current = new StoreMap(canvasElement.current);
-    const imported = storeMap.current?.import(window.localStorage.getItem('backup'));
-
-    setAddedItems(imported.filter((i: any) => i.type === Types.product).map((i: any) => i.name));
   }, []);
+
+  const [addedItems, setAddedItems] = useState<Array<string>>([]);
+
+  useEffect(() => {
+    if (response.data && response.data[0]) {
+      const imported = storeMap.current?.import(response.data[0].data);
+      setAddedItems(imported.filter((i: any) => i.type === Types.product).map((i: any) => i.name));
+    }
+  }, [response.data]);
+
+  const saveMap = useCallback(async () => {
+    const data = storeMap.current?.export();
+    if (data) {
+      try {
+        await updateOrCreateMap({ data });
+        toast.success(`Map saved 🗺️`);
+      } catch (ex: any) {
+        toast.error(`Could not save map. Reason: ${JSON.stringify(ex?.text())}`);
+      }
+    }
+  }, [storeMap]);
 
   function handleOnSelected(item: Item) {
     setAddedItems(old => [...old, item.name]);
@@ -43,15 +71,10 @@ export function StorePage() {
         availableItems={items.filter(item => addedItems.every(added => added !== item.name))}
       />
       <div className="buttons">
+        <button onClick={() => response.mutate()}>Load map</button>
         <button onClick={() => storeMap.current?.addWall()}>Add wall</button>
-        <button
-          id="export"
-          onClick={() => {
-            const data = storeMap.current?.export();
-            window.localStorage.setItem('backup', data || '[]');
-          }}
-        >
-          Save state
+        <button id="export" onClick={saveMap}>
+          Save map
         </button>
         <button onClick={() => storeMap.current?.solve()}>Solve</button>
         <button onClick={() => storeMap.current?.copy()}>copy</button>

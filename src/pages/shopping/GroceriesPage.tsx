@@ -1,7 +1,7 @@
 import React, { useCallback, useState } from 'react';
 import { toast } from 'react-toastify';
 import { Box, Button, TextField } from '@mui/material';
-import { addGrocery } from 'srcRootDir/services/shopping';
+import { addGrocery } from 'srcRootDir/pages/shopping/services/shopping';
 
 export function GroceriesPage() {
   const [name, setName] = useState('');

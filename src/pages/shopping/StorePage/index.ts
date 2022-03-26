@@ -1,1 +1,1 @@
-export { StorePage } from './StorePage';
+export { StoreMapPage } from './StoreMapPage';
