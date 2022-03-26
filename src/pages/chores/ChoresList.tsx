@@ -1,11 +1,7 @@
 import React, { useMemo } from 'react';
+import { isAfter, parseISO } from 'date-fns';
 import { ChoreListItem } from 'srcRootDir/pages/chores/ChoreListItem';
-import Box from '@mui/material/Box';
-import Typography from '@mui/material/Typography';
-import CircularProgress from '@mui/material/CircularProgress';
-import { parseISO, isAfter } from 'date-fns';
-import Fade from '@mui/material/Fade';
-import { styled } from '@mui/material';
+import { Box, CircularProgress, Fade, styled, Typography } from '@mui/material';
 
 interface ChoreListProps {
   chores: Array<Assignment> | undefined;

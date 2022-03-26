@@ -1,12 +1,10 @@
 import React, { useEffect, useMemo, useState } from 'react';
 import useSWR from 'swr';
 import { fetcher } from 'srcRootDir/services/fetcher';
-import Box from '@mui/material/Box';
 import { toast } from 'react-toastify';
 import { getCurrentUserId } from 'srcRootDir/services/auth';
 import { ChoreList } from 'srcRootDir/pages/chores/ChoresList';
-import Button from '@mui/material/Button';
-import { Alert } from '@mui/material';
+import { Alert, Box, Button } from '@mui/material';
 import RefreshIcon from '@mui/icons-material/Refresh';
 
 export function ChoresPage() {
