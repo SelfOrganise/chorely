@@ -46,6 +46,14 @@ interface DbGrocery {
 
 type Grocery = Pick<DbGrocery, 'id' | 'name'>;
 
+interface DbMapData {
+  id: number;
+  data: string;
+  organisation_id: string;
+}
+
+type MapData = Pick<DbMapData, 'id' | 'data'>;
+
 declare module 'fastify' {
   interface FastifyRequest {
     user: DbUser;

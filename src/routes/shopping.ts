@@ -1,22 +1,22 @@
-import { FastifyPluginCallback } from 'fastify/types/plugin';
-import S from 'fluent-json-schema';
-import { exec } from 'child_process';
-import { addGrocery, getGroceries } from "../repository/groceries";
+import { FastifyPluginCallback } from "fastify/types/plugin";
+import S from "fluent-json-schema";
+import { exec } from "child_process";
+import { addGrocery, getGroceries, getMaps, updateOrCreateMap } from "../repository/shopping";
 
 interface SolveParam {
   Body: {
     weights: Array<Array<number>>;
     numberOfPeople: number;
-  }
+  };
 }
 
 export const shopping: FastifyPluginCallback = (server, opts, done) => {
-  server.post<SolveParam>('/shopping/solve', {
+  server.post<SolveParam>("/shopping/solve", {
     schema: {
       body: S.object()
-        .prop('weights', S.array().items(S.array().items(S.number().minimum(0))))
-        .prop('numberOfPeople', S.number().minimum(1).maximum(5))
-        .required(['weights', 'numberOfPeople'])
+        .prop("weights", S.array().items(S.array().items(S.number().minimum(0))))
+        .prop("numberOfPeople", S.number().minimum(1).maximum(5))
+        .required(["weights", "numberOfPeople"])
     },
     handler: async (req, res) => {
       const args = req.body;
@@ -31,24 +31,44 @@ export const shopping: FastifyPluginCallback = (server, opts, done) => {
     }
   });
 
-  server.get('/shopping/groceries', async req => {
+  server.get("/shopping/groceries", async req => {
     return await getGroceries(req.user.organisation_id);
-  })
+  });
 
   interface AddGroceryRequest {
-    Body: { name: string }
+    Body: { name: string };
   }
 
-  server.post<AddGroceryRequest>('/shopping/groceries', {
+  server.post<AddGroceryRequest>("/shopping/groceries", {
     schema: {
       body: S.object()
-        .prop('name', S.string().minLength(1).maxLength(50))
-        .required(['name'])
+        .prop("name", S.string().minLength(1).maxLength(50))
+        .required(["name"])
     },
     handler: async (req, res) => {
       const response = await addGrocery({ name: req.body.name }, req.user);
       res.status(200).send(response);
+    }
+  });
+
+  server.get("/shopping/maps", async req => {
+    return await getMaps(req.user.organisation_id);
+  });
+
+  interface UpdateStoreMapRequest {
+    Body: { data: string };
+  }
+
+  server.post<UpdateStoreMapRequest>("/shopping/maps", {
+    schema: {
+      body: S.object()
+        .prop("data", S.string().minLength(2))
+        .required(["data"])
     },
+    handler: async (req, res) => {
+      await updateOrCreateMap(req.body, req.user.organisation_id);
+      res.status(204).send();
+    }
   });
 
   done();
