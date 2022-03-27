@@ -20,7 +20,7 @@ export const shopping: FastifyPluginCallback = (server, opts, done) => {
     handler: (req, res) => {
       const args = req.body;
 
-      exec(`${process.cwd()}/dist/solver.py '${JSON.stringify(args.weights)}' '${JSON.stringify(args.numberOfPeople)}'`, (err, stdout, stderr) => {
+      exec(`${process.cwd()}/dist/solver.py '${JSON.stringify(args.weights)}' '${JSON.stringify(args.numberOfPeople)}'`, (err: string, stdout: string, stderr: string) => {
         if (err || stderr) {
           res.status(400).send(stderr);
         } else {
