@@ -24,6 +24,8 @@ const clearTables = withDbClient(async client => {
   await client.query(`delete from ${tableNames.assignments} where true`);
   await client.query(`delete from ${tableNames.tasks} where true`);
   await client.query(`delete from ${tableNames.users} where true`);
+  await client.query(`delete from ${tableNames.maps} where true`);
+  await client.query(`delete from ${tableNames.groceries} where true`);
   await client.query(`delete from ${tableNames.organisations} where true`);
 });
 

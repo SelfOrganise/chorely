@@ -5,6 +5,8 @@ module.exports = {
     users: 'users',
     tasks: 'tasks',
     assignments: 'assignments',
-    exemptions: 'exemptions'
+    exemptions: 'exemptions',
+    groceries: 'groceries',
+    maps: 'maps',
   },
 };

@@ -66,6 +66,7 @@ describe('Assignments routes', () => {
     expect(response.json()).toEqual([
       {
         id: aDatumAssignments[2].id,
+        subtasks: null,
         title: cleanToilet.title,
         assigned_to_user_id: bob.id,
         due_by_utc: aDatumAssignments[2].due_by_utc.toISOString(),
@@ -73,6 +74,7 @@ describe('Assignments routes', () => {
       },
       {
         id: aDatumAssignments[4].id,
+        subtasks: null,
         title: washDishes.title,
         assigned_to_user_id: alice.id,
         due_by_utc: aDatumAssignments[4].due_by_utc.toISOString(),
