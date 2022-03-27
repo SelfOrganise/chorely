@@ -1,5 +1,7 @@
 import React from 'react';
 import styled from '@emotion/styled';
+import { fallbackImage } from 'srcRootDir/pages/shopping/services/constants';
+import { toImageName } from '../../services/utils';
 
 export interface Item {
   name: string;
@@ -15,7 +17,16 @@ export function Selector({ availableItems, onSelected }: SelectorProps) {
     <div>
       {availableItems.map(product => (
         <Selectable key={product.name} onClick={() => onSelected(product)}>
-          <img alt={product.name} height={20} width={20} src={`/images/${product.name}.png`} />
+          <img
+            height={20}
+            width={20}
+            onError={(e: any) => {
+              if (e.target.src !== fallbackImage.src) {
+                e.target.src = fallbackImage.src;
+              }
+            }}
+            src={`/images/${toImageName(product.name)}.jpeg`}
+          />
           {product.name}
         </Selectable>
       ))}

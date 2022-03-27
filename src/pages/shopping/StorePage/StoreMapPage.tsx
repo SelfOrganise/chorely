@@ -8,27 +8,27 @@ import { fetcher } from 'srcRootDir/services/fetcher';
 import { updateOrCreateMap } from 'srcRootDir/pages/shopping/services/shopping';
 import { toast } from 'react-toastify';
 
-const items: Array<Item> = [
-  { name: 'milk' },
-  { name: 'broccoli' },
-  { name: 'eggs' },
-  { name: 'onion' },
-  { name: 'pak_choy' },
-  { name: 'salmon' },
-  { name: 'water' },
-];
-
 export function StoreMapPage() {
   const canvasElement = useRef<HTMLCanvasElement | null>(null);
   const storeMap = useRef<StoreMap>();
 
-  const response = useSWR<Array<MapData>>('/shopping/maps', {
+  const mapResponse = useSWR<Array<MapData>>('/shopping/maps', {
     fetcher,
     refreshInterval: 0,
     revalidateOnFocus: false,
     revalidateOnReconnect: false,
     revalidateOnMount: false,
   });
+
+  const groceriesResponse = useSWR<Array<Grocery>>('/shopping/groceries', {
+    fetcher,
+    refreshInterval: 0,
+    revalidateOnFocus: false,
+    revalidateOnReconnect: false,
+    revalidateOnMount: false,
+  });
+
+  const items = groceriesResponse?.data || [];
 
   useEffect(() => {
     if (!canvasElement.current) {
@@ -41,11 +41,11 @@ export function StoreMapPage() {
   const [addedItems, setAddedItems] = useState<Array<string>>([]);
 
   useEffect(() => {
-    if (response.data && response.data[0]) {
-      const imported = storeMap.current?.import(response.data[0].data);
+    if (mapResponse.data && mapResponse.data[0]) {
+      const imported = storeMap.current?.import(mapResponse.data[0].data);
       setAddedItems(imported.filter((i: any) => i.type === Types.product).map((i: any) => i.name));
     }
-  }, [response.data]);
+  }, [mapResponse.data]);
 
   const saveMap = useCallback(async () => {
     const data = storeMap.current?.export();
@@ -64,6 +64,11 @@ export function StoreMapPage() {
     storeMap.current?.addProduct(item);
   }
 
+  function load(): void {
+    mapResponse?.mutate();
+    groceriesResponse?.mutate();
+  }
+
   return (
     <Wrapper>
       <Selector
@@ -71,7 +76,7 @@ export function StoreMapPage() {
         availableItems={items.filter(item => addedItems.every(added => added !== item.name))}
       />
       <div className="buttons">
-        <button onClick={() => response.mutate()}>Load map</button>
+        <button onClick={load}>Load map</button>
         <button onClick={() => storeMap.current?.addWall()}>Add wall</button>
         <button id="export" onClick={saveMap}>
           Save map
@@ -89,8 +94,9 @@ export function StoreMapPage() {
 }
 
 const CanvasWrapper = styled.div`
-  width: 1000px;
-  height: 1000px;
+  width: 100vw;
+  height: 300px;
+  overflow: hidden;
   border: 1px solid black;
 `;
 

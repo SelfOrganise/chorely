@@ -1,8 +1,10 @@
 import React, { useState } from 'react';
 import { Outlet, useLocation, useNavigate } from 'react-router-dom';
 import { BottomNavigation, BottomNavigationAction } from '@mui/material';
-import ListAltIcon from '@mui/icons-material/ListAlt';
 import LocalGroceryStoreIcon from '@mui/icons-material/LocalGroceryStore';
+import MapIcon from '@mui/icons-material/Map';
+import TextSnippetIcon from '@mui/icons-material/TextSnippet';
+import CategoryIcon from '@mui/icons-material/Category';
 import styled from '@emotion/styled';
 
 export function ShoppingWrapper() {
@@ -29,10 +31,10 @@ export function ShoppingWrapper() {
           navigate(newValue);
         }}
       >
-        <BottomNavigationAction value="/shopping" label="List" icon={<ListAltIcon />} />
-        <BottomNavigationAction value="/shopping/groceries" label="Groceries" icon={<LocalGroceryStoreIcon />} />
-        <BottomNavigationAction value="/shopping/recipes" label="Recipes" icon={<LocalGroceryStoreIcon />} />
-        <BottomNavigationAction value="/shopping/map" label="Recipes" icon={<LocalGroceryStoreIcon />} />
+        <BottomNavigationAction value="/shopping" label="Cart" icon={<LocalGroceryStoreIcon />} />
+        <BottomNavigationAction value="/shopping/groceries" label="Groceries" icon={<CategoryIcon />} />
+        <BottomNavigationAction value="/shopping/recipes" label="Recipes" icon={<TextSnippetIcon />} />
+        <BottomNavigationAction value="/shopping/map" label="Map" icon={<MapIcon />} />
       </BottomNavigation>
     </RootWrapper>
   );

@@ -1,6 +1,7 @@
 import { fabric } from 'fabric';
-import { Names, Types, Urls } from './constants';
+import { fallbackImage, Names, Types, Urls } from './constants';
 import { AStarFinder, Grid } from 'pathfinding';
+import { toImageName} from '../services/utils';
 
 export class StoreMap {
   canvas: fabric.Canvas;
@@ -14,7 +15,7 @@ export class StoreMap {
   constructor(canvasElement: HTMLCanvasElement) {
     this.canvas = new fabric.Canvas(canvasElement, { selection: false });
     this.canvas.setWidth(1000);
-    this.canvas.setHeight(1000);
+    this.canvas.setHeight(500);
 
     this.init();
   }
@@ -365,9 +366,12 @@ export class StoreMap {
   }
 
   addProduct({ name, left, top }: { name: string; left?: number; top?: number }) {
-    fabric.Image.fromURL(`/images/${name}.png`, item => {
+    fabric.Image.fromURL(`/images/${toImageName(name)}.jpeg`, item => {
       item.name = name;
       item.type = 'product';
+      if (item.height === 0 || item.width === 0) {
+        item.setElement(fallbackImage);
+      }
       this.#addHelper({ item, left: left || 4 * this.grid, top: top || 4 * this.grid });
     });
   }
