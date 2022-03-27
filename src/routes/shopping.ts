@@ -1,7 +1,7 @@
 import { FastifyPluginCallback } from "fastify/types/plugin";
 import S from "fluent-json-schema";
-import { exec } from "child_process";
 import { addGrocery, getGroceries, getMaps, updateOrCreateMap } from "../repository/shopping";
+const { exec } = require("child_process");
 
 interface SolveParam {
   Body: {
