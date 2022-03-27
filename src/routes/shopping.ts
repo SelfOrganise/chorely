@@ -9,7 +9,6 @@ interface SolveParam {
     numberOfPeople: number;
   };
 }
-
 export const shopping: FastifyPluginCallback = (server, opts, done) => {
   server.post<SolveParam>("/shopping/solve", {
     schema: {

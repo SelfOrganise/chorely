@@ -14,5 +14,5 @@ server.listen(port, function (err, address) {
     process.exit(1);
   }
 
-  console.log(`🚀 Server ready at ${address}`);
+  console.log(`🚀 Server ready at ${address} ${process.cwd()}`);
 });
