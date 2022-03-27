@@ -12,7 +12,7 @@ export const Names = {
 };
 
 export const Types = {
-  rect: 'rect',
-  product: 'product',
-  checkpoint: 'checkpoint',
+  rect: 'rect' as const,
+  product: 'product' as const,
+  checkpoint: 'checkpoint' as const,
 };

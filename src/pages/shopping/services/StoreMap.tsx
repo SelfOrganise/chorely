@@ -1,21 +1,23 @@
 import { fabric } from 'fabric';
 import { fallbackImage, Names, Types, Urls } from './constants';
-import { AStarFinder, Grid } from 'pathfinding';
-import { toImageName} from '../services/utils';
+import { RoutesContext, toImageName } from '../services/utils';
+
+export const storeMapConfig = {
+  columns: 100,
+  rows: 32,
+  grid: 10,
+};
 
 export class StoreMap {
   canvas: fabric.Canvas;
   clipboard: fabric.Object | null = null;
-  grid = 10;
-  columns = 100;
-  rows = 32;
-  canvasWidth = this.columns * this.grid;
-  canvasHeight = this.rows * this.grid;
+  canvasWidth = storeMapConfig.columns * storeMapConfig.grid;
+  canvasHeight = storeMapConfig.rows * storeMapConfig.grid;
 
   constructor(canvasElement: HTMLCanvasElement) {
     this.canvas = new fabric.Canvas(canvasElement, { selection: false });
-    this.canvas.setWidth(1000);
-    this.canvas.setHeight(500);
+    this.canvas.setWidth(this.canvasWidth);
+    this.canvas.setHeight(this.canvasHeight);
 
     this.init();
   }
@@ -26,30 +28,29 @@ export class StoreMap {
     this.#enableSnapToGrid();
   }
 
-  export() {
-    const result = this.canvas
+  export(): MapDefinition {
+    const validTypes = Object.keys(Types);
+    return this.canvas
       .getObjects()
-      .filter(o => o.type !== 'line' && o.type !== 'result')
+      .filter((o): o is fabric.Object & { type: keyof typeof Types } => {
+        return o.type != null && validTypes.includes(o.type);
+      })
       .map(o => ({
         type: o.type,
-        left: o.left,
-        top: o.top,
-        width: o.width,
-        height: o.height,
-        name: o.name,
+        left: o.left!,
+        top: o.top!,
+        width: o.width!,
+        height: o.height!,
+        name: o.name!,
       }));
-
-    return JSON.stringify(result);
   }
 
-  import(data: string | null) {
+  import(data: MapDefinition): void {
     if (!data) {
       alert('no data in storage');
-      return [];
     }
 
-    const items = JSON.parse(data);
-    for (const item of items) {
+    for (const item of data) {
       if (item.name === Names.start) {
         this.#addSvg({ url: Urls.startUrl, ...item });
       } else if (item.name === Names.finish) {
@@ -70,8 +71,6 @@ export class StoreMap {
         );
       }
     }
-
-    return items;
   }
 
   copy() {
@@ -182,10 +181,10 @@ export class StoreMap {
   addWall() {
     this.canvas.add(
       new fabric.Rect({
-        left: this.grid,
-        top: this.grid,
-        width: this.grid,
-        height: this.grid * 2,
+        left: storeMapConfig.grid,
+        top: storeMapConfig.grid,
+        width: storeMapConfig.grid,
+        height: storeMapConfig.grid * 2,
         fill: '#fab',
         stroke: '',
         originX: 'left',
@@ -201,159 +200,64 @@ export class StoreMap {
     );
   }
 
-  solve() {
+  drawRoutes(result: number[][], routes: RoutesContext) {
     // clear
     const lines = this.canvas.getObjects('result');
     this.canvas.remove(...lines);
 
-    // const checkpoints = canvas.current.getObjects('group');
-    const walls = this.canvas.getObjects('rect');
+    for (let i = 0; i < result.length; i++) {
+      const color = '#' + Math.floor(Math.random() * 16777215).toString(16);
 
-    const table = Array(this.rows)
-      .fill(null)
-      .map(() => new Array(this.columns).fill(0));
+      for (let j = 0; j < result[i].length - 1; j++) {
+        const a = result[i][j];
+        const b = result[i][j + 1];
 
-    for (const wall of walls) {
-      if (wall.left == null || wall.top == null || wall.height == null || wall.width == null) {
-        continue;
-      }
+        const route = routes[a][b].route;
 
-      const left1 = Math.floor(wall.left / this.grid);
-      const top1 = Math.floor(wall.top / this.grid);
-      const left2 = Math.floor((wall.left + wall.width) / this.grid);
-      const top2 = Math.floor((wall.top + wall.height) / this.grid);
+        if (!route) {
+          continue;
+        }
 
-      for (let i = 0; i < left2 - left1; i++) {
-        for (let j = 0; j < top2 - top1; j++) {
-          table[top1 + j][left1 + i] = 1;
+        for (let i = 0; i < route.length - 1; i++) {
+          const line = new fabric.Line(
+            [
+              route[i][0] * storeMapConfig.grid,
+              route[i][1] * storeMapConfig.grid,
+              route[i + 1][0] * storeMapConfig.grid,
+              route[i + 1][1] * storeMapConfig.grid,
+            ],
+            {
+              type: 'result',
+              fill: color,
+              stroke: color,
+              strokeWidth: 2,
+              selectable: false,
+              evented: false,
+            }
+          );
+          this.canvas.add(line);
         }
       }
     }
-
-    // console.log(table.map(row => row.join(' ')).join('\n'));
-
-    const products: Array<Array<number>> = this.canvas
-      .getObjects('product')
-      .map(p => {
-        return [(p.left || 0) / this.grid, (p.top || 0) / this.grid];
-      })
-      .filter(p => p);
-
-    const checkpoints = this.canvas.getObjects(Types.checkpoint);
-    const startCheckpoint = checkpoints.find(c => c.name === Names.start);
-    const start = [startCheckpoint!.left! / this.grid, startCheckpoint!.top! / this.grid];
-
-    const finishCheckpoint = checkpoints.find(c => c.name === Names.finish);
-    const finish = [finishCheckpoint!.left! / this.grid, finishCheckpoint!.top! / this.grid];
-
-    products.unshift(start);
-    products.push(finish);
-
-    const finder = new AStarFinder({});
-
-    const allCombinations = products.flatMap((v, i) => products.slice(i + 1).map(w => [v, w]));
-
-    const weights = Array(products.length)
-      .fill(null)
-      .map(() => new Array(products.length).fill(0));
-
-    const values: any = [];
-    for (const combination of allCombinations) {
-      const searchGrid = new Grid(table);
-      const result = finder.findPath(
-        combination[0][0],
-        combination[0][1],
-        combination[1][0],
-        combination[1][1],
-        searchGrid
-      );
-
-      const set = [products.indexOf(combination[0]), products.indexOf(combination[1])];
-      weights[set[0]][set[1]] = result.length;
-      weights[set[1]][set[0]] = result.length;
-
-      values.push({
-        set,
-        value: result.length,
-        route: result,
-      });
-
-      values.push({
-        set: [...set].reverse(),
-        value: result.length,
-        route: result,
-      });
-    }
-
-    console.log({ values, weights });
-
-    fetch('http://localhost:4000/shopping/solve', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'X-UserId': '1',
-      },
-      body: JSON.stringify({
-        weights,
-        numberOfPeople: 2,
-      }),
-    })
-      .then(result => result.json())
-      .then((result: number[][]) => {
-        console.log({ result });
-
-        for (let i = 0; i < result.length; i++) {
-          const color = '#' + Math.floor(Math.random() * 16777215).toString(16);
-
-          for (let j = 0; j < result[0].length - 1; j++) {
-            const a = result[i][j];
-            const b = result[i][j + 1];
-
-            const route = values.find((v: any) => v.set[0] == a && v.set[1] === b)?.route;
-
-            if (!route) {
-              continue;
-            }
-
-            for (let i = 0; i < route.length - 1; i++) {
-              const line = new fabric.Line(
-                [
-                  route[i][0] * this.grid,
-                  route[i][1] * this.grid,
-                  route[i + 1][0] * this.grid,
-                  route[i + 1][1] * this.grid,
-                ],
-                {
-                  type: 'result',
-                  fill: color,
-                  stroke: color,
-                  strokeWidth: 2,
-                  selectable: false,
-                  evented: false,
-                }
-              );
-              this.canvas.add(line);
-            }
-          }
-        }
-      });
   }
 
   #drawGridLines() {
-    for (let i = 0; i < this.columns + 1; i++) {
+    for (let i = 0; i < storeMapConfig.columns + 1; i++) {
       this.canvas.add(
-        new fabric.Line([i * this.grid, 0, i * this.grid, this.canvasHeight], {
-          stroke: '#ccc',
+        new fabric.Line([i * storeMapConfig.grid, 0, i * storeMapConfig.grid, this.canvasHeight], {
+          stroke: '#ddd',
+          opacity: 0.4,
           selectable: false,
           evented: false,
         })
       );
     }
 
-    for (let i = 0; i < this.rows + 1; i++) {
+    for (let i = 0; i < storeMapConfig.rows + 1; i++) {
       this.canvas.add(
-        new fabric.Line([0, i * this.grid, this.canvasWidth, i * this.grid], {
-          stroke: '#ccc',
+        new fabric.Line([0, i * storeMapConfig.grid, this.canvasWidth, i * storeMapConfig.grid], {
+          stroke: '#ddd',
+          opacity: 0.4,
           selectable: false,
           evented: false,
         })
@@ -362,7 +266,7 @@ export class StoreMap {
   }
 
   #snap(size: number): number {
-    return Math.round(size / this.grid) * this.grid;
+    return Math.round(size / storeMapConfig.grid) * storeMapConfig.grid;
   }
 
   addProduct({ name, left, top }: { name: string; left?: number; top?: number }) {
@@ -372,7 +276,7 @@ export class StoreMap {
       if (item.height === 0 || item.width === 0) {
         item.setElement(fallbackImage);
       }
-      this.#addHelper({ item, left: left || 4 * this.grid, top: top || 4 * this.grid });
+      this.#addHelper({ item, left: left || 4 * storeMapConfig.grid, top: top || 4 * storeMapConfig.grid });
     });
   }
 
@@ -388,8 +292,11 @@ export class StoreMap {
   #addHelper(args: { item: fabric.Object; left: number; top: number }) {
     args.item.left = this.#snap(args.left);
     args.item.top = this.#snap(args.top);
-    args.item.scaleToHeight(this.grid);
-    args.item.scaleToWidth(this.grid);
+    if (args.item.width! > args.item.height!) {
+      args.item.scaleToWidth(storeMapConfig.grid);
+    } else {
+      args.item.scaleToHeight(storeMapConfig.grid);
+    }
     args.item.lockRotation = true;
     args.item.hasControls = false;
     args.item.originX = 'left';

@@ -14,7 +14,7 @@ interface SelectorProps {
 
 export function Selector({ availableItems, onSelected }: SelectorProps) {
   return (
-    <div>
+    <Wrapper>
       {availableItems.map(product => (
         <Selectable key={product.name} onClick={() => onSelected(product)}>
           <img
@@ -30,15 +30,26 @@ export function Selector({ availableItems, onSelected }: SelectorProps) {
           {product.name}
         </Selectable>
       ))}
-    </div>
+    </Wrapper>
   );
 }
+
+const Wrapper = styled.div`
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+  grid-auto-rows: 30px;
+  grid-gap: 5px;
+  padding: 5px;
+`;
 
 const Selectable = styled.div`
   display: flex;
   align-items: center;
+  width: 100%;
+  height: 100%;
+  justify-content: center;
   border: 1px solid black;
-  margin-bottom: 5px;
+  border-radius: 2px;
 
   &:hover {
     background-color: #f5f5f5;
