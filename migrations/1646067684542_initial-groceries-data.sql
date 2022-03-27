@@ -31,3 +31,5 @@ values ('Eggs', 1),
        ('Sushi', 1),
        ('Avocado', 1);
 
+
+-- Down Migration

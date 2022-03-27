@@ -17,15 +17,16 @@ export const shopping: FastifyPluginCallback = (server, opts, done) => {
         .prop("numberOfPeople", S.number().minimum(1).maximum(5))
         .required(["weights", "numberOfPeople"])
     },
-    handler: async (req, res) => {
+    handler: (req, res) => {
       const args = req.body;
 
-      exec(`/home/bogdan/work/chores/chores-api/scripts/solver.py '${JSON.stringify(args.weights)}' '${JSON.stringify(args.numberOfPeople)}'`, (err, stdout, stderr) => {
+      exec(`${process.cwd()}/dist/solver.py '${JSON.stringify(args.weights)}' '${JSON.stringify(args.numberOfPeople)}'`, (err, stdout, stderr) => {
         if (err || stderr) {
           res.status(400).send(stderr);
+        } else {
+          // need to set content type since we return text from stdout
+          res.type('application/json').status(200).send(stdout);
         }
-
-        res.status(200).send(stdout);
       });
     }
   });

@@ -5,6 +5,7 @@ from ortools.constraint_solver import pywrapcp
 
 import sys
 import json
+import math
 
 def parse_args():
     distance_matrix = json.loads(sys.argv[1])
@@ -12,7 +13,7 @@ def parse_args():
 
     data = {}
     data['distance_matrix'] = distance_matrix
-    data['num_vehicles'] = num_vehicles
+    data['num_vehicles'] = 2
     data['starts'] = [0, 0]
     data['ends'] = [len(distance_matrix) - 1, len(distance_matrix) - 1]
 
@@ -43,7 +44,7 @@ def solve():
 
     # Create the routing index manager.
     manager = pywrapcp.RoutingIndexManager(len(data['distance_matrix']),
-                                           data['num_vehicles'], data['starts'], 
+                                           data['num_vehicles'], data['starts'],
                                            data['ends'])
 
     # Create Routing Model.
@@ -59,6 +60,22 @@ def solve():
 
     transit_callback_index = routing.RegisterTransitCallback(distance_callback)
 
+    def demand_callback(from_index):
+        """Returns the demand of the node."""
+        # Convert from routing variable Index to demands NodeIndex.
+#         from_node = manager.IndexToNode(from_index)
+#         return data['demands'][from_node]
+        return 1
+
+    demand_callback_index = routing.RegisterUnaryTransitCallback(
+        demand_callback)
+    routing.AddDimensionWithVehicleCapacity(
+        demand_callback_index,
+        0,  # null capacity slack
+        [math.ceil(len(data['distance_matrix']) / 1.7), math.ceil(len(data['distance_matrix']) / 1.7)],  # vehicle maximum capacities
+        True,  # start cumul to zero
+        'Capacity')
+
     # Define cost of each arc.
     routing.SetArcCostEvaluatorOfAllVehicles(transit_callback_index)
 
@@ -66,7 +83,7 @@ def solve():
     dimension_name = 'Distance'
     routing.AddDimension(
         transit_callback_index,
-        0,  # no slack
+        10,  # no slack
         3000,  # vehicle maximum travel distance
         True,  # start cumul to zero
         dimension_name)
