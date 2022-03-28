@@ -40,11 +40,12 @@ interface DbExemption {
 interface DbGrocery {
   id: number;
   name: string;
+  size: 1 | 2 | 3;
   organisation_id: number;
   created_at_utc: string;
 }
 
-type Grocery = Pick<DbGrocery, 'id' | 'name'>;
+type Grocery = Pick<DbGrocery, 'id' | 'name' | 'size'>;
 
 interface DbMapData {
   id: number;

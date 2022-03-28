@@ -1,11 +1,13 @@
 import { FastifyPluginCallback } from "fastify/types/plugin";
 import S from "fluent-json-schema";
 import { addGrocery, getGroceries, getMaps, updateOrCreateMap } from "../repository/shopping";
+import { DbGrocery } from "../types";
 const { exec } = require("child_process");
 
 interface SolveParam {
   Body: {
     weights: Array<Array<number>>;
+    sizes: Array<number>;
     numberOfPeople: number;
   };
 }
@@ -14,13 +16,14 @@ export const shopping: FastifyPluginCallback = (server, opts, done) => {
     schema: {
       body: S.object()
         .prop("weights", S.array().items(S.array().items(S.number().minimum(0))))
+        .prop("sizes", S.array().items(S.number().minimum(0)))
         .prop("numberOfPeople", S.number().minimum(1).maximum(5))
-        .required(["weights", "numberOfPeople"])
+        .required(["weights", "numberOfPeople", "sizes"])
     },
     handler: (req, res) => {
       const args = req.body;
 
-      exec(`${process.cwd()}/dist/solver.py '${JSON.stringify(args.weights)}' '${JSON.stringify(args.numberOfPeople)}'`, (err: string, stdout: string, stderr: string) => {
+      exec(`${process.cwd()}/dist/solver.py '${JSON.stringify(args.weights)}' '${JSON.stringify(args.sizes)}' '${JSON.stringify(args.numberOfPeople)}'`, (err: string, stdout: string, stderr: string) => {
         if (err || stderr) {
           res.status(400).send(stderr);
         } else {
@@ -36,17 +39,18 @@ export const shopping: FastifyPluginCallback = (server, opts, done) => {
   });
 
   interface AddGroceryRequest {
-    Body: { name: string };
+    Body: Pick<DbGrocery, 'name' | 'size'>
   }
 
   server.post<AddGroceryRequest>("/shopping/groceries", {
     schema: {
       body: S.object()
         .prop("name", S.string().minLength(1).maxLength(50))
-        .required(["name"])
+        .prop("size", S.number().minimum(1).maximum(3))
+        .required(["name", "size"])
     },
     handler: async (req, res) => {
-      const response = await addGrocery({ name: req.body.name }, req.user);
+      const response = await addGrocery(req.body, req.user);
       res.status(200).send(response);
     }
   });

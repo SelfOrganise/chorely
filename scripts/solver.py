@@ -9,13 +9,18 @@ import math
 
 def parse_args():
     distance_matrix = json.loads(sys.argv[1])
-    num_vehicles = json.loads(sys.argv[2])
+    sizes = json.loads(sys.argv[2])
+    num_vehicles = json.loads(sys.argv[3])
+    total_size = sum(sizes)
+    size_per_vehicle = math.ceil(total_size / num_vehicles)
 
     data = {}
     data['distance_matrix'] = distance_matrix
-    data['num_vehicles'] = 2
-    data['starts'] = [0, 0]
-    data['ends'] = [len(distance_matrix) - 1, len(distance_matrix) - 1]
+    data['num_vehicles'] = num_vehicles
+    data['sizes'] = sizes
+    data['sizes_per_vehicle'] = [size_per_vehicle] * num_vehicles
+    data['starts'] = [0] * num_vehicles
+    data['ends'] = [len(distance_matrix) - 1] * num_vehicles
 
     return data
 
@@ -63,16 +68,15 @@ def solve():
     def demand_callback(from_index):
         """Returns the demand of the node."""
         # Convert from routing variable Index to demands NodeIndex.
-#         from_node = manager.IndexToNode(from_index)
-#         return data['demands'][from_node]
-        return 1
+        from_node = manager.IndexToNode(from_index)
+        return data['sizes'][from_node]
 
     demand_callback_index = routing.RegisterUnaryTransitCallback(
         demand_callback)
     routing.AddDimensionWithVehicleCapacity(
         demand_callback_index,
         0,  # null capacity slack
-        [math.ceil(len(data['distance_matrix']) / 1.7), math.ceil(len(data['distance_matrix']) / 1.7)],  # vehicle maximum capacities
+        data['sizes_per_vehicle'],  # vehicle maximum capacities
         True,  # start cumul to zero
         'Capacity')
 

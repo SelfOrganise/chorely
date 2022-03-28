@@ -6,7 +6,7 @@ export async function getGroceries(organisationId: number): Promise<Array<Grocer
   const client = await pool.connect();
   const result = await client.query<Grocery>(
     `
-        select id, name
+        select id, name, size
         from groceries
         where organisation_id = $1
         order by name asc
@@ -19,14 +19,14 @@ export async function getGroceries(organisationId: number): Promise<Array<Grocer
   return result.rows;
 }
 
-export async function addGrocery({ name }: Pick<DbGrocery, 'name'>, user: DbUser): Promise<Response<Grocery>> {
+export async function addGrocery({ name, size }: Pick<DbGrocery, 'name' | 'size'>, user: DbUser): Promise<Response<Grocery>> {
   const client = await pool.connect();
   const result = await client.query<Grocery>(
     `
-        insert into groceries(name, organisation_id) 
-        values($1, $2) 
+        insert into groceries(name, size, organisation_id) 
+        values($1, $2, $3) 
         returning id, name
-    `, [name, user.organisation_id]);
+    `, [name, size, user.organisation_id]);
 
   await client.release();
 
