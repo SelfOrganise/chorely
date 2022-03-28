@@ -77,7 +77,11 @@ export function StoreMapPage() {
     const routes = getAllRoutes(mapDefinition);
     const weights = routes.map(a => a.map(b => b.route?.length));
 
-    const result = await solveShopping(weights);
+    const result = await solveShopping({
+      weights,
+      // todo: pass in correct sizes
+      sizes: Array(mapDefinition.filter(m => m.type === Types.product).length + 2 /* for checkpoints */).fill(0),
+    });
 
     storeMap.current!.drawRoutes(result, routes);
   }

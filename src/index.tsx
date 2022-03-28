@@ -9,11 +9,11 @@ import { ToastContainer, toast } from 'react-toastify';
 
 import { Login } from 'srcRootDir/pages/login';
 import { ChoresPage } from 'srcRootDir/pages/chores';
-import { ShoppingPage } from 'srcRootDir/pages/shopping/ShoppingPage';
-import { GroceriesPage } from 'srcRootDir/pages/shopping/GroceriesPage';
+import { BasketPage } from 'srcRootDir/pages/shopping/BasketPage';
+import { ManageGroceriesPage } from 'srcRootDir/pages/shopping/ManageGroceriesPage';
 import { RecipesPage } from 'srcRootDir/pages/shopping/RecipesPage';
 import { ShoppingWrapper } from 'srcRootDir/pages/shopping/ShoppingRoot';
-import { StoreMapPage } from 'srcRootDir/pages/shopping/StorePage';
+import { StoreMapPage } from 'srcRootDir/pages/shopping/StoreMapPage';
 
 const theme = createTheme({
   typography: {
@@ -62,8 +62,8 @@ function RouteDefinitions() {
         <Route index element={<Login />} />
         <Route path="/chores" element={<ChoresPage />} />
         <Route path="/shopping" element={<ShoppingWrapper />}>
-          <Route index element={<ShoppingPage />} />
-          <Route path="groceries" element={<GroceriesPage />} />
+          <Route index element={<BasketPage />} />
+          <Route path="groceries" element={<ManageGroceriesPage />} />
           <Route path="recipes" element={<RecipesPage />} />
           <Route path="map" element={<StoreMapPage />} />
         </Route>

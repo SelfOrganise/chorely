@@ -4,6 +4,7 @@ declare global {
   interface Grocery {
     id: number;
     name: string;
+    size: number;
   }
 
   interface MapData {

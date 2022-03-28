@@ -8,11 +8,18 @@ export async function updateOrCreateMap(storeMap: MapDefinition): Promise<unknow
   return await fetcher('/shopping/maps', { method: 'POST', body: JSON.stringify({ data: JSON.stringify(storeMap) }) });
 }
 
-export async function solveShopping(weights: Array<Array<number>>): Promise<Array<Array<number>>> {
+export async function solveShopping({
+  weights,
+  sizes,
+}: {
+  weights: Array<Array<number>>;
+  sizes: Array<number>;
+}): Promise<Array<Array<number>>> {
   return await fetcher('/shopping/solve', {
     method: 'POST',
     body: JSON.stringify({
       weights,
+      sizes,
       numberOfPeople: 2,
     }),
   });

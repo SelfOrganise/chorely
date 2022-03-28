@@ -3,12 +3,13 @@ import { toast } from 'react-toastify';
 import { Box, Button, TextField } from '@mui/material';
 import { addGrocery } from 'srcRootDir/pages/shopping/services/shopping';
 
-export function GroceriesPage() {
+export function ManageGroceriesPage() {
   const [name, setName] = useState('');
+  const [size, setSize] = useState(2);
 
   const handleAddGrocery = useCallback(async () => {
     try {
-      await addGrocery({ name });
+      await addGrocery({ name, size });
       toast.success(`Added new grocery '${name}'.`);
       setName('');
     } catch (ex: any) {
@@ -25,6 +26,8 @@ export function GroceriesPage() {
       justifyContent="center"
     >
       <TextField value={name} onChange={c => setName(c.target.value)} />
+      <input type="range" min="1" max="3" value={size} onChange={r => setSize(parseInt(r.target.value) || 2)} />
+      <span>{size === 1 ? 'small' : size === 2 ? 'medium' : 'large'}</span>
       <Button disabled={name.length === 0} variant="contained" onClick={handleAddGrocery}>
         Add
       </Button>

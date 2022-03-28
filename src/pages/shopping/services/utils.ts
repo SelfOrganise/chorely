@@ -65,7 +65,7 @@ export function getAllRoutes(mapDefinition: MapDefinition): RoutesContext {
   ];
   products.push(finish);
 
-  const every2ProductCombination = products.flatMap((v, i) => products.slice(i + 1).map(w => [v, w]));
+  const every2ProductCombination = products.flatMap((v, i) => products.slice(i).map(w => [v, w]));
 
   // use AStar to find distances between every product
   const finder = new AStarFinder({});
