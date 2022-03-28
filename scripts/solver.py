@@ -75,7 +75,7 @@ def solve():
         demand_callback)
     routing.AddDimensionWithVehicleCapacity(
         demand_callback_index,
-        0,  # null capacity slack
+        5,  # null capacity slack
         data['sizes_per_vehicle'],  # vehicle maximum capacities
         True,  # start cumul to zero
         'Capacity')
