@@ -52,6 +52,7 @@ export const shopping: FastifyPluginCallback = (server, opts, done) => {
   const sseHeaders = {
     Connection: 'keep-alive',
     'Content-Encoding': 'none',
+    'X-Accel-Buffering': 'no', // fixes nginx caching sse
     'Cache-Control': 'no-cache',
     'Content-Type': 'text/event-stream',
   };
