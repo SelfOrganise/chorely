@@ -1,5 +1,5 @@
 -- Up Migration
-ALTER TABLE groceries ADD "size" smallint NOT NULL DEFAULT 0;
+ALTER TABLE groceries ADD COLUMN IF NOT EXISTS "size" smallint NOT NULL DEFAULT 0;
 
 UPDATE groceries
 	SET "size"=2
@@ -89,6 +89,6 @@ UPDATE groceries
 	SET "size"=1
 	WHERE id=29;
 
-ALTER TABLE public.groceries ALTER COLUMN "size" DROP DEFAULT;
+ALTER TABLE groceries ALTER COLUMN "size" DROP DEFAULT;
 
 -- Down Migration

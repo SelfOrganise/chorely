@@ -45,6 +45,28 @@ interface DbGrocery {
   created_at_utc: string;
 }
 
+interface Basket {
+  id: number;
+  created_at_utc: string;
+  items: Arry<BasketItem>;
+}
+
+interface BasketItem extends Grocery {
+  basketId: number;
+}
+
+interface DbBasket {
+  id: number;
+  organisation_id: number;
+  create_at_utc: string;
+}
+
+interface DbBasketItem {
+  id: number;
+  basket_id: number;
+  grocery_id: number;
+}
+
 type Grocery = Pick<DbGrocery, 'id' | 'name' | 'size'>;
 
 interface DbMapData {
