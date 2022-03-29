@@ -20,4 +20,14 @@ declare global {
     height: number;
     name: string;
   }>;
+
+  interface Basket {
+    id: number;
+    created_at_utc: string;
+    items: Array<BasketItem>;
+  }
+
+  interface BasketItem extends Grocery {
+    basketId: number;
+  }
 }

@@ -5,14 +5,20 @@ import useSWR from 'swr';
 import { fetcher } from 'srcRootDir/services/fetcher';
 import { Types } from 'srcRootDir/pages/shopping/services/constants';
 import { getAllRoutes } from 'srcRootDir/pages/shopping/services/utils';
-import { solveShopping } from 'srcRootDir/pages/shopping/services/shopping';
+import {
+  addToBasket,
+  createNewBasket,
+  solveShopping,
+  useLiveBasket,
+} from 'srcRootDir/pages/shopping/services/shopping';
 import { StoreMap } from 'srcRootDir/pages/shopping/services/StoreMap';
+import { toast } from 'react-toastify';
 
 export function BasketPage() {
   const canvasElement = useRef<HTMLCanvasElement | null>(null);
   const storeMap = useRef<StoreMap>();
+  const currentBasket = useLiveBasket();
 
-  const [addedItems, setAddedItems] = useState<Array<Grocery>>([]);
   const [selectedTab, setSelectedTab] = useState(0);
   const [result, setResult] = useState<Array<Array<Grocery>>>();
 
@@ -54,8 +60,8 @@ export function BasketPage() {
 
     const productOrder: Array<Grocery> = [{ id: -1, name: 'start', size: 0 }];
     const filteredMapData = mapDefinition.filter(p => {
-      if (p.type === Types.product) {
-        const item = addedItems.find(a => a.name === p.name);
+      if (p.type === Types.product && currentBasket) {
+        const item = currentBasket.items.find((a: BasketItem) => a.name === p.name);
         if (item) {
           productOrder.push(item);
         }
@@ -97,19 +103,29 @@ export function BasketPage() {
     <Box alignItems="center" display="flex" flexDirection="column">
       <StyledTabs value={selectedTab} onChange={handleChange}>
         <Tab label="List" />
-        <Tab label={`Basket (${addedItems.length})`} />
+        <Tab label={`Basket (${currentBasket?.items.length})`} />
         <Tab label={`Solve`} />
       </StyledTabs>
       {selectedTab == 0 && (
         <StyledList>
           {groceriesResponse.data?.map(g => (
-            <GroceryItem key={g.id} item={g} onAdd={item => setAddedItems(old => [...old, item])} />
+            <GroceryItem
+              key={g.id}
+              item={g}
+              onAdd={async item => {
+                await addToBasket(item.id);
+                toast.success('added to basket');
+              }}
+            />
           ))}
         </StyledList>
       )}
       {selectedTab == 1 && (
         <StyledList>
-          {addedItems.map((g, i) => (
+          <Button variant="contained" onClick={() => createNewBasket()}>
+            Create new basket
+          </Button>
+          {currentBasket?.items.map((g, i) => (
             <GroceryItem key={`${g.id}-${i}`} item={g} onAdd={() => null} />
           ))}
         </StyledList>
