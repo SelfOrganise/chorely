@@ -55,7 +55,7 @@ export const shopping: FastifyPluginCallback = (server, opts, done) => {
     'Cache-Control': 'no-cache',
     'Content-Type': 'text/event-stream',
   };
-  server.get('/shopping/baskets/current', async (req, reply) => {
+  server.get('/shopping/baskets/current', (req, reply) => {
     reply.raw.writeHead(200, { ...sseHeaders, 'access-control-allow-origin': req.headers.origin });
     const client = {
       id: req.id,
@@ -63,10 +63,11 @@ export const shopping: FastifyPluginCallback = (server, opts, done) => {
       send: (basket: Basket) => reply.raw.write(`data: ${JSON.stringify(basket)}\n\n`),
     };
 
-    const basket = await getCurrentBasket(req.user.organisation_id);
-    if (basket) {
-      client.send(basket);
-    }
+    getCurrentBasket(req.user.organisation_id).then(basket => {
+      if (basket) {
+        client.send(basket);
+      }
+    });
 
     clients.push(client);
 
