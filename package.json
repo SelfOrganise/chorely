@@ -5,7 +5,8 @@
   "main": "index.js",
   "scripts": {
     "esbuild": "node scripts/build/esbuild.mjs",
-    "build": "BACKEND_ORIGIN=https://api.3pounds.cyou/chorely NODE_ENV=production npm run esbuild",
+    "build": "npm-run-all -l build:*",
+    "build:web": "BACKEND_ORIGIN=https://api.3pounds.cyou/chorely NODE_ENV=production npm run esbuild",
     "build:tailwind": "npx tailwindcss -i ./src/tailwind.css -o ./dist/tailwind.css --minify",
     "dev": "npm-run-all -l -p dev:*",
     "dev:build": "BACKEND_ORIGIN=http://localhost:4000 npm run esbuild",
