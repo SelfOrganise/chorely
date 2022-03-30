@@ -1,5 +1,3 @@
-import styled from '@emotion/styled';
-import { Box, Button, TextField } from '@mui/material';
 import React, { useCallback, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { login } from 'srcRootDir/services/auth';
@@ -18,27 +16,20 @@ export function Login() {
   }, [username]);
 
   return (
-    <Box display="flex" height="100vh" alignItems="center" justifyContent="center">
-      <Centered>
-        <StyledTextField
-          label="Username"
+    <div className="flex flex-col justify-center items-center min-h-screen">
+      <div className="flex flex-col w-64">
+        <input
+          className="input"
+          type="text"
+          placeholder="email@domain.com"
           required={true}
           onChange={v => setUsername(v.target.value?.toLowerCase())}
           value={username}
         />
-        <Button disabled={!username} variant="contained" onClick={handleLogin}>
+        <button disabled={!username} onClick={handleLogin} className="button">
           Login
-        </Button>
-      </Centered>
-    </Box>
+        </button>
+      </div>
+    </div>
   );
 }
-
-const Centered = styled.div`
-  display: flex;
-  flex-direction: column;
-`;
-
-const StyledTextField = styled(TextField)`
-  margin-bottom: 1rem;
-`;

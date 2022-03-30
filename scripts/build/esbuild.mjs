@@ -17,20 +17,21 @@ const copyPlugin = ({ from, to }) => ({
 export const buildConfig = {
   logLevel: 'info',
   entryPoints: ['./src/index.tsx'],
-  entryNames: isProd ? '[dir]/[name]-[hash]' : undefined,
-  chunkNames: isProd ? 'chunks/[name]-[hash]' : undefined,
+  entryNames: isProd ? '[name]-[hash]' : '[name]',
+  chunkNames: '[name]-[hash]',
   minify: isProd,
-  outdir: './dist/esbuild/js',
+  outdir: './dist',
   outExtension: { '.js': '.mjs' },
   bundle: true,
   format: 'esm',
   splitting: true,
-  metafile: true,
-  sourcemap: true,
+  metafile: false,
+  sourcemap: isDev,
   target: 'esnext',
   loader: { '.svg': 'file', '.png': 'file' },
+  legalComments: 'none',
   watch: isDev,
-  plugins: [copyPlugin({ from: './static', to: './dist/esbuild' })],
+  plugins: [copyPlugin({ from: './static', to: './dist' })],
   define: {
     'process.env.NODE_ENV': JSON.stringify(process.env.NODE_ENV || 'development'),
     BACKEND_ORIGIN: JSON.stringify(process.env.BACKEND_ORIGIN),
@@ -39,7 +40,7 @@ export const buildConfig = {
 
 const main = async () => {
   // clear build folder
-  fs.emptydirSync('./dist/esbuild');
+  fs.emptydirSync('./dist');
 
   await build(buildConfig);
 
