@@ -10,7 +10,7 @@
     "dev": "npm-run-all -l -p dev:*",
     "dev:build": "BACKEND_ORIGIN=http://localhost:4000 npm run esbuild",
     "dev:type-check": "tsc --noEmit --watch --preserveWatchOutput --pretty",
-    "dev:live-server": "live-server dist --port=5000 --no-browser --no-css-inject",
+    "dev:live-server": "live-server dist --port=5000 --no-browser --no-css-inject --wait=100",
     "dev:tailwind": "tailwindcss -i ./src/tailwind.css -o ./dist/tailwind.css --watch"
   },
   "repository": {
@@ -30,8 +30,10 @@
   "dependencies": {
     "@emotion/react": "^11.7.1",
     "@emotion/styled": "^11.6.0",
+    "@headlessui/react": "^1.5.0",
     "@mui/icons-material": "^5.2.5",
     "@mui/material": "^5.2.7",
+    "classnames": "^2.3.1",
     "date-fns": "^2.28.0",
     "esbuild": "^0.14.11",
     "eslint": "^8.6.0",
@@ -41,6 +43,7 @@
     "pathfinding": "^0.4.18",
     "react": "^17.0.2",
     "react-dom": "^17.0.2",
+    "react-popper": "^2.2.5",
     "react-router-dom": "^6.2.1",
     "react-toastify": "^8.1.0",
     "react-transition-group": "^4.4.2",

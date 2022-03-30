@@ -1,7 +1,7 @@
 import React, { useMemo } from 'react';
 import { isAfter, parseISO } from 'date-fns';
 import { ChoreListItem } from 'srcRootDir/pages/chores/ChoreListItem';
-import { Box, CircularProgress, Fade, styled, Typography } from '@mui/material';
+import { Box, CircularProgress, styled, Typography } from '@mui/material';
 
 interface ChoreListProps {
   chores: Array<Assignment> | undefined;
@@ -56,11 +56,7 @@ export function ChoreList({ chores, onComplete, areDone }: ChoreListProps) {
   return (
     <StyledList>
       {sortedChores.map(ch => {
-        return (
-          <Fade timeout={800} key={ch.id} in={true}>
-            <ChoreListItem assignment={ch} onComplete={onComplete} isDone={areDone} />
-          </Fade>
-        );
+        return <ChoreListItem key={ch.id} assignment={ch} onComplete={onComplete} isDone={areDone} />;
       })}
     </StyledList>
   );

@@ -1,17 +1,16 @@
 import React, { useCallback, useMemo, useState } from 'react';
 import { toast } from 'react-toastify';
-import { Collapse, Box, Menu, MenuItem, Paper, IconButton, LinearProgress, Typography, Fab } from '@mui/material';
-import MenuIcon from '@mui/icons-material/Menu';
-import MenuOpenIcon from '@mui/icons-material/MenuOpen';
-import CheckIcon from '@mui/icons-material/Check';
-import CircleIcon from '@mui/icons-material/Circle';
-import CheckCircleIcon from '@mui/icons-material/CheckCircle';
-import KeyboardDoubleArrowDownIcon from '@mui/icons-material/KeyboardDoubleArrowDown';
+import { Popover, Transition } from '@headlessui/react';
+import { usePopper } from 'react-popper';
 
 import { completeAssignment, sendReminder, undoAssignment } from 'srcRootDir/services/chores';
 import { useLastCompletedSubtask } from 'srcRootDir/hooks/useLastCompletedSubtask';
 import { parseDueDate } from 'srcRootDir/services/parseDueDate';
-import { cardColors } from 'srcRootDir/services/cardColors';
+import { menuIcon } from 'srcRootDir/common/icons/menu-icon';
+import { checkIcon } from 'srcRootDir/common/icons/check-icon';
+import ReactDOM from 'react-dom';
+import classNames from 'classnames';
+import { chevronDoubleDownIcon } from 'srcRootDir/common/icons/chevron-double-down-icon';
 
 interface ChoreListItemProps {
   assignment: Assignment;
@@ -20,211 +19,192 @@ interface ChoreListItemProps {
   style?: React.CSSProperties;
 }
 
-export const ChoreListItem = React.forwardRef(
-  ({ assignment, onComplete, isDone, style }: ChoreListItemProps, ref: any) => {
-    const [anchorEl, setAnchorEl] = React.useState<HTMLElement | null>(null);
-    const [isLoading, setIsLoading] = useState(false);
-    const subtasks = useLastCompletedSubtask(assignment.id);
-    const hasSubtasks = assignment.subtasks && assignment.subtasks.length > 0;
-    const allSubtasksCompleted = hasSubtasks ? subtasks.lastIndex >= (assignment.subtasks?.length ?? -1) : true;
-    const [subtasksVisible, setSubtasksVisible] = useState(subtasks.lastIndex > 0);
-    const showExpandSubtasksButton = hasSubtasks && !subtasksVisible;
-    const showCompleteTasksButton = !hasSubtasks || allSubtasksCompleted;
-    const open = Boolean(anchorEl);
+export const ChoreListItem = ({ assignment, onComplete, isDone }: ChoreListItemProps) => {
+  const [referenceElement, setReferenceElement] = useState<HTMLButtonElement>();
+  const [popperElement, setPopperElement] = useState<HTMLDivElement>();
+  // todo: show loader
+  const [, setIsLoading] = useState(false);
 
-    const handleMenuClose = useCallback((e: React.MouseEvent<HTMLElement>) => {
-      e.stopPropagation();
-      setAnchorEl(null);
-    }, []);
+  let { styles, attributes } = usePopper(referenceElement, popperElement);
+  const subtasks = useLastCompletedSubtask(assignment.id);
+  const hasSubtasks = assignment.subtasks && assignment.subtasks.length > 0;
+  const allSubtasksCompleted = hasSubtasks ? subtasks.lastIndex >= (assignment.subtasks?.length ?? -1) : true;
+  const [subtasksVisible, setSubtasksVisible] = useState(subtasks.lastIndex > 0);
+  const showExpandSubtasksButton = hasSubtasks && !subtasksVisible;
+  const showCompleteTasksButton = !hasSubtasks || allSubtasksCompleted;
 
-    const handleCompleteClick = useCallback(
-      async (e: React.MouseEvent<HTMLElement>, chore: Assignment) => {
-        setIsLoading(true);
-        handleMenuClose(e);
-        try {
-          if (showExpandSubtasksButton) {
-            setSubtasksVisible(true);
+  const handleCompleteClick = useCallback(
+    async (e: React.MouseEvent<HTMLElement>, chore: Assignment) => {
+      setIsLoading(true);
+      try {
+        if (showExpandSubtasksButton) {
+          setSubtasksVisible(true);
+          return;
+        }
+
+        if (allSubtasksCompleted) {
+          if (
+            isDone &&
+            !confirm(`"${assignment.title}" is not assigned to you. Are you sure you want to complete it?`)
+          ) {
             return;
           }
 
-          if (allSubtasksCompleted) {
-            if (
-              isDone &&
-              !confirm(`"${assignment.title}" is not assigned to you. Are you sure you want to complete it?`)
-            ) {
-              return;
-            }
-
-            const result = await completeAssignment(chore.id);
-            if (result) {
-              toast.success(result);
-            } else {
-              toast.success(`Task completed`);
-            }
-            subtasks.clear();
-            onComplete && onComplete();
+          const result = await completeAssignment(chore.id);
+          if (result) {
+            toast.success(result);
           } else {
-            subtasks.complete();
+            toast.success(`Task completed`);
           }
-        } catch (ex: any) {
-          toast.error(`Could not complete chore (${ex?.statusText})`);
-        } finally {
-          setIsLoading(false);
-        }
-      },
-      [allSubtasksCompleted, assignment, subtasksVisible]
-    );
-
-    const handleUndoClick = useCallback(
-      async (e: React.MouseEvent<HTMLElement>, chore: Assignment) => {
-        setIsLoading(true);
-        handleMenuClose(e);
-        try {
-          await undoAssignment(chore.id);
-          toast.info(`Undo complete`);
           subtasks.clear();
           onComplete && onComplete();
-        } catch (ex: any) {
-          const message = await ex?.text();
-          toast.error(message);
-        } finally {
-          setIsLoading(false);
+        } else {
+          subtasks.complete();
         }
-      },
-      [assignment]
-    );
-
-    const handleSendReminderClick = useCallback(
-      async (e: React.MouseEvent<HTMLElement>, chore: Assignment) => {
-        setIsLoading(true);
-        handleMenuClose(e);
-        await sendReminder(chore.id);
+      } catch (ex: any) {
+        toast.error(`Could not complete chore (${ex?.statusText})`);
+      } finally {
         setIsLoading(false);
-        toast.success(`Reminder sent`);
+      }
+    },
+    [allSubtasksCompleted, assignment, subtasksVisible]
+  );
+
+  const handleUndoClick = useCallback(
+    async (e: React.MouseEvent<HTMLElement>, chore: Assignment) => {
+      setIsLoading(true);
+      try {
+        await undoAssignment(chore.id);
+        toast.info(`Undo complete`);
+        subtasks.clear();
         onComplete && onComplete();
-      },
-      [assignment]
-    );
+      } catch (ex: any) {
+        const message = await ex?.text();
+        toast.error(message);
+      } finally {
+        setIsLoading(false);
+      }
+    },
+    [assignment]
+  );
 
-    const colors = cardColors[assignment.id % cardColors.length];
+  const handleSendReminderClick = useCallback(
+    async (e: React.MouseEvent<HTMLElement>, chore: Assignment) => {
+      setIsLoading(true);
+      await sendReminder(chore.id);
+      setIsLoading(false);
+      toast.success(`Reminder sent`);
+      onComplete && onComplete();
+    },
+    [assignment]
+  );
 
-    const { dueString, isLate } = useMemo(() => parseDueDate(assignment), [assignment]);
+  const { dueString, isLate } = useMemo(() => parseDueDate(assignment), [assignment]);
 
-    return (
-      <Paper
-        style={style}
-        ref={ref}
-        elevation={1}
-        sx={{
-          minHeight: '6rem',
-          background: colors.background,
-          position: 'relative',
-          display: 'flex',
-          flexDirection: 'column',
-          justifyContent: 'space-between',
-        }}
+  return (
+    <div className="flex flex-col justify-between min-h-[6rem] bg-teal-500 rounded px-2 py-2 drop-shadow relative">
+      <span className="text-white text-2xl font-black">{assignment.title}</span>
+      <Transition
+        as="div"
+        className="mt-3 ml-1 overflow-hidden"
+        show={subtasksVisible}
+        enter="transition-all duration-300"
+        enterFrom="max-h-0"
+        enterTo="max-h-56"
+        leave="transition-all duration-300"
+        leaveFrom="max-h-56"
+        leaveTo="max-h-0"
       >
-        <Typography sx={{ fontSize: 24 }} fontWeight={800} color={colors.color} paddingLeft={1} paddingTop={1}>
-          {assignment.title}
-        </Typography>
-        <Collapse in={subtasksVisible}>
-          <Box padding="0.5rem 1rem 0 1rem">
-            {assignment.subtasks &&
-              assignment.subtasks.map((subtask, i) => {
-                return (
-                  <Box
-                    key={subtask}
-                    display="flex"
-                    alignItems="center"
-                    paddingBottom="0.4rem"
-                    onClick={() => subtasks.complete(i >= subtasks.lastIndex ? i + 1 : i)}
-                    sx={{ cursor: 'pointer' }}
-                  >
-                    {i >= subtasks.lastIndex ? (
-                      <CircleIcon color="disabled" />
-                    ) : (
-                      <CheckCircleIcon sx={{ opacity: 0.7, color: 'white' }} />
-                    )}
-                    <Typography paddingLeft="0.2rem" color={colors.color}>
-                      {subtask}
-                    </Typography>
-                  </Box>
-                );
-              })}
-          </Box>
-        </Collapse>
-        <Box display="flex" justifyContent="center" paddingBottom={1}>
-          <Typography
-            padding="0 1rem"
-            sx={{ fontSize: isLate ? 16 : 12, backgroundColor: isLate ? 'red' : null }}
-            fontWeight={isLate ? 800 : 300}
-            color={colors.color}
+        {assignment?.subtasks?.map((subtask, i) => {
+          return (
+            <div
+              className="flex items-center pb-[0.4rem] cursor-pointer"
+              key={subtask}
+              onClick={() => subtasks.complete(i >= subtasks.lastIndex ? i + 1 : i)}
+            >
+              <input type="checkbox" readOnly checked={i < subtasks.lastIndex} className="rounded w-4 h-4" />
+              <span className="text-white ml-1">{subtask}</span>
+            </div>
+          );
+        })}
+      </Transition>
+      <span
+        className={classNames('text-white self-center rounded px-2 py-1', {
+          'bg-rose-500 shadow font-bold': isLate,
+          'opacity-80': !isLate,
+        })}
+      >
+        {dueString}
+      </span>
+      <Popover className="absolute top-0 right-0 mr-2 mt-2 z-20">
+        <Popover.Button
+          className="text-white hover:text-teal-200"
+          ref={(e: HTMLButtonElement) => e && setReferenceElement(e)}
+        >
+          {menuIcon}
+        </Popover.Button>
+        {ReactDOM.createPortal(
+          <Popover.Panel
+            ref={(e: HTMLDivElement) => e && setPopperElement(e)}
+            style={styles.popper}
+            {...attributes.popper}
           >
-            {dueString}
-          </Typography>
-        </Box>
-        <IconButton
-          sx={{ position: 'absolute', top: 0, right: 0 }}
-          onClick={(e: React.MouseEvent<HTMLElement>) => setAnchorEl(e.currentTarget)}
-        >
-          {open ? (
-            <MenuOpenIcon sx={{ color: colors.color }} />
-          ) : (
-            <MenuIcon sx={{ color: colors.color, opacity: 0.7 }} />
-          )}
-          <Menu open={open} onClose={handleMenuClose} anchorEl={anchorEl}>
-            <MenuItem
-              disabled={!isDone || isLoading}
-              onClick={(e: React.MouseEvent<HTMLElement>) => handleUndoClick(e, assignment)}
-            >
-              ⏪ Undo
-            </MenuItem>
-            <MenuItem
-              disabled={!isDone || isLoading}
-              onClick={(e: React.MouseEvent<HTMLElement>) => handleSendReminderClick(e, assignment)}
-            >
-              🔔 Send reminder
-            </MenuItem>
-            <MenuItem
-              disabled={!hasSubtasks || isLoading}
-              onClick={(e: React.MouseEvent<HTMLElement>) => {
-                handleMenuClose(e);
-                subtasks.clear();
-                setSubtasksVisible(false);
-              }}
-            >
-              🧽 Clear subtasks
-            </MenuItem>
-          </Menu>
-        </IconButton>
-        <Fab
-          onClick={(e: React.MouseEvent<HTMLElement>) => handleCompleteClick(e, assignment)}
-          disabled={isLoading}
-          size="small"
-          sx={{
-            position: 'absolute',
-            color: colors.fabColor,
-            right: 0,
-            bottom: 0,
-            marginRight: 1,
-            marginBottom: 1,
-            background: `linear-gradient(0, ${colors.fabBackground} 0%, white 100%)`,
-            boxShadow: '0px 2px 2px -1px rgb(0 0 0 / 20%)',
-          }}
-          aria-label="like"
-        >
-          {showExpandSubtasksButton ? (
-            <KeyboardDoubleArrowDownIcon />
-          ) : showCompleteTasksButton ? (
-            <CheckIcon />
-          ) : (
-            <span>
-              {subtasks.lastIndex}/{assignment.subtasks!.length}
-            </span>
-          )}
-        </Fab>
-        {isLoading && <LinearProgress />}
-      </Paper>
-    );
-  }
-);
+            {({ close }) => (
+              <div className="rounded bg-white shadow mt-2">
+                <Popover.Button className="flex items-center w-full">
+                  <span
+                    onClick={(e: React.MouseEvent<HTMLElement>) => {
+                      close();
+                      handleUndoClick(e, assignment);
+                    }}
+                    className="px-4 py-3 whitespace-pre"
+                  >
+                    ⏪ Undo
+                  </span>
+                </Popover.Button>
+                <Popover.Button className="flex items-center w-full">
+                  <span
+                    onClick={(e: React.MouseEvent<HTMLElement>) => {
+                      close();
+                      handleSendReminderClick(e, assignment);
+                    }}
+                    className="px-4 py-3 whitespace-pre"
+                  >
+                    🔔 Send reminder
+                  </span>
+                </Popover.Button>
+                <Popover.Button className="flex items-center w-full">
+                  <span
+                    onClick={() => {
+                      close();
+                      subtasks.clear();
+                      setSubtasksVisible(false);
+                    }}
+                    className="py-3 px-4 whitespace-pre"
+                  >
+                    🧽 Clear subtasks
+                  </span>
+                </Popover.Button>
+              </div>
+            )}
+          </Popover.Panel>,
+          document.body
+        )}
+      </Popover>
+      <div
+        onClick={(e: React.MouseEvent<HTMLElement>) => handleCompleteClick(e, assignment)}
+        className="absolute text-teal-500 bottom-0 right-0 mr-2 mb-2 bg-white hover:opacity-80 rounded-full shadow px-2 py-2 hover:cursor-pointer"
+      >
+        {showExpandSubtasksButton ? (
+          chevronDoubleDownIcon
+        ) : showCompleteTasksButton ? (
+          checkIcon
+        ) : (
+          <span>
+            {subtasks.lastIndex}/{assignment.subtasks!.length}
+          </span>
+        )}
+      </div>
+    </div>
+  );
+};
