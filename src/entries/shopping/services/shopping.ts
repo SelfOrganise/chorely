@@ -24,14 +24,40 @@ export function useLiveBasket(): Basket | null {
 
   useEffect(() => {
     const userId = getCurrentUserId();
-    const sse = new EventSource(`${BACKEND_ORIGIN}/shopping/baskets/current?userId=${userId}`);
-    sse.onmessage = e => setCurrentBasket(JSON.parse(e.data));
-    sse.onopen = () => toast.success('connected to live basket');
-    sse.onerror = () => {
-      toast.error('lost connection to basket data, try to reload the page');
+
+    const setup = () => {
+      const sse = new EventSource(`${BACKEND_ORIGIN}/shopping/baskets/current?userId=${userId}`);
+      sse.onmessage = e => setCurrentBasket(JSON.parse(e.data));
+      return sse;
     };
+
+    // let delayTimeout = 0;
+
+    // const delayClose = () => {
+    //   delayTimeout = setTimeout(() => {
+    //     sse?.close();
+    //   }, 5000);
+    // };
+
+    let sse: EventSource | null = setup();
+
+    // const handleBlur = () => {
+    //   delayClose();
+    // };
+
+    const handleFocus = () => {
+      if (!sse || sse.readyState === 2) {
+        toast.info('reconnecting...');
+        sse?.close();
+        sse = setup();
+      }
+    };
+
+    window.addEventListener('focus', handleFocus);
+
     return () => {
-      sse.close();
+      sse?.close();
+      window.removeEventListener('focus', handleFocus);
     };
   }, []);
 
