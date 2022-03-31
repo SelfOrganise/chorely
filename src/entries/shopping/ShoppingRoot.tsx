@@ -10,7 +10,7 @@ export function ShoppingWrapper() {
     <div className="h-screen">
       <div>
         <Tab.Group>
-          <Tab.List className="flex p-1 m-2 space-x-1 bg-blue-100 rounded">
+          <Tab.List className="flex p-1 m-2 space-x-1 rounded justify-center">
             <Tab as={Fragment}>
               <Button onClick={() => navigate('/shopping')}>Cart</Button>
             </Tab>

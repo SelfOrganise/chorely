@@ -1,7 +1,7 @@
 import { fetcher } from 'srcRootDir/services/fetcher';
 import { useEffect, useState } from 'react';
-import { toast } from 'react-toastify';
 import { getCurrentUserId } from 'srcRootDir/services/auth';
+import { toast } from 'react-toastify';
 
 export async function addGrocery(grocery: Omit<Grocery, 'id'>): Promise<unknown> {
   return await fetcher('/shopping/groceries', { method: 'POST', body: JSON.stringify(grocery) });
@@ -26,9 +26,9 @@ export function useLiveBasket(): Basket | null {
     const userId = getCurrentUserId();
     const sse = new EventSource(`${BACKEND_ORIGIN}/shopping/baskets/current?userId=${userId}`);
     sse.onmessage = e => setCurrentBasket(JSON.parse(e.data));
+    sse.onopen = () => toast.success('connected to live basket');
     sse.onerror = () => {
       toast.error('lost connection to basket data, try to reload the page');
-      sse.close();
     };
     return () => {
       sse.close();
