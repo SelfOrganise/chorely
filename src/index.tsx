@@ -4,7 +4,7 @@ import ReactDOM from 'react-dom';
 import { HashRouter, Route, Routes, useNavigate } from 'react-router-dom';
 import { ProviderConfiguration, SWRConfiguration } from 'swr/dist/types';
 import { SWRConfig } from 'swr';
-import { ToastContainer, toast } from 'react-toastify';
+import { ToastContainer, toast, Zoom } from 'react-toastify';
 
 import { Login } from 'srcRootDir/entries/login';
 import { ChoresPage } from 'srcRootDir/entries/chores';
@@ -26,6 +26,7 @@ function Root(): JSX.Element {
         newestOnTop={true}
         closeOnClick
         rtl={false}
+        transition={Zoom}
         pauseOnFocusLoss
         draggable
         pauseOnHover
