@@ -103,54 +103,48 @@ export function BasketPage() {
           <Tab as={Button}>Basket ({currentBasket?.items.length || 0})</Tab>
           <Tab as={Button}>Solve</Tab>
         </Tab.List>
-        <Tab.Panels>
+        <Tab.Panels className="flex flex-col w-full md:w-[500px] p-6">
           <Tab.Panel>
-            <div className="flex flex-col w-[500px] p-6">
-              {groceriesResponse.data?.map(g => (
-                <GroceryItem
-                  key={g.id}
-                  item={g}
-                  onAdd={async item => {
-                    await addToBasket(item.id);
-                    toast.success('added to basket');
-                  }}
-                />
-              ))}
-            </div>
+            {groceriesResponse.data?.map(g => (
+              <GroceryItem
+                key={g.id}
+                item={g}
+                onAdd={async item => {
+                  await addToBasket(item.id);
+                  toast.success('added to basket');
+                }}
+              />
+            ))}
           </Tab.Panel>
           <Tab.Panel>
-            <div className="flex flex-col w-[500px] p-6">
-              <Button onClick={() => createNewBasket()}>Create new basket</Button>
-              {currentBasket?.items.map((g, i) => (
-                <GroceryItem key={`${g.id}-${i}`} item={g} onAdd={() => null} />
-              ))}
-            </div>
+            <Button onClick={() => createNewBasket()}>Create new basket</Button>
+            {currentBasket?.items.map((g, i) => (
+              <GroceryItem key={`${g.id}-${i}`} item={g} onAdd={() => null} />
+            ))}
           </Tab.Panel>
-          <Tab.Panel>
-            <div className="flex flex-col">
-              <Button onClick={solve}>Solve</Button>
-              <div className="w-screen h-[330px] overflow-hidden border-2 border-black">
-                <canvas ref={canvasElement} />
-              </div>
-              {result && (
-                <div className="flex justify-around">
-                  <div>
-                    {result[0].map(v => (
-                      <div>
-                        {v?.name} - {v?.size}
-                      </div>
-                    ))}
-                  </div>
-                  <div>
-                    {result[1].map(v => (
-                      <div>
-                        {v?.name} - {v?.size}
-                      </div>
-                    ))}
-                  </div>
+          <Tab.Panel className="flex flex-col">
+            <Button onClick={solve}>Solve</Button>
+            <div className="w-full h-[330px] overflow-hidden border-2 border-black">
+              <canvas ref={canvasElement} />
+            </div>
+            {result && (
+              <div className="flex justify-around">
+                <div>
+                  {result[0].map(v => (
+                    <div>
+                      {v?.name} - {v?.size}
+                    </div>
+                  ))}
                 </div>
-              )}
-            </div>
+                <div>
+                  {result[1].map(v => (
+                    <div>
+                      {v?.name} - {v?.size}
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
           </Tab.Panel>
         </Tab.Panels>
       </Tab.Group>

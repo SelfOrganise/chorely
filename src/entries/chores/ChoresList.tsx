@@ -50,7 +50,7 @@ export function ChoreList({ chores, onComplete, areDone }: ChoreListProps) {
   }
 
   return (
-    <div className="flex flex-col w-[500px] p-6">
+    <div className="flex flex-col w-full md:w-[500px] p-6">
       {sortedChores.map(ch => {
         return <ChoreListItem key={ch.id} assignment={ch} onComplete={onComplete} isDone={areDone} />;
       })}
