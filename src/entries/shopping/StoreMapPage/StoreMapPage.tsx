@@ -1,13 +1,13 @@
 import React, { useCallback, useEffect, useRef, useState } from 'react';
-import styled from '@emotion/styled';
 import { StoreMap } from '../services/StoreMap';
 import { Item, Selector } from './components/Selector';
 import { Types } from '../services/constants';
 import useSWR from 'swr';
 import { fetcher } from 'srcRootDir/services/fetcher';
-import { solveShopping, updateOrCreateMap } from 'srcRootDir/pages/shopping/services/shopping';
+import { solveShopping, updateOrCreateMap } from 'srcRootDir/entries/shopping/services/shopping';
 import { toast } from 'react-toastify';
-import { getAllRoutes } from 'srcRootDir/pages/shopping/services/utils';
+import { getAllRoutes } from 'srcRootDir/entries/shopping/services/utils';
+import { Button } from 'srcRootDir/common/components';
 
 export function StoreMapPage() {
   const canvasElement = useRef<HTMLCanvasElement | null>(null);
@@ -87,37 +87,25 @@ export function StoreMapPage() {
   }
 
   return (
-    <Wrapper>
-      <div className="buttons">
-        <button onClick={load}>Load map</button>
-        <button onClick={() => storeMap.current?.addWall()}>Add wall</button>
-        <button id="export" onClick={saveMap}>
+    <div className="w-100 h-100">
+      <div>
+        <Button onClick={load}>Load map</Button>
+        <Button onClick={() => storeMap.current?.addWall()}>Add wall</Button>
+        <Button id="export" onClick={saveMap}>
           Save map
-        </button>
-        <button onClick={solve}>Solve</button>
-        <button onClick={() => storeMap.current?.copy()}>copy</button>
-        <button onClick={() => storeMap.current?.paste()}>paste</button>
-        <button onClick={() => storeMap.current?.delete()}>delete</button>
+        </Button>
+        <Button onClick={solve}>Solve</Button>
+        <Button onClick={() => storeMap.current?.copy()}>copy</Button>
+        <Button onClick={() => storeMap.current?.paste()}>paste</Button>
+        <Button onClick={() => storeMap.current?.delete()}>delete</Button>
       </div>
-      <CanvasWrapper>
+      <div className="w-screen h-[330px] overflow-hidden border-2 border-black">
         <canvas ref={canvasElement} />
-      </CanvasWrapper>
+      </div>
       <Selector
         onSelected={handleOnSelected}
         availableItems={items.filter(item => addedItems.every(added => added !== item.name))}
       />
-    </Wrapper>
+    </div>
   );
 }
-
-const CanvasWrapper = styled.div`
-  width: 100vw;
-  height: 330px;
-  overflow: hidden;
-  border: 1px solid black;
-`;
-
-const Wrapper = styled.div`
-  width: 100%;
-  height: 100%;
-`;

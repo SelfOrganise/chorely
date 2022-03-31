@@ -1,29 +1,22 @@
 import 'react-toastify/dist/ReactToastify.css';
 import React from 'react';
 import ReactDOM from 'react-dom';
-import { createTheme, CssBaseline, ThemeProvider } from '@mui/material';
 import { HashRouter, Route, Routes, useNavigate } from 'react-router-dom';
 import { ProviderConfiguration, SWRConfiguration } from 'swr/dist/types';
 import { SWRConfig } from 'swr';
 import { ToastContainer, toast } from 'react-toastify';
 
-import { Login } from 'srcRootDir/pages/login';
-import { ChoresPage } from 'srcRootDir/pages/chores';
-import { BasketPage } from 'srcRootDir/pages/shopping/BasketPage';
-import { ManageGroceriesPage } from 'srcRootDir/pages/shopping/ManageGroceriesPage';
-import { RecipesPage } from 'srcRootDir/pages/shopping/RecipesPage';
-import { ShoppingWrapper } from 'srcRootDir/pages/shopping/ShoppingRoot';
-import { StoreMapPage } from 'srcRootDir/pages/shopping/StoreMapPage';
-
-const theme = createTheme({
-  typography: {
-    fontSize: 14,
-  },
-});
+import { Login } from 'srcRootDir/entries/login';
+import { ChoresPage } from 'srcRootDir/entries/chores';
+import { BasketPage } from 'srcRootDir/entries/shopping/BasketPage';
+import { ManageGroceriesPage } from 'srcRootDir/entries/shopping/ManageGroceriesPage';
+import { RecipesPage } from 'srcRootDir/entries/shopping/RecipesPage';
+import { ShoppingWrapper } from 'srcRootDir/entries/shopping/ShoppingRoot';
+import { StoreMapPage } from 'srcRootDir/entries/shopping/StoreMapPage';
 
 function Root(): JSX.Element {
   return (
-    <ThemeProvider theme={theme}>
+    <div>
       <ToastContainer
         position="top-center"
         autoClose={5000}
@@ -36,10 +29,9 @@ function Root(): JSX.Element {
         pauseOnHover
       />
       <HashRouter>
-        <CssBaseline />
         <RouteDefinitions />
       </HashRouter>
-    </ThemeProvider>
+    </div>
   );
 }
 

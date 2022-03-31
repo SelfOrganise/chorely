@@ -1,7 +1,7 @@
 import React, { useMemo } from 'react';
 import { isAfter, parseISO } from 'date-fns';
-import { ChoreListItem } from 'srcRootDir/pages/chores/ChoreListItem';
-import { Box, CircularProgress, styled, Typography } from '@mui/material';
+import { ChoreListItem } from 'srcRootDir/entries/chores/ChoreListItem';
+import { spinnerIcon } from 'srcRootDir/common/icons';
 
 interface ChoreListProps {
   chores: Array<Assignment> | undefined;
@@ -33,46 +33,27 @@ export function ChoreList({ chores, onComplete, areDone }: ChoreListProps) {
 
   if (!sortedChores) {
     return (
-      <Box display="flex" flexDirection="column" alignItems="center" justifyContent="center" margin="2rem">
-        <CircularProgress />
-        <Typography variant="body1" marginTop="2rem">
-          Loading...
-        </Typography>
-      </Box>
+      <div className="flex flex-col items-center justify-center m-8">
+        {spinnerIcon}
+        <h4 className="mt-4">Loading...</h4>
+      </div>
     );
   }
 
   if (sortedChores.length === 0) {
     return (
-      <Box display="flex" flexDirection="column" alignItems="center" justifyContent="center" margin="2rem">
-        <Typography variant="h2" marginBottom="1rem">
-          🎉
-        </Typography>
-        <Typography variant="body1">All your chores are done!</Typography>
-      </Box>
+      <div className="flex flex-col items-center justify-center m-8">
+        <h2 className="mt-4 text-5xl">🎉</h2>
+        <h4 className="mt-4">All your chores are done!</h4>
+      </div>
     );
   }
 
   return (
-    <StyledList>
+    <div className="flex flex-col w-[500px] p-6">
       {sortedChores.map(ch => {
         return <ChoreListItem key={ch.id} assignment={ch} onComplete={onComplete} isDone={areDone} />;
       })}
-    </StyledList>
+    </div>
   );
 }
-
-const StyledList = styled('div')`
-  display: flex;
-  flex-direction: column;
-  width: 500px;
-  padding: 1.5rem;
-
-  & > * {
-    margin-bottom: 1rem;
-  }
-
-  @media (max-width: 700px) {
-    width: 100%;
-  }
-`;

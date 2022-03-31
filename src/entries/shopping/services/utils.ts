@@ -1,5 +1,5 @@
-import { storeMapConfig } from 'srcRootDir/pages/shopping/services/StoreMap';
-import { Names, Types } from 'srcRootDir/pages/shopping/services/constants';
+import { storeMapConfig } from 'srcRootDir/entries/shopping/services/StoreMap';
+import { Names, Types } from 'srcRootDir/entries/shopping/services/constants';
 import { AStarFinder, Grid } from 'pathfinding';
 
 export function toImageName(name: string): string {

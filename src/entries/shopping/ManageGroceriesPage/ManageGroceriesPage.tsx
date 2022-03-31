@@ -1,7 +1,7 @@
 import React, { useCallback, useState } from 'react';
 import { toast } from 'react-toastify';
-import { Box, Button, TextField } from '@mui/material';
-import { addGrocery } from 'srcRootDir/pages/shopping/services/shopping';
+import { addGrocery } from 'srcRootDir/entries/shopping/services/shopping';
+import { Button, TextField } from 'srcRootDir/common/components';
 
 export function ManageGroceriesPage() {
   const [name, setName] = useState('');
@@ -18,19 +18,13 @@ export function ManageGroceriesPage() {
   }, [name]);
 
   return (
-    <Box
-      alignItems="center"
-      display="flex"
-      flexDirection="column"
-      height="calc(100vh - 3.5rem)"
-      justifyContent="center"
-    >
+    <div className="flex flex-col items-center justify-center h-100">
       <TextField value={name} onChange={c => setName(c.target.value)} />
       <input type="range" min="1" max="3" value={size} onChange={r => setSize(parseInt(r.target.value) || 2)} />
       <span>{size === 1 ? 'small' : size === 2 ? 'medium' : 'large'}</span>
-      <Button disabled={name.length === 0} variant="contained" onClick={handleAddGrocery}>
+      <Button disabled={name.length === 0} onClick={handleAddGrocery}>
         Add
       </Button>
-    </Box>
+    </div>
   );
 }

@@ -1,4 +1,6 @@
 import React, { useCallback, useMemo, useState } from 'react';
+import ReactDOM from 'react-dom';
+import classNames from 'classnames';
 import { toast } from 'react-toastify';
 import { Popover, Transition } from '@headlessui/react';
 import { usePopper } from 'react-popper';
@@ -6,11 +8,7 @@ import { usePopper } from 'react-popper';
 import { completeAssignment, sendReminder, undoAssignment } from 'srcRootDir/services/chores';
 import { useLastCompletedSubtask } from 'srcRootDir/hooks/useLastCompletedSubtask';
 import { parseDueDate } from 'srcRootDir/services/parseDueDate';
-import { menuIcon } from 'srcRootDir/common/icons/menu-icon';
-import { checkIcon } from 'srcRootDir/common/icons/check-icon';
-import ReactDOM from 'react-dom';
-import classNames from 'classnames';
-import { chevronDoubleDownIcon } from 'srcRootDir/common/icons/chevron-double-down-icon';
+import { menuIcon, checkIcon, chevronDoubleDownIcon } from 'srcRootDir/common/icons';
 
 interface ChoreListItemProps {
   assignment: Assignment;
@@ -102,7 +100,7 @@ export const ChoreListItem = ({ assignment, onComplete, isDone }: ChoreListItemP
   const { dueString, isLate } = useMemo(() => parseDueDate(assignment), [assignment]);
 
   return (
-    <div className="flex flex-col justify-between min-h-[6rem] bg-teal-500 rounded px-2 py-2 drop-shadow relative">
+    <div className="flex flex-col justify-between min-h-[6rem] bg-teal-500 rounded px-2 py-2 drop-shadow relative mb-4">
       <span className="text-white text-2xl font-black">{assignment.title}</span>
       <Transition
         as="div"

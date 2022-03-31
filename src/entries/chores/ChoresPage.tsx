@@ -3,9 +3,8 @@ import useSWR from 'swr';
 import { fetcher } from 'srcRootDir/services/fetcher';
 import { toast } from 'react-toastify';
 import { getCurrentUserId } from 'srcRootDir/services/auth';
-import { ChoreList } from 'srcRootDir/pages/chores/ChoresList';
-import { Alert, Box, Button } from '@mui/material';
-import RefreshIcon from '@mui/icons-material/Refresh';
+import { ChoreList } from 'srcRootDir/entries/chores/ChoresList';
+import { Button } from 'srcRootDir/common/components';
 
 export function ChoresPage() {
   const userId = useMemo(getCurrentUserId, []);
@@ -23,26 +22,27 @@ export function ChoresPage() {
   if (response.error) {
     return (
       <React.Fragment>
-        <Alert severity="error">The API server is down. ({response.error.toString()})</Alert>
-        <Box height="60vh" display="flex" alignItems="center" justifyContent="center">
-          <Button onClick={() => location.reload()} startIcon={<RefreshIcon />} variant="contained">
-            Reload
-          </Button>
-        </Box>
+        <div className="flex flex-col items-center justify-center h-screen">
+          <p className="text-carnation-600 font-bold m-4 bg-carnation-200 bg-opacity-80 p-2 rounded">
+            The backend server is down. (Reason: '{response.error?.toString() || 'unknown'}')
+          </p>
+
+          <Button onClick={() => location.reload()}>🔃 Reload</Button>
+        </div>
       </React.Fragment>
     );
   }
 
   return (
-    <Box alignItems="center" display="flex" flexDirection="column">
+    <div className="flex flex-col items-center">
       <ChoreList
         chores={response.data?.filter(ch => ch.assigned_to_user_id == userId)}
         areDone={false}
         onComplete={response.mutate}
       />
       <Button
+        className="bg-transparent hover:bg-transparent text-gray-400 border-2 border-gray-300 opacity-80"
         onClick={() => setShowCompletedTasks(!showCompletedTasks)}
-        sx={{ color: 'text.secondary', opacity: 0.6, marginBottom: '2rem', marginTop: '2rem' }}
       >
         {showCompletedTasks ? 'Hide' : 'Show'} completed tasks
       </Button>
@@ -54,6 +54,6 @@ export function ChoresPage() {
           onComplete={response.mutate}
         />
       )}
-    </Box>
+    </div>
   );
 }

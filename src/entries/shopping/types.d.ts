@@ -1,4 +1,4 @@
-import { Types } from 'srcRootDir/pages/shopping/services/constants';
+import { Types } from 'srcRootDir/entries/shopping/services/constants';
 
 declare global {
   interface Grocery {

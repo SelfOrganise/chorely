@@ -1,5 +1,3 @@
-import { darken, lighten } from '@mui/material';
-
 export const cardColors = [
   { background: '#ff6f75', color: 'white' },
   { background: '#46c2a6', color: 'white' },
@@ -12,6 +10,7 @@ export const cardColors = [
   { background: '#ba68c8', color: 'white' },
 ].map(c => ({
   ...c,
-  fabBackground: lighten(c.background, 0.85),
-  fabColor: darken(c.background, 0.3),
+  // todo: move to tailwind.css and use utils
+  // fabBackground: lighten(c.background, 0.85),
+  // fabColor: darken(c.background, 0.3),
 }));
