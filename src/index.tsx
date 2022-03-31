@@ -14,13 +14,15 @@ import { RecipesPage } from 'srcRootDir/entries/shopping/RecipesPage';
 import { ShoppingWrapper } from 'srcRootDir/entries/shopping/ShoppingRoot';
 import { StoreMapPage } from 'srcRootDir/entries/shopping/StoreMapPage';
 
+import './index.css';
+
 function Root(): JSX.Element {
   return (
     <div>
       <ToastContainer
         position="top-center"
-        autoClose={5000}
-        hideProgressBar={false}
+        autoClose={3500}
+        hideProgressBar={true}
         newestOnTop={true}
         closeOnClick
         rtl={false}

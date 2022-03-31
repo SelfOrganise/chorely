@@ -111,7 +111,7 @@ export function BasketPage() {
                 item={g}
                 onAdd={async item => {
                   await addToBasket(item.id);
-                  toast.success('added to basket');
+                  toast.success(`added '${item.name}'`, { autoClose: 1500, position: 'bottom-center' });
                 }}
               />
             ))}
