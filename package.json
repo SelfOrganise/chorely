@@ -1,0 +1,61 @@
+{
+  "name": "chores-web",
+  "version": "0.0.1",
+  "description": "chores web",
+  "main": "index.js",
+  "scripts": {
+    "esbuild": "node scripts/build/esbuild.mjs",
+    "build": "npm-run-all -l build:*",
+    "build:web": "BACKEND_ORIGIN=https://api.3pounds.cyou/chorely NODE_ENV=production npm run esbuild",
+    "build:tailwind": "npx tailwindcss -i ./src/tailwind.css -o ./dist/tailwind.css --minify",
+    "dev": "npm-run-all -l -p dev:*",
+    "dev:build": "BACKEND_ORIGIN=http://localhost:4000 npm run esbuild",
+    "dev:type-check": "tsc --noEmit --watch --preserveWatchOutput --pretty",
+    "dev:live-server": "live-server dist --port=5000 --no-browser --no-css-inject --wait=100",
+    "dev:tailwind": "tailwindcss -i ./src/tailwind.css -o ./dist/tailwind.css --watch"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/bogdbo/chores-web.git"
+  },
+  "author": "bogdan boiculese",
+  "license": "GPL-2.0",
+  "bugs": {
+    "url": "https://github.com/bogdbo/chores-web/issues"
+  },
+  "homepage": "https://github.com/bogdbo/chores-web#readme",
+  "alias": {
+    "react": "preact-compat",
+    "react-dom": "preact-compat"
+  },
+  "dependencies": {
+    "@headlessui/react": "^1.5.0",
+    "@popperjs/core": "^2.11.4",
+    "classnames": "^2.3.1",
+    "date-fns": "^2.28.0",
+    "esbuild": "^0.14.11",
+    "eslint": "^8.6.0",
+    "fabric": "^5.2.1",
+    "fs-extra": "^10.0.0",
+    "live-server": "^1.2.1",
+    "pathfinding": "^0.4.18",
+    "react": "^17.0.2",
+    "react-dom": "^17.0.2",
+    "react-popper": "^2.2.5",
+    "react-router-dom": "^6.2.1",
+    "react-toastify": "^8.1.0",
+    "swr": "^1.1.2",
+    "typescript": "^4.5.4"
+  },
+  "devDependencies": {
+    "@types/fabric": "^4.5.7",
+    "@types/react": "^17.0.38",
+    "@types/react-dom": "^17.0.11",
+    "npm-run-all": "^4.1.5",
+    "prettier": "^2.5.1",
+    "tailwindcss": "^3.0.23"
+  },
+  "resolutions": {
+    "colors": "1.4.0"
+  }
+}
