@@ -3,6 +3,14 @@ import { useEffect, useState } from 'react';
 import { getCurrentUserId } from 'srcRootDir/services/auth';
 import { toast } from 'react-toastify';
 
+export async function addRecipe(name: string): Promise<unknown> {
+  return await fetcher('/shopping/recipes', { method: 'POST', body: JSON.stringify({ name }) });
+}
+
+export async function addGroceryToRecipe(recipeId: string | number, groceryId: string | number): Promise<unknown> {
+  return await fetcher(`/shopping/recipes/${recipeId}`, { method: 'POST', body: JSON.stringify({ groceryId }) });
+}
+
 export async function addGrocery(grocery: Omit<Grocery, 'id'>): Promise<unknown> {
   return await fetcher('/shopping/groceries', { method: 'POST', body: JSON.stringify(grocery) });
 }
@@ -31,24 +39,12 @@ export function useLiveBasket(): Basket | null {
       return sse;
     };
 
-    // let delayTimeout = 0;
-
-    // const delayClose = () => {
-    //   delayTimeout = setTimeout(() => {
-    //     sse?.close();
-    //   }, 5000);
-    // };
-
-    let sse: EventSource | null = setup();
-
-    // const handleBlur = () => {
-    //   delayClose();
-    // };
+    let sse: EventSource = setup();
 
     const handleFocus = () => {
       if (!sse || sse.readyState === 2) {
         toast.info('reconnecting...');
-        sse?.close();
+        sse.close();
         sse = setup();
       }
     };
@@ -56,7 +52,7 @@ export function useLiveBasket(): Basket | null {
     window.addEventListener('focus', handleFocus);
 
     return () => {
-      sse?.close();
+      sse.close();
       window.removeEventListener('focus', handleFocus);
     };
   }, []);

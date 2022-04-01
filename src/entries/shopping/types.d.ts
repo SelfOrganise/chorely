@@ -30,4 +30,11 @@ declare global {
   interface BasketItem extends Grocery {
     basketId: number;
   }
+
+  interface Recipe {
+    id: number;
+    name: string;
+    created_at_utc: string;
+    groceries: Array<Grocery>;
+  }
 }

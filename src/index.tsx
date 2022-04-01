@@ -15,6 +15,7 @@ import { ShoppingWrapper } from 'srcRootDir/entries/shopping/ShoppingRoot';
 import { StoreMapPage } from 'srcRootDir/entries/shopping/StoreMapPage';
 
 import './index.css';
+import { RecipePage } from 'srcRootDir/entries/shopping/RecipePage';
 
 function Root(): JSX.Element {
   return (
@@ -60,6 +61,7 @@ function RouteDefinitions() {
           <Route index element={<BasketPage />} />
           <Route path="groceries" element={<ManageGroceriesPage />} />
           <Route path="recipes" element={<RecipesPage />} />
+          <Route path="recipes/:id" element={<RecipePage />} />
           <Route path="map" element={<StoreMapPage />} />
         </Route>
       </Routes>
