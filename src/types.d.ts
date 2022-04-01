@@ -72,15 +72,30 @@ type Grocery = Pick<DbGrocery, 'id' | 'name' | 'size'>;
 interface DbMapData {
   id: number;
   data: string;
-  organisation_id: string;
+  organisation_id: number;
 }
 
 type MapData = Pick<DbMapData, 'id' | 'data'>;
 
+interface DbRecipe {
+  id: number;
+  name: string;
+  created_at_utc: string;
+  organisation_id: number;
+}
+
+interface Recipe extends Pick<DbRecipe, 'id' | 'name' | 'created_at_utc'> {
+  groceries: Array<Grocery>;
+}
+
+interface DbRecipeIngredient {
+  recipe_id: number;
+  grocery_id: number;
+}
+
 declare module 'fastify' {
   interface FastifyRequest {
     user: DbUser;
-    choreId: number;
   }
 
   interface FastifyRequestBody {}

@@ -8,7 +8,7 @@ const server = buildServer({
   },
 });
 
-server.listen(port, function (err, address) {
+server.listen(port, '0.0.0.0', function (err, address) {
   if (err) {
     server.log.error(err);
     process.exit(1);
