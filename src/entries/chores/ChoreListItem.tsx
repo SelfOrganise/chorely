@@ -1,14 +1,13 @@
 import React, { useCallback, useMemo, useState } from 'react';
-import ReactDOM from 'react-dom';
 import classNames from 'classnames';
 import { toast } from 'react-toastify';
-import { Popover, Transition } from '@headlessui/react';
-import { usePopper } from 'react-popper';
+import { Transition } from '@headlessui/react';
 
 import { completeAssignment, sendReminder, undoAssignment } from 'srcRootDir/services/chores';
 import { useLastCompletedSubtask } from 'srcRootDir/hooks/useLastCompletedSubtask';
 import { parseDueDate } from 'srcRootDir/services/parseDueDate';
 import { menuIcon, checkIcon, chevronDoubleDownIcon } from 'srcRootDir/common/icons';
+import { Dropdown } from 'srcRootDir/common/components';
 
 interface ChoreListItemProps {
   assignment: Assignment;
@@ -18,12 +17,8 @@ interface ChoreListItemProps {
 }
 
 export const ChoreListItem = ({ assignment, onComplete, isDone }: ChoreListItemProps) => {
-  const [referenceElement, setReferenceElement] = useState<HTMLButtonElement>();
-  const [popperElement, setPopperElement] = useState<HTMLDivElement>();
   // todo: show loader
   const [, setIsLoading] = useState(false);
-
-  let { styles, attributes } = usePopper(referenceElement, popperElement);
   const subtasks = useLastCompletedSubtask(assignment.id);
   const hasSubtasks = assignment.subtasks && assignment.subtasks.length > 0;
   const allSubtasksCompleted = hasSubtasks ? subtasks.lastIndex >= (assignment.subtasks?.length ?? -1) : true;
@@ -69,7 +64,7 @@ export const ChoreListItem = ({ assignment, onComplete, isDone }: ChoreListItemP
   );
 
   const handleUndoClick = useCallback(
-    async (e: React.MouseEvent<HTMLElement>, chore: Assignment) => {
+    async (chore: Assignment) => {
       setIsLoading(true);
       try {
         await undoAssignment(chore.id);
@@ -87,7 +82,7 @@ export const ChoreListItem = ({ assignment, onComplete, isDone }: ChoreListItemP
   );
 
   const handleSendReminderClick = useCallback(
-    async (e: React.MouseEvent<HTMLElement>, chore: Assignment) => {
+    async (chore: Assignment) => {
       setIsLoading(true);
       await sendReminder(chore.id);
       setIsLoading(false);
@@ -98,6 +93,27 @@ export const ChoreListItem = ({ assignment, onComplete, isDone }: ChoreListItemP
   );
 
   const { dueString, isLate } = useMemo(() => parseDueDate(assignment), [assignment]);
+
+  const buttons = useMemo(
+    () => [
+      {
+        label: '⏪ Undo',
+        onClick: () => handleUndoClick(assignment),
+      },
+      {
+        label: '🔔 Send reminder',
+        onClick: () => handleSendReminderClick(assignment),
+      },
+      {
+        label: '🧽 Clear subtasks',
+        onClick: () => {
+          subtasks.clear();
+          setSubtasksVisible(false);
+        },
+      },
+    ],
+    [handleUndoClick, handleSendReminderClick, subtasks, setSubtasksVisible]
+  );
 
   return (
     <div className="flex flex-col justify-between min-h-[6rem] bg-teal-500 rounded px-2 py-2 drop-shadow relative mb-4">
@@ -134,61 +150,9 @@ export const ChoreListItem = ({ assignment, onComplete, isDone }: ChoreListItemP
       >
         {dueString}
       </span>
-      <Popover className="absolute top-0 right-0 mr-2 mt-2 z-20">
-        <Popover.Button
-          className="text-white hover:text-teal-200"
-          ref={(e: HTMLButtonElement) => e && setReferenceElement(e)}
-        >
-          {menuIcon}
-        </Popover.Button>
-        {ReactDOM.createPortal(
-          <Popover.Panel
-            ref={(e: HTMLDivElement) => e && setPopperElement(e)}
-            style={styles.popper}
-            {...attributes.popper}
-          >
-            {({ close }) => (
-              <div className="rounded bg-white shadow mt-2">
-                <Popover.Button className="flex items-center w-full">
-                  <span
-                    onClick={(e: React.MouseEvent<HTMLElement>) => {
-                      close();
-                      handleUndoClick(e, assignment);
-                    }}
-                    className="px-4 py-3 whitespace-pre"
-                  >
-                    ⏪ Undo
-                  </span>
-                </Popover.Button>
-                <Popover.Button className="flex items-center w-full">
-                  <span
-                    onClick={(e: React.MouseEvent<HTMLElement>) => {
-                      close();
-                      handleSendReminderClick(e, assignment);
-                    }}
-                    className="px-4 py-3 whitespace-pre"
-                  >
-                    🔔 Send reminder
-                  </span>
-                </Popover.Button>
-                <Popover.Button className="flex items-center w-full">
-                  <span
-                    onClick={() => {
-                      close();
-                      subtasks.clear();
-                      setSubtasksVisible(false);
-                    }}
-                    className="py-3 px-4 whitespace-pre"
-                  >
-                    🧽 Clear subtasks
-                  </span>
-                </Popover.Button>
-              </div>
-            )}
-          </Popover.Panel>,
-          document.body
-        )}
-      </Popover>
+      <Dropdown className="absolute top-0 right-0 mr-2 mt-2 z-20" buttons={buttons}>
+        {menuIcon}
+      </Dropdown>
       <div
         onClick={(e: React.MouseEvent<HTMLElement>) => handleCompleteClick(e, assignment)}
         className="absolute text-teal-500 bottom-0 right-0 mr-2 mb-2 bg-white hover:opacity-80 rounded-full shadow px-2 py-2 hover:cursor-pointer"
