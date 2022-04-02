@@ -27,8 +27,21 @@
     "synchronousWatchDirectory": true,
 
     // Finally, two additional settings for reducing the amount of possible
-    // files to track  work from these directories
+    // files to track work from these directories
     "excludeDirectories": ["**/node_modules", "dist"]
   },
-  "include": ["src/**/*"]
+  "include": ["./src/**/*"],
+  "ts-node": {
+    // It is faster to skip typechecking.
+    // Remove if you want ts-node to do typechecking.
+    "transpileOnly": true,
+
+    "files": true,
+
+    "compilerOptions": {
+      // compilerOptions specified here will override those declared below,
+      // but *only* in ts-node.  Useful if you want ts-node and tsc to use
+      // different options with a single tsconfig.json.
+    }
+  }
 }

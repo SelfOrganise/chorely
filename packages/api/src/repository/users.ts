@@ -1,4 +1,3 @@
-import { DbUser } from '../types';
 import { pool } from './db';
 
 export async function findUser(email: string | undefined): Promise<DbUser | null | undefined> {
@@ -14,7 +13,7 @@ export async function findUser(email: string | undefined): Promise<DbUser | null
     [email]
   );
 
-  await client.release();
+  client.release();
 
   if (users.rows.length !== 1) {
     return null;

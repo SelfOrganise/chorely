@@ -14,7 +14,6 @@ import {
   getStoreMaps,
   updateOrCreateMap,
 } from '../repository/shopping';
-import { Basket, DbGrocery } from '../types';
 
 const { exec } = require('child_process');
 

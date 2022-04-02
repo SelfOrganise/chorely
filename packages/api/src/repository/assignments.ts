@@ -1,5 +1,4 @@
 import { pool } from './db';
-import { Assignment, DbAssignment, DbExemption, DbTask, DbUser, User } from '../types';
 import { sendEmail, sendReminder } from '../services/email';
 import { Response, response } from "../utilities/response";
 import { getUsersByOrganisation } from './users';
@@ -8,7 +7,7 @@ import { setHours, setMinutes, setSeconds, addHours } from 'date-fns';
 
 export async function getTasks(organisationId: number): Promise<Array<Assignment>> {
   const client = await pool.connect();
-  const choresResult = await client.query<DbAssignment>(
+  const choresResult = await client.query<Assignment>(
     `
         select extended.id,
                t.title,
@@ -28,10 +27,8 @@ export async function getTasks(organisationId: number): Promise<Array<Assignment
                                 id desc
                             ) as row_number
                  from assignments a) as extended
-                 inner join tasks t on
-            extended.task_id = t.id
-        where extended.row_number = 1
-          and t.organisation_id = $1
+                 inner join tasks t on extended.task_id = t.id
+        where extended.row_number = 1 and t.organisation_id = $1
      `,
     [organisationId]
   );

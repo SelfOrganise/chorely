@@ -1,5 +1,4 @@
 import MailService from '@sendgrid/mail';
-import { DbAssignment, DbUser, User } from '../types';
 
 MailService.setApiKey(process.env.SENDGRID_API_KEY!);
 

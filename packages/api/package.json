@@ -28,6 +28,8 @@
     "@babel/preset-typescript": "^7.16.7",
     "@faker-js/faker": "^6.0.0-alpha.3",
     "@types/jest": "^27.4.0",
+    "@types/chorely": "workspace:*",
+    "@types/node": "^17.0.23",
     "@types/pg": "^8.6.4",
     "babel-jest": "^27.4.6",
     "dotenv": "^12.0.4",

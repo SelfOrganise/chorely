@@ -118,7 +118,7 @@ export function BasketPage() {
           </Tab.Panel>
           <Tab.Panel>
             <Button onClick={() => createNewBasket()}>Create new basket</Button>
-            {currentBasket?.items.map((g, i) => (
+            {currentBasket?.items.map((g: Grocery, i: number) => (
               <GroceryItem key={`${g.id}-${i}`} item={g} onAdd={() => null} />
             ))}
           </Tab.Panel>

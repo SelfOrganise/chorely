@@ -1,5 +1,3 @@
-const BACKEND_ORIGIN: string;
-
 declare module 'pathfinding' {
   export var Heap: any;
   export var Node: any;
