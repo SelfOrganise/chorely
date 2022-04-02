@@ -1,0 +1,29 @@
+name: 🖼️ Release frontend
+on:
+  push:
+    branches: [ main ]
+    paths:
+      - 'packages/web'
+      - 'common/types'
+  workflow_dispatch:
+
+jobs:
+  deploy-web:
+    runs-on: ubuntu-latest
+    environment: github-pages
+    steps:
+      - uses: actions/checkout@v3
+      - name: Setup PNPM
+        uses: pnpm/action-setup@v2.2.1
+      - name: Use Node.js 16.x
+        uses: actions/setup-node@v2
+        with:
+          node-version: 16.x
+          cache: 'pnpm'
+      - run: pnpm --filter web i --prod
+      - run: pnpm --filter web build
+#      - name: Deploy 🚀
+#        uses: JamesIves/github-pages-deploy-action@v4.2.2
+#        with:
+#          branch: gh-pages # The branch the action should deploy to.
+#          folder: dist # The folder the action should deploy.

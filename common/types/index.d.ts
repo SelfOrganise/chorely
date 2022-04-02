@@ -22,7 +22,7 @@ interface Assignment {
 interface Basket {
   id: number;
   created_at_utc: string;
-  items: Arry<BasketItem>;
+  items: Array<BasketItem>;
 }
 
 interface BasketItem extends Grocery {
