@@ -42,7 +42,7 @@ export const shopping: FastifyPluginCallback = (server, opts, done) => {
       // note: theoretically safe to pass as shell args because schema ensures values are numbers or array of numbers
       // strings like (') would break things otherwise
       exec(
-        `${process.cwd()}/dist/solver.py '${weights}' '${sizes}' '${numberOfPeople}'`,
+        `${process.cwd()}/solver.py '${weights}' '${sizes}' '${numberOfPeople}'`,
         (err: string, stdout: string, stderr: string) => {
           if (err || stderr) {
             res.status(400).send(stderr);
