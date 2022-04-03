@@ -3,8 +3,8 @@ on:
   push:
     branches: [ main ]
     paths:
-      - 'packages/api'
-      - 'common/types'
+      - 'packages/api/**'
+      - 'common/types/**'
   workflow_dispatch:
 
 jobs:

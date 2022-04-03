@@ -3,8 +3,8 @@ on:
   push:
     branches: [ main ]
     paths:
-      - 'packages/web'
-      - 'common/types'
+      - 'packages/web/**'
+      - 'common/types/**'
   workflow_dispatch:
 
 jobs:
@@ -22,7 +22,7 @@ jobs:
         with:
           node-version: 16.x
           cache: 'pnpm'
-      - run: pnpm --filter web i --prod
+      - run: pnpm --filter web i
       - run: pnpm --filter web build
       - name: Deploy 🚀
         uses: JamesIves/github-pages-deploy-action@v4.2.2
