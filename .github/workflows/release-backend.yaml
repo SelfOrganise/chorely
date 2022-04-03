@@ -27,6 +27,7 @@ jobs:
       - name: Deploy 🚀
         uses: appleboy/scp-action@v0.1.2
         with:
+          strip_components: 3
           host: ${{ secrets.HOST }}
           username: ${{ secrets.USERNAME }}
           password: ${{ secrets.PASSWORD }}
