@@ -1,3 +1,6 @@
+// note: for some reason this fails tsc when there are no imports 🤦
+import { AddContentTypeParser} from 'fastify';
+
 declare global {
   interface DbUser {
     id: number;

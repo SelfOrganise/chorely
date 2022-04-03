@@ -10,7 +10,7 @@ import { Login } from 'srcRootDir/entries/login';
 import { ChoresPage } from 'srcRootDir/entries/chores';
 import { BasketPage } from 'srcRootDir/entries/shopping/BasketPage';
 import { ManageGroceriesPage } from 'srcRootDir/entries/shopping/ManageGroceriesPage';
-import { RecipesPage } from 'srcRootDir/entries/shopping/RecipesPage';
+import { RecipesPage } from 'srcRootDir/entries/shopping/RecipesPage/RecipesPage';
 import { ShoppingWrapper } from 'srcRootDir/entries/shopping/ShoppingRoot';
 import { StoreMapPage } from 'srcRootDir/entries/shopping/StoreMapPage';
 

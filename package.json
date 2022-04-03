@@ -3,10 +3,8 @@
   "version": "0.0.1",
   "description": "Just Chorely",
   "main": "index.js",
-  "dependencies": {},
-  "devDependencies": {},
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "dev": "pnpm run dev --stream --parallel --filter 'web' --filter 'api'"
   },
   "repository": {
     "type": "git",

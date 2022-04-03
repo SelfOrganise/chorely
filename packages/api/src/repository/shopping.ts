@@ -152,7 +152,7 @@ export async function updateOrCreateMap(map: Pick<MapData, 'data'>, organisation
   }
 }
 
-export async function addToBasket(groceryId: number, organisationId: number) {
+export async function addGroceryToBasket(groceryId: number, organisationId: number) {
   const basket = await ensureCurrentBasket(organisationId);
 
   await pool.query(
@@ -161,6 +161,22 @@ export async function addToBasket(groceryId: number, organisationId: number) {
     values($1, $2)
   `,
     [basket.id, groceryId]
+  );
+}
+
+export async function addRecipeToBasket(recipeId: number, organisationId: number) {
+  const basket = await ensureCurrentBasket(organisationId);
+
+  await pool.query(
+    `
+    insert into basket_items(basket_id, grocery_id)
+    select $1 as basket_id, g.id 
+    from recipes r 
+    inner join recipe_ingredients ri on ri.recipe_id = r.id
+    inner join groceries g on ri.grocery_id = g.id
+    where r.organisation_id = $2 and r.id = $3 
+  `,
+    [basket.id, organisationId, recipeId]
   );
 }
 

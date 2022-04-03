@@ -14,6 +14,7 @@ import { StoreMap } from 'srcRootDir/entries/shopping/services/StoreMap';
 import { toast } from 'react-toastify';
 import { Button } from 'srcRootDir/common/components';
 import { Tab } from '@headlessui/react';
+import { RecipeItem } from 'srcRootDir/entries/shopping/RecipesPage/components/RecipeItem';
 
 export function BasketPage() {
   const canvasElement = useRef<HTMLCanvasElement | null>(null);
@@ -30,6 +31,14 @@ export function BasketPage() {
   });
 
   const mapResponse = useSWR<Array<MapData>>('/shopping/maps', {
+    fetcher,
+    refreshInterval: 0,
+    revalidateOnFocus: false,
+    revalidateOnReconnect: false,
+    revalidateOnMount: true,
+  });
+
+  const recipes = useSWR<Array<Recipe>>('/shopping/recipes', {
     fetcher,
     refreshInterval: 0,
     revalidateOnFocus: false,
@@ -100,6 +109,7 @@ export function BasketPage() {
       <Tab.Group>
         <Tab.List className="flex justify-between w-64 mb-2">
           <Tab as={Button}>List </Tab>
+          <Tab as={Button}>Recipes</Tab>
           <Tab as={Button}>Basket ({currentBasket?.items.length || 0})</Tab>
           <Tab as={Button}>Solve</Tab>
         </Tab.List>
@@ -110,8 +120,20 @@ export function BasketPage() {
                 key={g.id}
                 item={g}
                 onAdd={async item => {
-                  await addToBasket(item.id);
+                  await addToBasket({ groceryId: item.id });
                   toast.success(`added '${item.name}'`, { autoClose: 1500, position: 'bottom-center' });
+                }}
+              />
+            ))}
+          </Tab.Panel>
+          <Tab.Panel>
+            {recipes?.data?.map(recipe => (
+              <RecipeItem
+                key={recipe.id}
+                recipe={recipe}
+                onClick={async () => {
+                  await addToBasket({ recipeId: recipe.id });
+                  toast.success(`added '${recipe.name}'`, { autoClose: 1500, position: 'bottom-center' });
                 }}
               />
             ))}

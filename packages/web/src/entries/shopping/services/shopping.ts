@@ -15,8 +15,8 @@ export async function addGrocery(grocery: Omit<Grocery, 'id'>): Promise<unknown>
   return await fetcher('/shopping/groceries', { method: 'POST', body: JSON.stringify(grocery) });
 }
 
-export async function addToBasket(groceryId: number): Promise<unknown> {
-  return await fetcher('/shopping/baskets/current', { method: 'POST', body: JSON.stringify({ groceryId }) });
+export async function addToBasket(item: { groceryId?: number; recipeId?: number }): Promise<unknown> {
+  return await fetcher('/shopping/baskets/current', { method: 'POST', body: JSON.stringify(item) });
 }
 
 export async function updateOrCreateMap(storeMap: MapDefinition): Promise<unknown> {

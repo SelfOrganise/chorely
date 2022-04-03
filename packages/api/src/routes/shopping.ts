@@ -4,7 +4,7 @@ import {
   addGrocery,
   addGroceryToRecipe,
   addRecipe,
-  addToBasket,
+  addGroceryToBasket,
   createNewBasket,
   deleteGroceryFromRecipe,
   getCurrentBasket,
@@ -13,6 +13,7 @@ import {
   getRecipes,
   getStoreMaps,
   updateOrCreateMap,
+  addRecipeToBasket,
 } from '../repository/shopping';
 
 const { exec } = require('child_process');
@@ -85,14 +86,24 @@ export const shopping: FastifyPluginCallback = (server, opts, done) => {
   });
 
   // add to basket
-  server.post<{ Body: { groceryId: number } }>('/shopping/baskets/current', {
+  server.post<{ Body: { groceryId?: number; recipeId?: number } }>('/shopping/baskets/current', {
     schema: {
-      body: S.object().prop('groceryId').required(['groceryId']),
+      body: S.oneOf([
+        S.object().prop('groceryId').required(['groceryId']),
+        S.object().prop('recipeId').required(['recipeId']),
+      ]),
     },
     handler: async (req, reply) => {
       const organisationId = req.user.organisation_id;
-      await addToBasket(req.body.groceryId, organisationId);
-      reply.status(204);
+      if (req.body.groceryId) {
+        await addGroceryToBasket(req.body.groceryId, organisationId);
+        reply.status(204);
+      } else if (req.body.recipeId) {
+        await addRecipeToBasket(req.body.recipeId, organisationId);
+        reply.status(204);
+      } else {
+        reply.status(400).send('recipeId or bodyId required in body.');
+      }
 
       // update baskets
       const currentBasket = await getCurrentBasket(organisationId);

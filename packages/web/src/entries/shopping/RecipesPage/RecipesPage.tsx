@@ -5,12 +5,13 @@ import { Button, TextField } from 'srcRootDir/common/components';
 import { addRecipe } from 'srcRootDir/entries/shopping/services/shopping';
 import { toast } from 'react-toastify';
 import { useNavigate } from 'react-router-dom';
+import {RecipeItem} from "srcRootDir/entries/shopping/RecipesPage/components/RecipeItem";
 
 export function RecipesPage() {
   const navigate = useNavigate();
   const [recipeName, setRecipeName] = useState('');
 
-  const recipes = useSWR<Array<Grocery>>('/shopping/recipes', {
+  const recipes = useSWR<Array<Recipe>>('/shopping/recipes', {
     fetcher,
     refreshInterval: 0,
     revalidateOnFocus: false,
@@ -35,10 +36,7 @@ export function RecipesPage() {
 
       <div className="flex flex-col w-full mt-4">
         {recipes?.data?.map(recipe => (
-          <div className="flex justify-between w-full bg-blue-200 rounded mb-2 p-4" key={recipe.id}>
-            <span>{recipe.name}</span>
-            <Button onClick={() => navigate(`/shopping/recipes/${recipe.id}`)}>Open</Button>
-          </div>
+          <RecipeItem recipe={recipe} onClick={() => navigate(`/shopping/recipes/${recipe.id}`)} />
         ))}
       </div>
     </div>
