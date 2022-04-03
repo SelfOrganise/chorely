@@ -15,6 +15,8 @@ jobs:
       - uses: actions/checkout@v3
       - name: Setup PNPM
         uses: pnpm/action-setup@v2.2.1
+        with:
+          version: 6
       - name: Use Node.js 16.x
         uses: actions/setup-node@v2
         with:
@@ -22,8 +24,8 @@ jobs:
           cache: 'pnpm'
       - run: pnpm --filter web i --prod
       - run: pnpm --filter web build
-#      - name: Deploy 🚀
-#        uses: JamesIves/github-pages-deploy-action@v4.2.2
-#        with:
-#          branch: gh-pages # The branch the action should deploy to.
-#          folder: dist # The folder the action should deploy.
+      - name: Deploy 🚀
+        uses: JamesIves/github-pages-deploy-action@v4.2.2
+        with:
+          branch: gh-pages # The branch the action should deploy to.
+          folder: "packages/web/dist" # The folder the action should deploy.

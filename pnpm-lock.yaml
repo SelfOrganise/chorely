@@ -2,6 +2,9 @@ lockfileVersion: 5.3
 
 importers:
 
+  .:
+    specifiers: {}
+
   common/types:
     specifiers: {}
 

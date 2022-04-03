@@ -8,13 +8,15 @@ on:
   workflow_dispatch:
 
 jobs:
-  build:
+  deploy-api:
     runs-on: ubuntu-latest
     environment: upcloud
     steps:
       - uses: actions/checkout@v3
       - name: Setup PNPM
         uses: pnpm/action-setup@v2.2.1
+        with:
+          version: 6
       - name: Use Node.js 16.x
         uses: actions/setup-node@v2
         with:
@@ -22,12 +24,12 @@ jobs:
           cache: 'pnpm'
       - run: pnpm --filter api i --prod
       - run: pnpm --filter api build
-#    - name: deploy to upcloud
-#      uses: appleboy/scp-action@v0.1.2
-#      with:
-#        host: ${{ secrets.HOST }}
-#        username: ${{ secrets.USERNAME }}
-#        password: ${{ secrets.PASSWORD }}
-#        port: ${{ secrets.PORT }}
-#        source: "packages/api/dist/*"
-#        target: "/home/chores/api"
+      - name: Deploy 🚀
+        uses: appleboy/scp-action@v0.1.2
+        with:
+          host: ${{ secrets.HOST }}
+          username: ${{ secrets.USERNAME }}
+          password: ${{ secrets.PASSWORD }}
+          port: ${{ secrets.PORT }}
+          source: "packages/api/dist/*"
+          target: "/home/chores/api"
