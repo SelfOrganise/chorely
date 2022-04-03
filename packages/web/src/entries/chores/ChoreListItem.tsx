@@ -45,7 +45,8 @@ export const ChoreListItem = ({ assignment, onComplete, isDone }: ChoreListItemP
 
           const result = await completeAssignment(chore.id);
           if (result) {
-            toast.success(result);
+            // note: alert when reassigned back
+            alert(result);
           } else {
             toast.success(`Task completed`);
           }

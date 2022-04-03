@@ -93,6 +93,7 @@ export function BasketPage() {
 
     storeMap.current?.drawRoutes(response, routes);
 
+    storeMap.current?.canvas.forEachObject(o => (o.selectable = false));
     setResult(productRoutes);
   }
 
@@ -152,15 +153,15 @@ export function BasketPage() {
             {result && (
               <div className="flex justify-around">
                 <div>
-                  {result[0].map(v => (
-                    <div>
+                  {result[0].map((v, i) => (
+                    <div key={v.name + i}>
                       {v?.name} - {v?.size}
                     </div>
                   ))}
                 </div>
                 <div>
-                  {result[1].map(v => (
-                    <div>
+                  {result[1].map((v, i) => (
+                    <div key={v.name + i}>
                       {v?.name} - {v?.size}
                     </div>
                   ))}

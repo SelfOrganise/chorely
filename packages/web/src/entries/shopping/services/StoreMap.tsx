@@ -1,6 +1,8 @@
 import { fabric } from 'fabric';
 import { fallbackImage, Names, Types, Urls } from './constants';
 import { RoutesContext, toImageName } from '../services/utils';
+import Hammer from 'hammerjs';
+import { ICanvasOptions } from 'fabric/fabric-impl';
 
 export const storeMapConfig = {
   columns: 100,
@@ -8,22 +10,131 @@ export const storeMapConfig = {
   grid: 10,
 };
 
+interface HammerCanvasClass extends fabric.Canvas {
+  new (element: HTMLCanvasElement | string | null, options?: ICanvasOptions): HammerCanvasClass;
+  scale: number;
+  isDragging: boolean;
+  lastPosX: number;
+  lastPosY: number;
+  wrapperEl: HTMLElement;
+  isScalingObject: boolean;
+}
+
+const HammerCanvas: HammerCanvasClass = fabric.util.createClass(fabric.Canvas, {
+  _onMouseDown: function (e: any) {
+    if (e.type === 'touchstart') {
+      // Do not allow grouping in mobile mode
+      this.selection = false;
+      fabric.util.removeListener(this.upperCanvasEl, 'mousedown', this._onMouseDown);
+      if (this.currentTouchStart) {
+        // Second event, stop this as this is multitouch
+        clearTimeout(this.currentTouchStart);
+        this.currentTouchStart = null;
+      } else {
+        // First touch start, wait 100 ms then call
+        this.currentTouchStart = setTimeout(() => {
+          this.currentTouchStart = null;
+          this.callSuper('_onMouseDown', e);
+        }, 75);
+      }
+    } else {
+      this.callSuper('_onMouseDown', e);
+    }
+  },
+
+  _onMouseUp: function (e: any) {
+    if (e.type === 'touchend') {
+      setTimeout(() => {
+        this.callSuper('_onMouseUp', e);
+      }, 75);
+    } else {
+      this.callSuper('_onMouseUp', e);
+    }
+  },
+
+  _onMouseMove: function (e: any) {
+    this.getActiveObject() && e.preventDefault && e.preventDefault();
+    this.__onMouseMove(e);
+  },
+
+  _onObjectScaling: function (e: any) {
+    this._onObjectScaling(e);
+  },
+
+  addOrRemove: function (this: HammerCanvasClass, functor: unknown, eventjsFunctor: unknown) {
+    // @ts-ignore
+    this.callSuper('addOrRemove', functor, eventjsFunctor);
+    const mc = new Hammer.Manager(this.wrapperEl);
+
+    const pinch = new Hammer.Pinch({ interval: 100 });
+    const pan = new Hammer.Pan();
+    mc.add(pinch);
+    mc.add(pan);
+
+    mc.on('pinchin', e => {
+      this.scale = Math.max((this.getZoom() || 1) - 0.03, 0.9);
+
+      this.zoomToPoint({ x: e.center.x, y: e.center.y }, this.scale);
+      this.requestRenderAll();
+    });
+
+    mc.on('pinchout', e => {
+      this.scale = Math.min((this.getZoom() || 1) + 0.03, 3);
+
+      this.zoomToPoint({ x: e.center.x, y: e.center.y }, this.scale);
+      this.requestRenderAll();
+    });
+
+    mc.on('panstart', e => {
+      this.isDragging = true;
+      this.lastPosX = e.deltaX;
+      this.lastPosY = e.deltaY;
+    });
+
+    mc.on('panend', e => {
+      this.isDragging = false;
+      this.setViewportTransform(this.viewportTransform!);
+    });
+
+    mc.on('panmove', e => {
+      if (this.isDragging) {
+        const activeObject = this.getActiveObject();
+        if (activeObject) {
+          return;
+        } else {
+          const vpt = this.viewportTransform;
+          vpt![4] += e.deltaX - this.lastPosX;
+          vpt![5] += e.deltaY - this.lastPosY;
+          this.requestRenderAll();
+          this.lastPosX = e.deltaX;
+          this.lastPosY = e.deltaY;
+        }
+      }
+    });
+  },
+});
+
 export class StoreMap {
-  canvas: fabric.Canvas;
+  canvas: HammerCanvasClass;
   clipboard: fabric.Object | null = null;
   canvasWidth = storeMapConfig.columns * storeMapConfig.grid;
   canvasHeight = storeMapConfig.rows * storeMapConfig.grid;
 
   constructor(canvasElement: HTMLCanvasElement) {
-    this.canvas = new fabric.Canvas(canvasElement, { selection: false });
+    this.canvas = new HammerCanvas(canvasElement, { selection: false });
     this.canvas.setWidth(this.canvasWidth);
     this.canvas.setHeight(this.canvasHeight);
+
+    const pattern = new fabric.Pattern({
+      source:
+        'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAoAAAAKBAMAAAB/HNKOAAAAAXNSR0IB2cksfwAAAAlwSFlzAAALEwAACxMBAJqcGAAAABJQTFRFpqamAAAAAAAAAAAAAAAAAAAANjJK4QAAAAZ0Uk5T/wABAgMFah24GgAAABdJREFUeJxjYAADRiEhk0AGRkEgIJ4EAFQYAtPe/vhQAAAAAElFTkSuQmCC',
+    });
+    this.canvas.setBackgroundColor(pattern, () => null);
 
     this.init();
   }
 
   init() {
-    this.#drawGridLines();
     this.#enableZoom();
     this.#enableSnapToGrid();
   }
@@ -117,67 +228,6 @@ export class StoreMap {
     }
   }
 
-  //region old
-  // let isDown = false;
-  // let origX = 0;
-  // let origY = 0;
-  // let rect: any = null;
-  // canvas.on('mouse:down', function (o) {
-  //   if (!canvas.current) {
-  //     return;
-  //   }
-  //
-  //   let pointer = canvas.getPointer(o.e);
-  //   isDown = true;
-  //   origX = snap(pointer.x);
-  //   origY = snap(pointer.y);
-  //   rect = new fabric.Rect({
-  //     top: snap(origY),
-  //     left: snap(origX),
-  //     originX: 'left',
-  //     originY: 'top',
-  //     width: snap(pointer.x - origX),
-  //     height: snap(pointer.y - origY),
-  //     angle: 0,
-  //     fill: 'rgba(255,0,0,1)',
-  //     transparentCorners: false,
-  //   });
-  //   canvas.add(rect);
-  // });
-
-  // canvas.on('mouse:move', function (o) {
-  //   if (!canvas.current) return;
-  //   if (!isDown) return;
-  //
-  //   let pointer = canvas.getPointer(o.e);
-  //
-  //   if (origX > pointer.x) {
-  //     rect.set({ left: snap(Math.abs(pointer.x)) });
-  //   }
-  //
-  //   if (origY > pointer.y) {
-  //     rect.set({ top: snap(Math.abs(pointer.y)) });
-  //   }
-  //
-  //   rect.set({ width: snap(Math.abs(origX - pointer.x)) });
-  //   rect.set({ height: snap(Math.abs(origY - pointer.y)) });
-  //
-  //   canvas.renderAll();
-  // });
-
-  // canvas.on('mouse:up', function (o) {
-  //   rect.set({
-  //     width: snap(rect.width),
-  //     height: snap(rect.height),
-  //     scaleX: 1,
-  //     scaleY: 1,
-  //   });
-  //
-  //   canvas.current?.renderAll();
-  //   isDown = false;
-  // });
-  //endregion
-
   addWall() {
     this.canvas.add(
       new fabric.Rect({
@@ -241,36 +291,12 @@ export class StoreMap {
     }
   }
 
-  #drawGridLines() {
-    for (let i = 0; i < storeMapConfig.columns + 1; i++) {
-      this.canvas.add(
-        new fabric.Line([i * storeMapConfig.grid, 0, i * storeMapConfig.grid, this.canvasHeight], {
-          stroke: '#ddd',
-          opacity: 0.4,
-          selectable: false,
-          evented: false,
-        })
-      );
-    }
-
-    for (let i = 0; i < storeMapConfig.rows + 1; i++) {
-      this.canvas.add(
-        new fabric.Line([0, i * storeMapConfig.grid, this.canvasWidth, i * storeMapConfig.grid], {
-          stroke: '#ddd',
-          opacity: 0.4,
-          selectable: false,
-          evented: false,
-        })
-      );
-    }
-  }
-
   #snap(size: number): number {
     return Math.round(size / storeMapConfig.grid) * storeMapConfig.grid;
   }
 
   addProduct({ name, left, top }: { name: string; left?: number; top?: number }) {
-    fabric.Image.fromURL(`/images/${toImageName(name)}.jpeg`, item => {
+    fabric.Image.fromURL(`/images/small/${toImageName(name)}.jpeg`, item => {
       item.name = name;
       item.type = 'product';
       if (item.height === 0 || item.width === 0) {
@@ -340,47 +366,6 @@ export class StoreMap {
       this.zoomToPoint({ x: opt.e.offsetX, y: opt.e.offsetY }, zoom);
       opt.e.preventDefault();
       opt.e.stopPropagation();
-    });
-
-    this.canvas.on('mouse:down', function (this: fabric.Canvas, opt) {
-      const mouseOrTouchEvent = opt.e as any;
-      const evt = mouseOrTouchEvent.changedTouches ? mouseOrTouchEvent.changedTouches[0] : mouseOrTouchEvent;
-      if (opt.e.altKey) {
-        // @ts-ignore
-        this.isDragging = true;
-        // @ts-ignore
-        this.lastPosX = evt.clientX;
-        // @ts-ignore
-        this.lastPosY = evt.clientY;
-      }
-    });
-
-    this.canvas.on('mouse:move', function (this: fabric.Canvas, opt) {
-      // @ts-ignore
-      if (this.isDragging) {
-        const mouseOrTouchEvent = opt.e as any;
-        const evt = mouseOrTouchEvent.changedTouches ? mouseOrTouchEvent.changedTouches[0] : mouseOrTouchEvent;
-
-        const vpt = this.viewportTransform;
-        // @ts-ignore
-        vpt![4] += evt.clientX - this.lastPosX;
-        // @ts-ignore
-        vpt![5] += evt.clientY - this.lastPosY;
-        this.requestRenderAll();
-        // @ts-ignore
-        this.lastPosX = evt.clientX;
-        // @ts-ignore
-        this.lastPosY = evt.clientY;
-      }
-    });
-
-    this.canvas.on('mouse:up', function (this: fabric.Canvas, opt) {
-      // on mouse up we want to recalculate new interaction
-      // for all objects, so we call setViewportTransform
-      // @ts-ignore
-      this.setViewportTransform(this.viewportTransform);
-      // @ts-ignore
-      this.isDragging = false;
     });
   }
 }
