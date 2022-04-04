@@ -9,7 +9,6 @@ const copyPlugin = ({ from, to }) => ({
   },
 });
 
-
 require('esbuild').build({
   entryPoints: ['src/index.ts'],
   bundle: true,
@@ -19,6 +18,6 @@ require('esbuild').build({
   target: ['node16'],
   external: ['pg-native'],
   outdir: 'dist',
-  plugins: [copyPlugin({ from: './scripts/solver.py', to: './dist/solver.py' })],
+  plugins: [copyPlugin({ from: './scripts/solver.py', to: './dist/scripts/solver.py' })],
   allowOverwrite: true,
 });

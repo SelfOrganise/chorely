@@ -50,7 +50,7 @@ export function RecipePage(): JSX.Element {
         <Tab.Panels className="flex flex-col w-full">
           <Tab.Panel>
             {recipe.data?.groceries?.map((grocery, i) => (
-              <GroceryItem key={`${grocery.id}${i}`} item={grocery} onAdd={() => null} />
+              <GroceryItem key={`${grocery.id}${i}`} item={grocery} />
             ))}
           </Tab.Panel>
           <Tab.Panel>
