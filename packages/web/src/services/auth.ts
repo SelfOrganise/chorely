@@ -18,7 +18,3 @@ export async function login(username: string) {
 export function getCurrentUserId(): number {
   return parseInt(window.localStorage.getItem('userId')!);
 }
-
-export function logout() {
-  document.cookie = 'userId=; Expires=Thu, 01 Jan 1970 00:00:00 GMT';
-}
