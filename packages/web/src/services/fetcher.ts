@@ -8,11 +8,15 @@ export function fetcher(url: string, init?: RequestInit): any | Response {
     ...(init || {}),
   }).then(res => {
     if (res.status === 200) {
-      if (res.headers.get("content-type")?.includes('json')) {
+      if (res.headers.get('content-type')?.includes('json')) {
         return res.json();
       } else {
         return res.text();
       }
+    }
+
+    if (res.status === 204) {
+      return null;
     }
 
     if (!res.ok) {
