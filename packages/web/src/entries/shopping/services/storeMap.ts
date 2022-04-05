@@ -296,7 +296,7 @@ export class StoreMap {
   }
 
   addProduct({ name, left, top }: { name: string; left?: number; top?: number }) {
-    fabric.Image.fromURL(`/images/small/${toImageName(name)}.jpeg`, item => {
+    fabric.Image.fromURL(`/images/small/${toImageName(name)}.webP`, item => {
       item.name = name;
       item.type = 'product';
       if (item.height === 0 || item.width === 0) {

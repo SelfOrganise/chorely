@@ -47,6 +47,7 @@ export function useLiveBasket(): Basket | null {
 
     const setup = () => {
       const sse = new EventSource(`${BACKEND_ORIGIN}/shopping/baskets/current?userId=${userId}`);
+      sse.onopen = () => toast.success('Connected to live basket');
       sse.onmessage = e => setCurrentBasket(JSON.parse(e.data));
       return sse;
     };
@@ -55,7 +56,6 @@ export function useLiveBasket(): Basket | null {
 
     const handleFocus = () => {
       if (!sse || sse.readyState === 2) {
-        toast.info('reconnecting...');
         sse.close();
         sse = setup();
       }

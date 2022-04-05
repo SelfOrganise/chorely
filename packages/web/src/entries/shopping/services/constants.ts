@@ -1,5 +1,5 @@
 export const fallbackImage = new Image(64, 64);
-fallbackImage.src = '/images/fallback.jpeg';
+fallbackImage.src = '/images/fallback.webP';
 
 export const Urls = {
   startUrl: '/images/start.svg',

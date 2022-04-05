@@ -28,7 +28,7 @@ export function Selector({ availableItems, onSelected }: SelectorProps) {
                 e.target.src = fallbackImage.src;
               }
             }}
-            src={`/images/${toImageName(product.name)}.jpeg`}
+            src={`/images/${toImageName(product.name)}.webP`}
           />
           {product.name}
         </div>
