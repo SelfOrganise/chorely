@@ -1,4 +1,4 @@
-import { storeMapConfig } from 'srcRootDir/entries/shopping/services/StoreMap';
+import { storeMapConfig } from 'srcRootDir/entries/shopping/services/storeMap';
 import { Names, Types } from 'srcRootDir/entries/shopping/services/constants';
 import { AStarFinder, Grid } from 'pathfinding';
 

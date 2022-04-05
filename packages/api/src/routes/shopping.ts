@@ -14,6 +14,8 @@ import {
   getStoreMaps,
   updateOrCreateMap,
   addRecipeToBasket,
+  deleteRecipe,
+  deleteGroceryFromBasket,
 } from '../repository/shopping';
 
 const { exec } = require('child_process');
@@ -21,7 +23,7 @@ const { exec } = require('child_process');
 let clients: Array<{ id: number; organisation_id: number; send: (basket: Basket) => void }> = [];
 
 export const shopping: FastifyPluginCallback = (server, opts, done) => {
-  // solve shopping
+  //region solve shopping
   interface SolveParam {
     Body: { weights: Array<Array<number>>; sizes: Array<number>; numberOfPeople: number };
   }
@@ -54,6 +56,7 @@ export const shopping: FastifyPluginCallback = (server, opts, done) => {
       );
     },
   });
+  //endregion
 
   //region basket
   // get current basket
@@ -128,6 +131,36 @@ export const shopping: FastifyPluginCallback = (server, opts, done) => {
       }
     }
   });
+
+  // delete from basket
+  server.delete<{ Body: { groceryId?: number; recipeId?: number } }>('/shopping/baskets/current', {
+    schema: {
+      body: S.oneOf([
+        S.object().prop('groceryId').required(['groceryId']),
+        S.object().prop('recipeId').required(['recipeId']),
+      ]),
+    },
+    handler: async (req, reply) => {
+      const organisationId = req.user.organisation_id;
+      if (req.body.groceryId) {
+        await deleteGroceryFromBasket(req.body.groceryId, organisationId);
+        reply.status(204).send();
+      } else if (req.body.recipeId) {
+        // todo: handle this
+        reply.status(400).send('Not implemented');
+      } else {
+        reply.status(400).send('recipeId or bodyId required in body.');
+      }
+
+      // update baskets
+      const currentBasket = await getCurrentBasket(organisationId);
+      if (currentBasket) {
+        for (const client of clients.filter(c => c.organisation_id === organisationId)) {
+          client.send(currentBasket);
+        }
+      }
+    },
+  });
   //endregion
 
   //region groceries
@@ -192,8 +225,19 @@ export const shopping: FastifyPluginCallback = (server, opts, done) => {
       params: S.object().prop('id', S.number().minimum(0)).required(['id']),
     },
     handler: async (req, res) => {
-      const recipe = await getRecipe(req.params.id, req.user.id);
+      const recipe = await getRecipe(req.params.id, req.user.organisation_id);
       return res.status(recipe.code).send(recipe.data);
+    },
+  });
+
+  // delete recipe
+  server.delete<{ Params: { id: number } }>('/shopping/recipes/:id', {
+    schema: {
+      params: S.object().prop('id', S.number().minimum(0)).required(['id']),
+    },
+    handler: async (req, res) => {
+      await deleteRecipe(req.params.id, req.user.organisation_id);
+      return res.status(204).send();
     },
   });
 
@@ -210,13 +254,15 @@ export const shopping: FastifyPluginCallback = (server, opts, done) => {
   });
 
   // delete grocery from recipe
-  server.delete<{ Params: { id: number }; Body: { recipeId: number } }>('/shopping/recipes/:id', {
+  server.delete<{ Params: { id: number; groceryId: number } }>('/shopping/recipes/:id/groceries/:groceryId', {
     schema: {
-      params: S.object().prop('id', S.number().minimum(0)).required(['id']),
-      body: S.object().prop('recipeId', S.number().minimum(0)),
+      params: S.object()
+        .prop('id', S.number().minimum(0))
+        .prop('groceryId', S.number().minimum(0))
+        .required(['id', 'groceryId']),
     },
     handler: async (req, res) => {
-      const result = await deleteGroceryFromRecipe(req.params.id, req.body.recipeId);
+      const result = await deleteGroceryFromRecipe(req.params.id, req.params.groceryId);
       return res.status(result.code).send(result.data);
     },
   });

@@ -1,6 +1,6 @@
 import React from 'react';
 import { fallbackImage } from 'srcRootDir/entries/shopping/services/constants';
-import { toImageName } from '../../services/utils';
+import { toImageName } from '../../../services/utils';
 
 export interface Item {
   name: string;

@@ -1,0 +1,1 @@
+export { ManageStoreMapPage } from './ManageStoreMapPage';

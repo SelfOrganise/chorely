@@ -6,7 +6,7 @@ export async function getRecipes(organisationId: number): Promise<Array<Recipe>>
     `
         select id, name, created_at_utc
         from recipes
-        where organisation_id = $1
+        where organisation_id = $1 and deleted = false
         order by created_at_utc desc
      `,
     [organisationId]
@@ -20,7 +20,7 @@ export async function getRecipe(recipeId: number, organisationId: number): Promi
     `
         select id, name, created_at_utc
         from recipes
-        where organisation_id = $1 and id = $2
+        where organisation_id = $1 and id = $2 and deleted = false
         order by created_at_utc asc
      `,
     [organisationId, recipeId]
@@ -45,6 +45,17 @@ export async function getRecipe(recipeId: number, organisationId: number): Promi
     ...recipe.rows[0],
     groceries: groceries.rows,
   });
+}
+
+export async function deleteRecipe(recipeId: number, organisationId: number): Promise<void> {
+  await pool.query(
+    `
+      update recipes 
+      set deleted = true
+      where id = $1 and organisation_id = $2
+    `,
+    [recipeId, organisationId]
+  );
 }
 
 export async function addRecipe(name: string, organisationId: number): Promise<Response<void>> {
@@ -159,6 +170,18 @@ export async function addGroceryToBasket(groceryId: number, organisationId: numb
     `
     insert into basket_items(basket_id, grocery_id)
     values($1, $2)
+  `,
+    [basket.id, groceryId]
+  );
+}
+
+export async function deleteGroceryFromBasket(groceryId: number, organisationId: number) {
+  const basket = await ensureCurrentBasket(organisationId);
+
+  await pool.query(
+    `
+    delete from basket_items
+    where basket_id = $1 and grocery_id = $2
   `,
     [basket.id, groceryId]
   );

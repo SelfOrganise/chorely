@@ -5,9 +5,9 @@ import { Button, TextField } from 'srcRootDir/common/components';
 import { addRecipe } from 'srcRootDir/entries/shopping/services/shopping';
 import { toast } from 'react-toastify';
 import { useNavigate } from 'react-router-dom';
-import {RecipeItem} from "srcRootDir/entries/shopping/RecipesPage/components/RecipeItem";
+import { RecipeItem } from 'srcRootDir/entries/shopping/manage/ManageRecipesPage/components/RecipeItem';
 
-export function RecipesPage() {
+export function ManageRecipesPage() {
   const navigate = useNavigate();
   const [recipeName, setRecipeName] = useState('');
 
@@ -36,7 +36,11 @@ export function RecipesPage() {
 
       <div className="flex flex-col w-full mt-4">
         {recipes?.data?.map(recipe => (
-          <RecipeItem recipe={recipe} onClick={() => navigate(`/shopping/recipes/${recipe.id}`)} />
+          <RecipeItem
+            key={recipe.id}
+            recipe={recipe}
+            onClick={() => navigate(`/shopping/manage/recipes/${recipe.id}`)}
+          />
         ))}
       </div>
     </div>

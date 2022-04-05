@@ -4,11 +4,11 @@ import { fetcher } from 'srcRootDir/services/fetcher';
 import { useParams } from 'react-router-dom';
 import { Tab } from '@headlessui/react';
 import { Button } from 'srcRootDir/common/components';
-import { GroceryItem } from 'srcRootDir/entries/shopping/ManageGroceriesPage/components/GroceryItem';
-import { addGroceryToRecipe } from 'srcRootDir/entries/shopping/services/shopping';
+import { GroceryItem } from 'srcRootDir/entries/shopping/manage/ManageGroceriesPage/components/GroceryItem';
+import { addGroceryToRecipe, deleteGroceryFromRecipe } from 'srcRootDir/entries/shopping/services/shopping';
 import { toast } from 'react-toastify';
 
-export function RecipePage(): JSX.Element {
+export function ManageRecipePage(): JSX.Element {
   const { id } = useParams<{ id: string }>();
   const cacheKey = `/shopping/recipes/${id}`;
 
@@ -50,7 +50,16 @@ export function RecipePage(): JSX.Element {
         <Tab.Panels className="flex flex-col w-full">
           <Tab.Panel>
             {recipe.data?.groceries?.map((grocery, i) => (
-              <GroceryItem key={`${grocery.id}${i}`} item={grocery} />
+              <GroceryItem
+                key={`${grocery.id}${i}`}
+                item={grocery}
+                onDelete={async () => {
+                  if (id && confirm(`Are you sure you want to remove "${grocery.name}" from the recipe?`)) {
+                    await deleteGroceryFromRecipe(id, grocery.id);
+                    await recipe.mutate();
+                  }
+                }}
+              />
             ))}
           </Tab.Panel>
           <Tab.Panel>

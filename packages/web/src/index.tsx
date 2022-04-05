@@ -1,4 +1,6 @@
+import './index.css';
 import 'react-toastify/dist/ReactToastify.css';
+
 import React from 'react';
 import ReactDOM from 'react-dom';
 import { HashRouter, Route, Routes, useNavigate } from 'react-router-dom';
@@ -8,14 +10,15 @@ import { ToastContainer, toast, Zoom } from 'react-toastify';
 
 import { Login } from 'srcRootDir/entries/login';
 import { ChoresPage } from 'srcRootDir/entries/chores';
-import { BasketPage } from 'srcRootDir/entries/shopping/BasketPage';
-import { ManageGroceriesPage } from 'srcRootDir/entries/shopping/ManageGroceriesPage';
-import { RecipesPage } from 'srcRootDir/entries/shopping/RecipesPage/RecipesPage';
-import { ShoppingWrapper } from 'srcRootDir/entries/shopping/ShoppingRoot';
-import { StoreMapPage } from 'srcRootDir/entries/shopping/StoreMapPage';
-
-import './index.css';
-import { RecipePage } from 'srcRootDir/entries/shopping/RecipePage';
+import { ShoppingRoot } from 'srcRootDir/entries/shopping/ShoppingRoot';
+import { ManageGroceriesPage } from 'srcRootDir/entries/shopping/manage/ManageGroceriesPage';
+import { ManageRecipesPage } from 'srcRootDir/entries/shopping/manage/ManageRecipesPage/ManageRecipesPage';
+import { ManageStoreMapPage } from 'srcRootDir/entries/shopping/manage/ManageStoreMapPage';
+import { ManageRecipePage } from 'srcRootDir/entries/shopping/manage';
+import { GroceriesView } from 'srcRootDir/entries/shopping/views/GroceriesView';
+import { RecipesView } from 'srcRootDir/entries/shopping/views/RecipesView';
+import { SolvePage } from 'srcRootDir/entries/shopping/views/SolvePage';
+import { BasketView } from 'srcRootDir/entries/shopping/views/BasketView';
 
 function Root(): JSX.Element {
   return (
@@ -57,12 +60,15 @@ function RouteDefinitions() {
       <Routes>
         <Route index element={<Login />} />
         <Route path="/chores" element={<ChoresPage />} />
-        <Route path="/shopping" element={<ShoppingWrapper />}>
-          <Route index element={<BasketPage />} />
-          <Route path="groceries" element={<ManageGroceriesPage />} />
-          <Route path="recipes" element={<RecipesPage />} />
-          <Route path="recipes/:id" element={<RecipePage />} />
-          <Route path="map" element={<StoreMapPage />} />
+        <Route path="/shopping" element={<ShoppingRoot />}>
+          <Route index element={<GroceriesView />} />
+          <Route path="basket" element={<BasketView />} />
+          <Route path="basket/solve" element={<SolvePage />} />
+          <Route path="recipes" element={<RecipesView />} />
+          <Route path="manage/groceries" element={<ManageGroceriesPage />} />
+          <Route path="manage/recipes" element={<ManageRecipesPage />} />
+          <Route path="manage/recipes/:id" element={<ManageRecipePage />} />
+          <Route path="manage/map" element={<ManageStoreMapPage />} />
         </Route>
       </Routes>
     </SWRConfig>

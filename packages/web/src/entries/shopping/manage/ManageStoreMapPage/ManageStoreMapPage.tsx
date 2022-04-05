@@ -1,15 +1,12 @@
 import React, { useCallback, useEffect, useRef, useState } from 'react';
-import { StoreMap } from '../services/StoreMap';
+import { getAllRoutes, StoreMap, Types, solveShopping, updateOrCreateMap } from '../../services';
 import { Item, Selector } from './components/Selector';
-import { Types } from '../services/constants';
 import useSWR from 'swr';
 import { fetcher } from 'srcRootDir/services/fetcher';
-import { solveShopping, updateOrCreateMap } from 'srcRootDir/entries/shopping/services/shopping';
 import { toast } from 'react-toastify';
-import { getAllRoutes } from 'srcRootDir/entries/shopping/services/utils';
 import { Button } from 'srcRootDir/common/components';
 
-export function StoreMapPage() {
+export function ManageStoreMapPage() {
   const canvasElement = useRef<HTMLCanvasElement | null>(null);
   const storeMap = useRef<StoreMap>();
 
@@ -99,7 +96,7 @@ export function StoreMapPage() {
         <Button onClick={() => storeMap.current?.paste()}>paste</Button>
         <Button onClick={() => storeMap.current?.delete()}>delete</Button>
       </div>
-      <div className="w-screen h-[330px] overflow-hidden border-2 border-black">
+      <div className="w-full h-[330px] overflow-hidden border-2 border-black">
         <canvas ref={canvasElement} />
       </div>
       <Selector

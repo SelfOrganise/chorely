@@ -11,12 +11,24 @@ export async function addGroceryToRecipe(recipeId: string | number, groceryId: s
   return await fetcher(`/shopping/recipes/${recipeId}`, { method: 'POST', body: JSON.stringify({ groceryId }) });
 }
 
+export async function deleteGroceryFromRecipe(recipeId: string | number, groceryId: string | number): Promise<unknown> {
+  return await fetcher(`/shopping/recipes/${recipeId}/groceries/${groceryId}`, { method: 'DELETE' });
+}
+
 export async function addGrocery(grocery: Omit<Grocery, 'id'>): Promise<unknown> {
   return await fetcher('/shopping/groceries', { method: 'POST', body: JSON.stringify(grocery) });
 }
 
 export async function addToBasket(item: { groceryId?: number; recipeId?: number }): Promise<unknown> {
   return await fetcher('/shopping/baskets/current', { method: 'POST', body: JSON.stringify(item) });
+}
+
+export async function deleteFromBasket(item: { groceryId?: number; recipeId?: number }): Promise<unknown> {
+  return await fetcher('/shopping/baskets/current', { method: 'delete', body: JSON.stringify(item) });
+}
+
+export async function deleteRecipe(recipeId: string | number): Promise<unknown> {
+  return await fetcher(`/shopping/recipes/${recipeId}`, { method: 'DELETE' });
 }
 
 export async function updateOrCreateMap(storeMap: MapDefinition): Promise<unknown> {
