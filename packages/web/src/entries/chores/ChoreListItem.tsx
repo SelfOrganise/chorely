@@ -3,11 +3,12 @@ import classNames from 'classnames';
 import { toast } from 'react-toastify';
 import { Transition } from '@headlessui/react';
 
-import { completeAssignment, sendReminder, undoAssignment } from 'srcRootDir/services/chores';
 import { useLastCompletedSubtask } from 'srcRootDir/hooks/useLastCompletedSubtask';
-import { parseDueDate } from 'srcRootDir/services/parseDueDate';
+import { parseDueDate } from 'srcRootDir/entries/chores/services/parseDueDate';
 import { menuIcon, checkIcon, chevronDoubleDownIcon } from 'srcRootDir/common/icons';
 import { Dropdown } from 'srcRootDir/common/components';
+
+import { completeAssignment, sendReminder, undoAssignment } from './services/chores';
 
 interface ChoreListItemProps {
   assignment: Assignment;
@@ -116,7 +117,7 @@ export const ChoreListItem = ({ assignment, onComplete, isDone }: ChoreListItemP
   );
 
   return (
-    <div className="flex flex-col justify-between min-h-[6rem] bg-teal-500 rounded px-2 py-2 drop-shadow relative mb-4">
+    <div className="flex flex-col justify-between min-h-[6rem] bg-gradient-to-r from-blue-500 to-blue-600 rounded px-2 py-2 drop-shadow relative mb-4">
       <span className="text-white text-2xl font-black">{assignment.title}</span>
       <Transition
         as="div"
@@ -155,7 +156,7 @@ export const ChoreListItem = ({ assignment, onComplete, isDone }: ChoreListItemP
       </Dropdown>
       <div
         onClick={(e: React.MouseEvent<HTMLElement>) => handleCompleteClick(e, assignment)}
-        className="absolute text-teal-500 bottom-0 right-0 mr-2 mb-2 bg-white hover:opacity-80 rounded-full shadow px-2 py-2 hover:cursor-pointer"
+        className="absolute text-blue-500 bottom-0 right-0 mr-2 mb-2 bg-white hover:opacity-80 rounded-full shadow px-2 py-2 hover:cursor-pointer"
       >
         {showExpandSubtasksButton ? (
           chevronDoubleDownIcon

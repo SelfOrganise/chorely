@@ -1,6 +1,6 @@
 import { fetcher } from 'srcRootDir/services/fetcher';
 import { useEffect, useState } from 'react';
-import { getCurrentUserId } from 'srcRootDir/services/auth';
+import { getCurrentUserId } from 'srcRootDir/entries/login/services/auth';
 import { toast } from 'react-toastify';
 
 export async function addRecipe(name: string): Promise<unknown> {

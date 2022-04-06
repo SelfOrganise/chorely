@@ -1,8 +1,10 @@
 import React, { useCallback, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { login } from 'srcRootDir/services/auth';
 import { toast } from 'react-toastify';
+
 import { Button, TextField } from 'srcRootDir/common/components';
+
+import { login } from './services/auth';
 
 export function Login() {
   const navigate = useNavigate();

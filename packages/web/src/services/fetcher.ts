@@ -1,4 +1,4 @@
-import { getCurrentUserId } from 'srcRootDir/services/auth';
+import { getCurrentUserId } from 'srcRootDir/entries/login/services/auth';
 
 export function fetcher(url: string, init?: RequestInit): any | Response {
   const userId = getCurrentUserId();
