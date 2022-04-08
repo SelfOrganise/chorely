@@ -1,4 +1,4 @@
-import { fetcher } from 'srcRootDir/services/fetcher';
+import { fetcher } from 'srcRootDir/common/services/fetcher';
 import { useEffect, useState } from 'react';
 import { getCurrentUserId } from 'srcRootDir/entries/login/services/auth';
 import { toast } from 'react-toastify';

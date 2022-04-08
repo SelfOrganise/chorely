@@ -1,6 +1,6 @@
 import React from 'react';
 import useSWR, { mutate } from 'swr';
-import { fetcher } from 'srcRootDir/services/fetcher';
+import { fetcher } from 'srcRootDir/common/services/fetcher';
 import { useParams } from 'react-router-dom';
 import { Tab } from '@headlessui/react';
 import { Button } from 'srcRootDir/common/components';

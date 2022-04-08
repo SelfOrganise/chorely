@@ -1,5 +1,5 @@
 import useSWR from 'swr';
-import { fetcher } from 'srcRootDir/services/fetcher';
+import { fetcher } from 'srcRootDir/common/services/fetcher';
 import { GroceryItem } from 'srcRootDir/entries/shopping/manage/ManageGroceriesPage/components/GroceryItem';
 import { addToBasket } from 'srcRootDir/entries/shopping/services/shopping';
 import { toast } from 'react-toastify';

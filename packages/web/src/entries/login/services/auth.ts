@@ -1,4 +1,4 @@
-import { fetcher } from 'srcRootDir/services/fetcher';
+import { fetcher } from 'srcRootDir/common/services/fetcher';
 
 export async function login(username: string) {
   try {

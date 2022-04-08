@@ -3,7 +3,7 @@ import classNames from 'classnames';
 import { toast } from 'react-toastify';
 import { Transition } from '@headlessui/react';
 
-import { useLastCompletedSubtask } from 'srcRootDir/hooks/useLastCompletedSubtask';
+import { useLastCompletedSubtask } from 'srcRootDir/entries/chores/hooks/useLastCompletedSubtask';
 import { parseDueDate } from 'srcRootDir/entries/chores/services/parseDueDate';
 import { menuIcon, checkIcon, chevronDoubleDownIcon } from 'srcRootDir/common/icons';
 import { Dropdown } from 'srcRootDir/common/components';

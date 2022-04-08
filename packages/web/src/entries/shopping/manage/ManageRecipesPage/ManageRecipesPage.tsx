@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import useSWR, { mutate } from 'swr';
-import { fetcher } from 'srcRootDir/services/fetcher';
+import { fetcher } from 'srcRootDir/common/services/fetcher';
 import { Button, TextField } from 'srcRootDir/common/components';
 import { addRecipe } from 'srcRootDir/entries/shopping/services/shopping';
 import { toast } from 'react-toastify';

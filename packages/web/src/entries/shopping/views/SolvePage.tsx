@@ -2,7 +2,7 @@ import useSWR from 'swr';
 import React, { useRef, useState } from 'react';
 import { Button } from 'srcRootDir/common/components';
 import { StoreMap, Types, getAllRoutes, solveShopping, useLiveBasket } from 'srcRootDir/entries/shopping/services';
-import { fetcher } from 'srcRootDir/services/fetcher';
+import { fetcher } from 'srcRootDir/common/services/fetcher';
 
 export function SolvePage() {
   const [result, setResult] = useState<Array<Array<Grocery>>>();

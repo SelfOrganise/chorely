@@ -1,6 +1,6 @@
 import React, { useEffect, useMemo, useState } from 'react';
 import useSWR from 'swr';
-import { fetcher } from 'srcRootDir/services/fetcher';
+import { fetcher } from 'srcRootDir/common/services/fetcher';
 import { toast } from 'react-toastify';
 import { getCurrentUserId } from 'srcRootDir/entries/login/services/auth';
 import { ChoreList } from 'srcRootDir/entries/chores/ChoresList';

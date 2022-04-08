@@ -2,7 +2,7 @@ import React, { useCallback, useEffect, useRef, useState } from 'react';
 import { getAllRoutes, StoreMap, Types, solveShopping, updateOrCreateMap } from '../../services';
 import { Item, Selector } from './components/Selector';
 import useSWR from 'swr';
-import { fetcher } from 'srcRootDir/services/fetcher';
+import { fetcher } from 'srcRootDir/common/services/fetcher';
 import { toast } from 'react-toastify';
 import { Button } from 'srcRootDir/common/components';
 

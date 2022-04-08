@@ -11,14 +11,14 @@ import { ToastContainer, toast, Zoom } from 'react-toastify';
 import { Login } from 'srcRootDir/entries/login';
 import { ChoresPage } from 'srcRootDir/entries/chores';
 import { ShoppingRoot } from 'srcRootDir/entries/shopping/ShoppingRoot';
-import { ManageGroceriesPage } from 'srcRootDir/entries/shopping/manage/ManageGroceriesPage';
-import { ManageRecipesPage } from 'srcRootDir/entries/shopping/manage/ManageRecipesPage/ManageRecipesPage';
-import { ManageStoreMapPage } from 'srcRootDir/entries/shopping/manage/ManageStoreMapPage';
-import { ManageRecipePage } from 'srcRootDir/entries/shopping/manage';
-import { GroceriesView } from 'srcRootDir/entries/shopping/views/GroceriesView';
-import { RecipesView } from 'srcRootDir/entries/shopping/views/RecipesView';
-import { SolvePage } from 'srcRootDir/entries/shopping/views/SolvePage';
-import { BasketView } from 'srcRootDir/entries/shopping/views/BasketView';
+import {
+  ManageGroceriesPage,
+  ManageRecipesPage,
+  ManageStoreMapPage,
+  ManageRecipePage,
+} from 'srcRootDir/entries/shopping/manage';
+import { GroceriesView, RecipesView, SolvePage, BasketView } from 'srcRootDir/entries/shopping/views';
+import { useFavicon } from 'srcRootDir/common/hooks';
 
 function Root(): JSX.Element {
   return (
@@ -43,6 +43,7 @@ function Root(): JSX.Element {
 }
 
 function RouteDefinitions() {
+  useFavicon();
   const navigate = useNavigate();
 
   const swrConfig: SWRConfiguration & Partial<ProviderConfiguration> = {

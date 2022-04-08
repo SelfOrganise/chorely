@@ -1,4 +1,4 @@
-import { fetcher } from 'srcRootDir/services/fetcher';
+import { fetcher } from 'srcRootDir/common/services/fetcher';
 export async function baseAssignmentAction(assignmentId: number, body: any): Promise<string | null> {
   return await fetcher(`/assignments/${assignmentId}`, { method: 'POST', body: JSON.stringify(body) });
 }
