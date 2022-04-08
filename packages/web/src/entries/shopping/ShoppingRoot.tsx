@@ -1,17 +1,13 @@
 import React from 'react';
 import { Outlet, useNavigate } from 'react-router-dom';
 import { Button, Dropdown } from 'srcRootDir/common/components';
-import { useLiveBasket } from 'srcRootDir/entries/shopping/services/shopping';
-// import create from 'zustand';
-//
-// const shoppingStore = create(set => ({
-//   basketCount: 0,
-//   setBasketCount: (basketCount: number) => set(state => ({ basketCount: state.basketCount + 1 })),
-// }));
+import { useListenToLiveBasket, useLiveBasket } from 'srcRootDir/entries/shopping/hooks';
+import classNames from 'classnames';
 
 export function ShoppingRoot() {
   const navigate = useNavigate();
-  const basket = useLiveBasket();
+  useListenToLiveBasket();
+  const [connected, basketCount] = useLiveBasket(state => [state.connected, state.basket?.items.length] || null);
 
   return (
     <div className="grid grid-rows-[1fr_auto] min-h-screen">
@@ -25,7 +21,15 @@ export function ShoppingRoot() {
           🥦 Groceries
         </Button>
         <Button onClick={() => navigate('/shopping/recipes')}>🗒️ Recipes</Button>
-        <Button onClick={() => navigate('/shopping/basket')}>🧺 Basket ({basket?.items.length || 0})</Button>
+        <span className="relative">
+          <span
+            className={classNames('inline-block w-3 h-3 rounded-full absolute -top-0.5 -right-0.5', {
+              'bg-red-600': !connected,
+              'bg-green-400': connected,
+            })}
+          ></span>
+          <Button onClick={() => navigate('/shopping/basket')}>🧺 Basket ({basketCount})</Button>
+        </span>
         <Dropdown
           className="flex !ml-auto text-xl px-2"
           buttons={[

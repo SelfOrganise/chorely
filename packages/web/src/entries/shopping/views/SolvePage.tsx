@@ -1,14 +1,15 @@
 import useSWR from 'swr';
 import React, { useRef, useState } from 'react';
 import { Button } from 'srcRootDir/common/components';
-import { StoreMap, Types, getAllRoutes, solveShopping, useLiveBasket } from 'srcRootDir/entries/shopping/services';
+import { StoreMap, Types, getAllRoutes, solveShopping } from 'srcRootDir/entries/shopping/services';
 import { fetcher } from 'srcRootDir/common/services/fetcher';
+import { useLiveBasket } from 'srcRootDir/entries/shopping/hooks';
 
 export function SolvePage() {
   const [result, setResult] = useState<Array<Array<Grocery>>>();
   const canvasElement = useRef<HTMLCanvasElement | null>(null);
   const storeMap = useRef<StoreMap>();
-  const currentBasket = useLiveBasket();
+  const currentBasket = useLiveBasket(state => state.basket);
 
   const groceriesResponse = useSWR<Array<Grocery>>('/shopping/groceries', {
     fetcher,
