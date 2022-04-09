@@ -5,7 +5,7 @@ import { StoreMap, Types, getAllRoutes, solveShopping } from 'srcRootDir/entries
 import { fetcher } from 'srcRootDir/common/services/fetcher';
 import { useLiveBasket } from 'srcRootDir/entries/shopping/hooks';
 
-export function SolvePage() {
+export function SolveView() {
   const [result, setResult] = useState<Array<Array<Grocery>>>();
   const canvasElement = useRef<HTMLCanvasElement | null>(null);
   const storeMap = useRef<StoreMap>();
@@ -21,9 +21,8 @@ export function SolvePage() {
   const mapResponse = useSWR<Array<MapData>>('/shopping/maps', {
     fetcher,
     refreshInterval: 0,
-    revalidateOnFocus: false,
-    revalidateOnReconnect: false,
     revalidateOnMount: true,
+    revalidateOnFocus: true,
   });
 
   async function solve() {
@@ -78,21 +77,21 @@ export function SolvePage() {
   }
 
   return (
-    <div>
+    <div className="flex flex-col items-center">
       <Button onClick={solve}>Solve</Button>
-      <div className="w-full h-[330px] overflow-hidden border-2 border-black">
+      <div className="overflow-hidden border-2 border-black">
         <canvas ref={canvasElement} />
       </div>
       {result && (
-        <div className="flex justify-around">
-          <div>
+        <div className="flex justify-around space-x-2 p-2">
+          <div className="border-2 p-2">
             {result[0].map((v, i) => (
               <div key={v.name + i}>
                 {v?.name} - {v?.size}
               </div>
             ))}
           </div>
-          <div>
+          <div className="border-2 p-2">
             {result[1].map((v, i) => (
               <div key={v.name + i}>
                 {v?.name} - {v?.size}

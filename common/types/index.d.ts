@@ -34,11 +34,11 @@ interface MapData {
   data: string;
 }
 
+type RecipeGrocery = Grocery & { description?: string };
+
 interface Recipe {
   id: number;
   name: string;
   created_at_utc: string;
-  groceries: Array<Grocery>;
+  groceries: Array<RecipeGrocery>;
 }
-
-

@@ -32,7 +32,7 @@ export async function getRecipe(recipeId: number, organisationId: number): Promi
 
   const groceries = await pool.query<Grocery>(
     `
-        select g.id, g.name, g.size
+        select g.id, g.name, g.size, ri.description
         from recipe_ingredients ri
         inner join groceries g on g.id = ri.grocery_id
         where g.organisation_id = $1 and ri.recipe_id = $2

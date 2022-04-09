@@ -17,7 +17,7 @@ import {
   ManageStoreMapPage,
   ManageRecipePage,
 } from 'srcRootDir/entries/shopping/manage';
-import { GroceriesView, RecipesView, SolvePage, BasketView } from 'srcRootDir/entries/shopping/views';
+import { GroceriesView, RecipesView, SolveView, BasketView } from 'srcRootDir/entries/shopping/views';
 import { useFavicon } from 'srcRootDir/common/hooks';
 
 function Root(): JSX.Element {
@@ -64,7 +64,7 @@ function RouteDefinitions() {
         <Route path="/shopping" element={<ShoppingRoot />}>
           <Route index element={<GroceriesView />} />
           <Route path="basket" element={<BasketView />} />
-          <Route path="basket/solve" element={<SolvePage />} />
+          <Route path="basket/solve" element={<SolveView />} />
           <Route path="recipes" element={<RecipesView />} />
           <Route path="manage/groceries" element={<ManageGroceriesPage />} />
           <Route path="manage/recipes" element={<ManageRecipesPage />} />

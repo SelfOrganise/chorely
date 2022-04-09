@@ -122,8 +122,8 @@ export class StoreMap {
 
   constructor(canvasElement: HTMLCanvasElement) {
     this.canvas = new HammerCanvas(canvasElement, { selection: false });
-    this.canvas.setWidth(this.canvasWidth);
-    this.canvas.setHeight(this.canvasHeight);
+    this.canvas.setWidth(500);
+    this.canvas.setHeight(300);
 
     const pattern = new fabric.Pattern({
       source:

@@ -39,33 +39,37 @@ export function ManageRecipePage(): JSX.Element {
   return (
     <div className="flex flex-col justify-center w-full items-center p-4">
       <Tab.Group>
-        <Tab.List>
-          <Tab>
+        <Tab.List className="flex">
+          <Tab as="div">
             <Button>Recipe details</Button>
           </Tab>
-          <Tab>
+          <Tab as="div">
             <Button>Add groceries</Button>
           </Tab>
         </Tab.List>
         <Tab.Panels className="flex flex-col w-full">
           <Tab.Panel>
-            {recipe.data?.groceries?.map((grocery, i) => (
-              <GroceryItem
-                key={`${grocery.id}${i}`}
-                item={grocery}
-                onDelete={async () => {
-                  if (id && confirm(`Are you sure you want to remove "${grocery.name}" from the recipe?`)) {
-                    await deleteGroceryFromRecipe(id, grocery.id);
-                    await recipe.mutate();
-                  }
-                }}
-              />
-            ))}
+            <div className="w-full h-full grid grid-cols-[1fr_1fr]">
+              {recipe.data?.groceries?.map((grocery, i) => (
+                <GroceryItem
+                  key={`${grocery.id}${i}`}
+                  item={grocery}
+                  onDelete={async () => {
+                    if (id && confirm(`Are you sure you want to remove "${grocery.name}" from the recipe?`)) {
+                      await deleteGroceryFromRecipe(id, grocery.id);
+                      await recipe.mutate();
+                    }
+                  }}
+                />
+              ))}
+            </div>
           </Tab.Panel>
           <Tab.Panel>
-            {groceriesResponse.data?.map(grocery => (
-              <GroceryItem key={grocery.id} item={grocery} onAdd={() => handleAddGroceryToRecipe(grocery)} />
-            ))}
+            <div className="w-full h-full grid grid-cols-[1fr_1fr]">
+              {groceriesResponse.data?.map(grocery => (
+                <GroceryItem key={grocery.id} item={grocery} onAdd={() => handleAddGroceryToRecipe(grocery)} />
+              ))}
+            </div>
           </Tab.Panel>
         </Tab.Panels>
       </Tab.Group>

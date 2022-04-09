@@ -11,20 +11,30 @@ export function BasketView(): JSX.Element {
 
   return (
     <React.Fragment>
-      <Button onClick={() => createNewBasket()}>Create new basket</Button>
+      <Button
+        onClick={() => {
+          if (confirm('Are you sure you want to create a new basket?')) {
+            return createNewBasket();
+          }
+        }}
+      >
+        Create new basket
+      </Button>
       <Button onClick={() => navigate('/shopping/basket/solve')}>🧠 Solve</Button>
 
-      {currentBasket?.items.map((g: Grocery, i: number) => (
-        <GroceryItem
-          key={`${g.id}-${i}`}
-          item={g}
-          onDelete={async () => {
-            if (confirm(`Are you sure you want to remove "${g.name}"?`)) {
-              await deleteFromBasket({ groceryId: g.id });
-            }
-          }}
-        />
-      ))}
+      <div className="w-full grid grid-cols-[1fr_1fr]">
+        {currentBasket?.items.map((g: Grocery, i: number) => (
+          <GroceryItem
+            key={`${g.id}-${i}`}
+            item={g}
+            onDelete={async () => {
+              if (confirm(`Are you sure you want to remove "${g.name}"?`)) {
+                await deleteFromBasket({ groceryId: g.id });
+              }
+            }}
+          />
+        ))}
+      </div>
     </React.Fragment>
   );
 }

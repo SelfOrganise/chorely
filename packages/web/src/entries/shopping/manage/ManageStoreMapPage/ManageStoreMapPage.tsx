@@ -14,8 +14,7 @@ export function ManageStoreMapPage() {
     fetcher,
     refreshInterval: 0,
     revalidateOnFocus: false,
-    revalidateOnReconnect: false,
-    revalidateOnMount: false,
+    revalidateOnMount: true,
   });
 
   const groceriesResponse = useSWR<Array<Grocery>>('/shopping/groceries', {
@@ -84,7 +83,7 @@ export function ManageStoreMapPage() {
   }
 
   return (
-    <div className="w-100 h-100">
+    <div className="h-100">
       <div>
         <Button onClick={load}>Load map</Button>
         <Button onClick={() => storeMap.current?.addWall()}>Add wall</Button>
@@ -96,7 +95,7 @@ export function ManageStoreMapPage() {
         <Button onClick={() => storeMap.current?.paste()}>paste</Button>
         <Button onClick={() => storeMap.current?.delete()}>delete</Button>
       </div>
-      <div className="w-full h-[330px] overflow-hidden border-2 border-black">
+      <div className="overflow-hidden border-2 border-black">
         <canvas ref={canvasElement} />
       </div>
       <Selector
