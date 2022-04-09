@@ -28,16 +28,18 @@ export function BasketView(): JSX.Element {
 
   return (
     <div className="basket-view">
-      <Button
-        onClick={() => {
-          if (confirm('Are you sure you want to create a new basket?')) {
-            return createNewBasket();
-          }
-        }}
-      >
-        Create new basket
-      </Button>
-      <Button onClick={() => navigate('/shopping/basket/solve')}>🧠 Solve</Button>
+      <div className="flex flex-row justify-between">
+        <Button
+          onClick={() => {
+            if (confirm('Are you sure you want to create a new basket?')) {
+              return createNewBasket();
+            }
+          }}
+        >
+          🔃 Create new basket
+        </Button>
+        <Button onClick={() => navigate('/shopping/basket/solve')}>🧠 Solve</Button>
+      </div>
 
       <div className="w-full grid grid-cols-[1fr_1fr]">
         {groupedGroceries.map((group: Array<Grocery>, i: number) => (

@@ -35,25 +35,31 @@ export function SolveView() {
 
     const mapDefinition: MapDefinition = JSON.parse(mapResponse.data[0].data);
 
+    // we use this later to obtain an array of sizes, this needs to be the same order as the items in the map definition
     const productOrder: Array<Grocery> = [{ id: -1, name: 'start', size: 0 }];
-    const filteredMapData = mapDefinition.filter(p => {
-      if (p.type === Types.product && currentBasket) {
-        const item = currentBasket.items.find((a: BasketItem) => a.name === p.name);
-        if (item) {
-          productOrder.push(item);
-        }
+    const filteredMapDefinition: MapDefinition = [];
 
-        return item;
+    // this forEach is needed to obtain the product order and to duplicate map items for each grocery instance in the
+    // basket so that each grocery is counted in the final weight
+    for (const mapItem of mapDefinition) {
+      if (mapItem.type === Types.product && currentBasket) {
+        const addedItems = currentBasket.items.filter(b => b.name === mapItem.name);
+
+        for (const item of addedItems) {
+          productOrder.push(item);
+          filteredMapDefinition.push(mapItem);
+        }
       } else {
-        return true;
+        filteredMapDefinition.push(mapItem);
       }
-    });
+    }
+
     productOrder.push({ id: -1, name: 'finish', size: 0 });
 
-    storeMap.current?.import(filteredMapData);
+    storeMap.current?.import(filteredMapDefinition);
 
     // note: getAllRoutes maintains order of passed in products
-    const routes = getAllRoutes(filteredMapData);
+    const routes = getAllRoutes(filteredMapDefinition);
     const weights = routes.map(a => a.map(b => b.route?.length));
     const response = await solveShopping({ weights, sizes: productOrder.map(p => p.size) });
 
