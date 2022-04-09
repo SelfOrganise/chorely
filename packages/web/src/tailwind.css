@@ -3,6 +3,18 @@
 @tailwind utilities;
 
 @layer components {
+  .groceries-view button {
+    @apply bg-green-600 hover:bg-green-600
+  }
+
+  .recipes-view button {
+    @apply bg-orchid-500 hover:bg-orchid-600
+  }
+
+  .basket-view button {
+    @apply bg-cyan-500 hover:bg-cyan-600
+  }
+
   .product-selector-grid {
     display: grid;
     grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
@@ -10,6 +22,4 @@
     grid-gap: 5px;
     padding: 5px;
   }
-
-
 }

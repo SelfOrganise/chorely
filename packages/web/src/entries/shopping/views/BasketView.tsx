@@ -27,7 +27,7 @@ export function BasketView(): JSX.Element {
   }, [currentBasket]);
 
   return (
-    <React.Fragment>
+    <div className="basket-view">
       <Button
         onClick={() => {
           if (confirm('Are you sure you want to create a new basket?')) {
@@ -54,6 +54,6 @@ export function BasketView(): JSX.Element {
           />
         ))}
       </div>
-    </React.Fragment>
+    </div>
   );
 }

@@ -9,6 +9,7 @@ interface GroceryItemProps {
   count?: number;
   deleteLabel?: string;
   clickLabel?: string;
+  buttonClassName?: string;
 }
 
 // todo: improve this??
@@ -21,7 +22,7 @@ export function GroceryItem({ item, onClick, onDelete, count, deleteLabel, click
     <div className="flex flex-col items-center rounded px-2 py-2 relative mb-4">
       <img className="h-20" alt={item.name} src={toProductImageUrl(item.name)} />
       <span className="text-black text-lg font-black">{item.name}</span>
-      {count && count > 1 && (
+      {count != null && count > 0 && (
         <span className="absolute top-2 right-4 px-2 py-1 text-xs font-bold leading-none text-red-100 bg-red-600 rounded-full">
           x{count}
         </span>

@@ -11,20 +11,8 @@ export function ManageStoreMapPage() {
   const storeMap = useRef<StoreMap>();
   const [title, setTitle] = useState('');
 
-  const mapResponse = useSWR<Array<MapData>>('/shopping/maps', {
-    fetcher,
-    refreshInterval: 0,
-    revalidateOnFocus: false,
-    revalidateOnMount: true,
-  });
-
-  const groceriesResponse = useSWR<Array<Grocery>>('/shopping/groceries', {
-    fetcher,
-    refreshInterval: 0,
-    revalidateOnFocus: false,
-    revalidateOnReconnect: false,
-    revalidateOnMount: false,
-  });
+  const mapResponse = useSWR<Array<MapData>>('/shopping/maps', { fetcher });
+  const groceriesResponse = useSWR<Array<Grocery>>('/shopping/groceries', { fetcher });
 
   const items = groceriesResponse?.data || [];
 

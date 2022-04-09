@@ -17,10 +17,12 @@ export function ShoppingRoot() {
         </div>
       </div>
       <div className="flex p-1 space-x-1 rounded justify-start w-full text-sm bg-white sticky bottom-0">
-        <Button className="p-0 m-0" onClick={() => navigate('/shopping')}>
+        <Button className="bg-green-600 hover:bg-green-600" onClick={() => navigate('/shopping')}>
           🥦 Groceries
         </Button>
-        <Button onClick={() => navigate('/shopping/recipes')}>🗒️ Recipes</Button>
+        <Button className="bg-orchid-500 hover:bg-orchid-600" onClick={() => navigate('/shopping/recipes')}>
+          🗒️ Recipes
+        </Button>
         <span className="relative">
           <span
             className={classNames('inline-block w-3 h-3 rounded-full absolute -top-0.5 -right-0.5', {
@@ -28,7 +30,9 @@ export function ShoppingRoot() {
               'bg-green-400': connected,
             })}
           ></span>
-          <Button onClick={() => navigate('/shopping/basket')}>🧺 Basket ({basketCount})</Button>
+          <Button className="bg-cyan-500 hover:bg-cyan-600" onClick={() => navigate('/shopping/basket')}>
+            🧺 Basket ({basketCount})
+          </Button>
         </span>
         <Dropdown
           className="flex !ml-auto text-xl px-2"

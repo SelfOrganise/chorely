@@ -15,17 +15,18 @@ export function RecipesView(): JSX.Element {
   });
 
   return (
-    <React.Fragment>
+    <div className="recipes-view">
       {recipes?.data?.map(recipe => (
         <RecipeItem
           key={recipe.id}
           recipe={recipe}
+          clickLabel="Add"
           onClick={async () => {
             await addToBasket({ recipeId: recipe.id });
             toast.success(`added '${recipe.name}'`, { autoClose: 1500, position: 'bottom-center' });
           }}
         />
       ))}
-    </React.Fragment>
+    </div>
   );
 }
