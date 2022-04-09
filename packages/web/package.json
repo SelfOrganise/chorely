@@ -8,7 +8,7 @@
     "build": "npm-run-all -l build:*",
     "build:web": "BACKEND_ORIGIN=https://api.3pounds.cyou/chorely NODE_ENV=production npm run esbuild",
     "build:tailwind": "npx tailwindcss -i ./src/tailwind.css -o ./dist/tailwind.css --minify",
-    "import-images": "npm-run-all -l -p magic:*",
+    "import-images": "npm-run-all -l -p magick:*",
     "magick:convert-webp": "magick mogrify -format webP -quality 60 -resize 200x -path 'static/images' 'static/images_prepare/*'",
     "magick:convert-webp-small": "magick mogrify -format webP -quality 60 -resize 32x -path 'static/images/small' 'static/images_prepare/*'",
     "dev": "npm-run-all -l -p dev:*",
