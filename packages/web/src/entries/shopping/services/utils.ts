@@ -2,8 +2,8 @@ import { storeMapConfig } from 'srcRootDir/entries/shopping/services/storeMap';
 import { Names, Types } from 'srcRootDir/entries/shopping/services/constants';
 import { AStarFinder, Grid } from 'pathfinding';
 
-export function toImageName(name: string): string {
-  return name.toLowerCase().replace(' ', '_');
+export function toProductImageUrl(name: string, small = false): string {
+  return `/images${small ? '/small' : ''}/${name.toLowerCase().replace(/ /g, '_')}.webP`;
 }
 
 export type RoutesContext = Array<

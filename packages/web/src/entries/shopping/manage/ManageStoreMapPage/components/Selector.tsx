@@ -1,6 +1,6 @@
 import React from 'react';
 import { fallbackImage } from 'srcRootDir/entries/shopping/services/constants';
-import { toImageName } from '../../../services/utils';
+import { toProductImageUrl } from 'srcRootDir/entries/shopping/services';
 
 export interface Item {
   name: string;
@@ -28,7 +28,7 @@ export function Selector({ availableItems, onSelected }: SelectorProps) {
                 e.target.src = fallbackImage.src;
               }
             }}
-            src={`/images/${toImageName(product.name)}.webP`}
+            src={toProductImageUrl(product.name)}
           />
           {product.name}
         </div>

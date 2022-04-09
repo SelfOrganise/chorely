@@ -1,6 +1,6 @@
 import { fabric } from 'fabric';
 import { fallbackImage, Names, Types, Urls } from './constants';
-import { RoutesContext, toImageName } from '../services/utils';
+import { RoutesContext, toProductImageUrl } from '../services/utils';
 import Hammer from 'hammerjs';
 import { ICanvasOptions } from 'fabric/fabric-impl';
 
@@ -296,7 +296,7 @@ export class StoreMap {
   }
 
   addProduct({ name, left, top }: { name: string; left?: number; top?: number }) {
-    fabric.Image.fromURL(`/images/small/${toImageName(name)}.webP`, item => {
+    fabric.Image.fromURL(toProductImageUrl(name, true), item => {
       item.name = name;
       item.type = 'product';
       if (item.height === 0 || item.width === 0) {

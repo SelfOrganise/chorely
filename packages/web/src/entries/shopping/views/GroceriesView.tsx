@@ -14,7 +14,7 @@ export function GroceriesView(): JSX.Element {
   });
 
   return (
-    <React.Fragment>
+    <div className="w-full h-full grid grid-cols-[1fr_1fr]">
       {groceriesResponse.data?.map(g => (
         <GroceryItem
           key={g.id}
@@ -25,6 +25,6 @@ export function GroceriesView(): JSX.Element {
           }}
         />
       ))}
-    </React.Fragment>
+    </div>
   );
 }
