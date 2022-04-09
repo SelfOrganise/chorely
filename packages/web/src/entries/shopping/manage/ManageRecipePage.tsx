@@ -67,7 +67,7 @@ export function ManageRecipePage(): JSX.Element {
           <Tab.Panel>
             <div className="w-full h-full grid grid-cols-[1fr_1fr]">
               {groceriesResponse.data?.map(grocery => (
-                <GroceryItem key={grocery.id} item={grocery} onAdd={() => handleAddGroceryToRecipe(grocery)} />
+                <GroceryItem key={grocery.id} item={grocery} onClick={() => handleAddGroceryToRecipe(grocery)} />
               ))}
             </div>
           </Tab.Panel>

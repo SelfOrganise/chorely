@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import useSWR, { mutate } from 'swr';
 import { fetcher } from 'srcRootDir/common/services/fetcher';
 import { Button, TextField } from 'srcRootDir/common/components';
-import { addRecipe } from 'srcRootDir/entries/shopping/services/shopping';
+import { addRecipe, deleteRecipe } from 'srcRootDir/entries/shopping/services/shopping';
 import { toast } from 'react-toastify';
 import { useNavigate } from 'react-router-dom';
 import { RecipeItem } from 'srcRootDir/entries/shopping/manage/ManageRecipesPage/components/RecipeItem';
@@ -27,7 +27,7 @@ export function ManageRecipesPage() {
 
   return (
     <div className="flex flex-col justify-center w-full items-center p-4">
-      <div className="flex w-[400px] justify-center flex-col">
+      <div className="flex w-full justify-center flex-col">
         <TextField value={recipeName} onChange={e => setRecipeName(e.target.value)} />
         <Button disabled={recipeName.length < 3} onClick={handleAddRecipe}>
           Add recipe
@@ -40,6 +40,12 @@ export function ManageRecipesPage() {
             key={recipe.id}
             recipe={recipe}
             onClick={() => navigate(`/shopping/manage/recipes/${recipe.id}`)}
+            onDelete={async () => {
+              if (confirm(`Are you sure you want to remove "${recipe.name}"?`)) {
+                await deleteRecipe(recipe.id);
+                await recipes.mutate();
+              }
+            }}
           />
         ))}
       </div>

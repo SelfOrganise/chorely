@@ -19,7 +19,7 @@ export function GroceriesView(): JSX.Element {
         <GroceryItem
           key={g.id}
           item={g}
-          onAdd={async () => {
+          onClick={async () => {
             await addToBasket({ groceryId: g.id });
             toast.success(`added '${g.name}'`, { autoClose: 1500, position: 'bottom-center' });
           }}

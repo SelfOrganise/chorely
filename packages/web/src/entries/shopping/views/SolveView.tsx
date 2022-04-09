@@ -20,9 +20,6 @@ export function SolveView() {
 
   const mapResponse = useSWR<Array<MapData>>('/shopping/maps', {
     fetcher,
-    refreshInterval: 0,
-    revalidateOnMount: true,
-    revalidateOnFocus: true,
   });
 
   async function solve() {

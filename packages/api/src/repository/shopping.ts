@@ -181,7 +181,12 @@ export async function deleteGroceryFromBasket(groceryId: number, organisationId:
   await pool.query(
     `
     delete from basket_items
-    where basket_id = $1 and grocery_id = $2
+    where id in (
+        select id 
+        from basket_items 
+        where basket_id = $1 and grocery_id = $2 
+        limit 1
+    )
   `,
     [basket.id, groceryId]
   );

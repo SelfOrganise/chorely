@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useMemo } from 'react';
 import { GroceryItem } from 'srcRootDir/entries/shopping/manage/ManageGroceriesPage/components/GroceryItem';
 import { createNewBasket, deleteFromBasket } from 'srcRootDir/entries/shopping/services/shopping';
 import { Button } from 'srcRootDir/common/components';
@@ -8,6 +8,23 @@ import { useLiveBasket } from 'srcRootDir/entries/shopping/hooks';
 export function BasketView(): JSX.Element {
   const currentBasket = useLiveBasket(state => state.basket);
   const navigate = useNavigate();
+
+  const groupedGroceries: Array<Array<BasketItem>> = useMemo(() => {
+    if (!currentBasket) {
+      return [];
+    }
+
+    const result: Record<number, Array<BasketItem>> = {};
+    for (const item of currentBasket.items) {
+      if (result[item.id]) {
+        result[item.id].push(item);
+      } else {
+        result[item.id] = [item];
+      }
+    }
+
+    return Object.values(result);
+  }, [currentBasket]);
 
   return (
     <React.Fragment>
@@ -23,13 +40,15 @@ export function BasketView(): JSX.Element {
       <Button onClick={() => navigate('/shopping/basket/solve')}>🧠 Solve</Button>
 
       <div className="w-full grid grid-cols-[1fr_1fr]">
-        {currentBasket?.items.map((g: Grocery, i: number) => (
+        {groupedGroceries.map((group: Array<Grocery>, i: number) => (
           <GroceryItem
-            key={`${g.id}-${i}`}
-            item={g}
+            key={`${group[0].id}-${i}`}
+            item={group[0]}
+            count={group.length}
+            deleteLabel="Remove"
             onDelete={async () => {
-              if (confirm(`Are you sure you want to remove "${g.name}"?`)) {
-                await deleteFromBasket({ groceryId: g.id });
+              if (confirm(`Are you sure you want to remove "${group[0].name}"?`)) {
+                await deleteFromBasket({ groceryId: group[0].id });
               }
             }}
           />

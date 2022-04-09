@@ -17,6 +17,7 @@ export function useListenToLiveBasket(): void {
       sse.onopen = () => useLiveBasket.setState(state => ({ ...state, connected: true }));
       sse.onerror = () => useLiveBasket.setState(state => ({ ...state, connected: false }));
       sse.onmessage = e => useLiveBasket.setState(state => ({ ...state, basket: JSON.parse(e.data) }));
+
       return sse;
     };
 
@@ -24,6 +25,7 @@ export function useListenToLiveBasket(): void {
 
     const handleFocus = () => {
       if (!sse || sse.readyState === 2) {
+        useLiveBasket.setState(state => ({ ...state, connected: false }));
         sse.close();
         sse = setup();
       }
