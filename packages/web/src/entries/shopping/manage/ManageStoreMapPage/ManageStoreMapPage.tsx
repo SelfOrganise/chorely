@@ -9,6 +9,7 @@ import { Button } from 'srcRootDir/common/components';
 export function ManageStoreMapPage() {
   const canvasElement = useRef<HTMLCanvasElement | null>(null);
   const storeMap = useRef<StoreMap>();
+  const [title, setTitle] = useState('');
 
   const mapResponse = useSWR<Array<MapData>>('/shopping/maps', {
     fetcher,
@@ -38,6 +39,12 @@ export function ManageStoreMapPage() {
 
       if (!storeMap.current) {
         storeMap.current = new StoreMap(canvasElement.current);
+        const handleSelected = (e: any) => setTitle(e?.selected?.[0]?.name || '');
+        storeMap.current.canvas.on('selection:created', handleSelected);
+        storeMap.current.canvas.on('selection:updated', handleSelected);
+        storeMap.current.canvas.on('selection:cleared', () => {
+          setTitle('');
+        });
       }
 
       const imported = JSON.parse(mapResponse.data[0].data);
@@ -95,7 +102,8 @@ export function ManageStoreMapPage() {
         <Button onClick={() => storeMap.current?.paste()}>paste</Button>
         <Button onClick={() => storeMap.current?.delete()}>delete</Button>
       </div>
-      <div className="overflow-hidden border-2 border-black">
+      <div className="overflow-hidden border-2 border-black mt-1">
+        <div>Selected item: {title}</div>
         <canvas ref={canvasElement} />
       </div>
       <Selector
