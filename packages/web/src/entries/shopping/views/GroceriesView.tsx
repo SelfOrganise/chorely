@@ -25,7 +25,7 @@ export function GroceriesView(): JSX.Element {
         }}
       />
     ));
-  }, [basket]);
+  }, [basket, groceriesResponse]);
 
   return <div className="groceries-view w-full h-full grid grid-cols-[1fr_1fr]">{groceries}</div>;
 }

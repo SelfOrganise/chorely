@@ -1,6 +1,6 @@
 import useSWR from 'swr';
 import React, { useRef, useState } from 'react';
-import { Button } from 'srcRootDir/common/components';
+import { Button, Loading } from 'srcRootDir/common/components';
 import { StoreMap, Types, getAllRoutes, solveShopping } from 'srcRootDir/entries/shopping/services';
 import { fetcher } from 'srcRootDir/common/services/fetcher';
 import { useLiveBasket } from 'srcRootDir/entries/shopping/hooks';
@@ -11,16 +11,8 @@ export function SolveView() {
   const storeMap = useRef<StoreMap>();
   const currentBasket = useLiveBasket(state => state.basket);
 
-  const groceriesResponse = useSWR<Array<Grocery>>('/shopping/groceries', {
-    fetcher,
-    refreshInterval: 0,
-    revalidateOnFocus: false,
-    revalidateOnReconnect: false,
-  });
-
-  const mapResponse = useSWR<Array<MapData>>('/shopping/maps', {
-    fetcher,
-  });
+  const groceriesResponse = useSWR<Array<Grocery>>('/shopping/groceries', { fetcher });
+  const mapResponse = useSWR<Array<MapData>>('/shopping/maps', { fetcher });
 
   async function solve() {
     if (!mapResponse?.data?.[0]) {
@@ -71,6 +63,10 @@ export function SolveView() {
 
     storeMap.current?.canvas.forEachObject(o => (o.selectable = false));
     setResult(productRoutes);
+  }
+
+  if (mapResponse.isValidating) {
+    return <Loading />;
   }
 
   return (

@@ -1,7 +1,7 @@
 import React, { useMemo } from 'react';
 import { isAfter, parseISO } from 'date-fns';
 import { ChoreListItem } from 'srcRootDir/entries/chores/ChoreListItem';
-import { spinnerIcon } from 'srcRootDir/common/icons';
+import { Loading } from 'srcRootDir/common/components';
 
 interface ChoreListProps {
   chores: Array<Assignment> | undefined;
@@ -32,12 +32,7 @@ export function ChoreList({ chores, onComplete, areDone }: ChoreListProps) {
   }, [chores]);
 
   if (!sortedChores) {
-    return (
-      <div className="flex flex-col items-center justify-center m-8">
-        {spinnerIcon}
-        <h4 className="mt-4">Loading...</h4>
-      </div>
-    );
+    return <Loading />;
   }
 
   if (sortedChores.length === 0) {
