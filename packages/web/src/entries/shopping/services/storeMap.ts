@@ -114,6 +114,8 @@ const HammerCanvas: HammerCanvasClass = fabric.util.createClass(fabric.Canvas, {
   },
 });
 
+const colours = ['#48CC33', '#B733CC'];
+
 export class StoreMap {
   canvas: HammerCanvasClass;
   clipboard: fabric.Object | null = null;
@@ -122,7 +124,7 @@ export class StoreMap {
 
   constructor(canvasElement: HTMLCanvasElement) {
     this.canvas = new HammerCanvas(canvasElement, { selection: false });
-    this.canvas.setWidth(500);
+    this.canvas.setWidth(400);
     this.canvas.setHeight(300);
 
     const pattern = new fabric.Pattern({
@@ -256,7 +258,7 @@ export class StoreMap {
     this.canvas.remove(...lines);
 
     for (let i = 0; i < result.length; i++) {
-      const color = '#' + Math.floor(Math.random() * 16777215).toString(16);
+      const color = colours[i];
 
       for (let j = 0; j < result[i].length - 1; j++) {
         const a = result[i][j];

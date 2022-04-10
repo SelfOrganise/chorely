@@ -1,18 +1,16 @@
 import useSWR from 'swr';
-import React, { useRef, useState } from 'react';
+import React from 'react';
 import { Button, Loading } from 'srcRootDir/common/components';
-import { StoreMap, Types, getAllRoutes, solveShopping } from 'srcRootDir/entries/shopping/services';
+import { Types, getAllRoutes, solveShopping, RoutesContext } from 'srcRootDir/entries/shopping/services';
 import { fetcher } from 'srcRootDir/common/services/fetcher';
 import { useLiveBasket } from 'srcRootDir/entries/shopping/hooks';
+import { useNavigate } from 'react-router-dom';
 
 export function SolveView() {
-  const [result, setResult] = useState<Array<Array<Grocery>>>();
-  const canvasElement = useRef<HTMLCanvasElement | null>(null);
-  const storeMap = useRef<StoreMap>();
-  const currentBasket = useLiveBasket(state => state.basket);
-
   const groceriesResponse = useSWR<Array<Grocery>>('/shopping/groceries', { fetcher });
   const mapResponse = useSWR<Array<MapData>>('/shopping/maps', { fetcher });
+  const currentBasket = useLiveBasket(state => state.basket);
+  const navigate = useNavigate();
 
   async function solve() {
     if (!mapResponse?.data?.[0]) {
@@ -25,50 +23,59 @@ export function SolveView() {
       return;
     }
 
-    if (!canvasElement.current) {
-      throw Error('canvasElement.current is null');
-    }
-
-    if (!storeMap.current) {
-      storeMap.current = new StoreMap(canvasElement.current);
+    if (!currentBasket) {
+      alert('Basket not loaded');
+      return;
     }
 
     const mapDefinition: MapDefinition = JSON.parse(mapResponse.data[0].data);
 
     // we use this later to obtain an array of sizes, this needs to be the same order as the items in the map definition
     const productOrder: Array<Grocery> = [{ id: -1, name: 'start', size: 0 }];
-    const filteredMapDefinition: MapDefinition = [];
 
     // this forEach is needed to obtain the product order and to duplicate map items for each grocery instance in the
-    // basket so that each grocery is counted in the final weight
+    // basket so that each grocery is counted in the final weight, it's awkward code I know
+    const basketGroceriesAsMapDefinition = [];
     for (const mapItem of mapDefinition) {
       if (mapItem.type === Types.product && currentBasket) {
         const addedItems = currentBasket.items.filter(b => b.name === mapItem.name);
 
         for (const item of addedItems) {
           productOrder.push(item);
-          filteredMapDefinition.push(mapItem);
+          basketGroceriesAsMapDefinition.push(mapItem);
         }
       } else {
-        filteredMapDefinition.push(mapItem);
+        basketGroceriesAsMapDefinition.push(mapItem);
       }
     }
 
     productOrder.push({ id: -1, name: 'finish', size: 0 });
 
-    storeMap.current?.import(filteredMapDefinition);
-
     // note: getAllRoutes maintains order of passed in products
-    const routes = getAllRoutes(filteredMapDefinition);
-    const weights = routes.map(a => a.map(b => b.route?.length));
-    const response = await solveShopping({ weights, sizes: productOrder.map(p => p.size) });
+    const routesBetweenBasketGroceries = getAllRoutes(basketGroceriesAsMapDefinition);
+    const rawSolution = await solveShopping({
+      weights: routesBetweenBasketGroceries.map(a => a.map(b => b.route?.length)),
+      sizes: productOrder.map(p => p.size),
+    });
 
-    const productRoutes = response.map(user => user.map(p => productOrder[p]));
+    const groceriesSolution = rawSolution.map(sol => sol.map(productIndex => productOrder[productIndex]));
 
-    storeMap.current?.drawRoutes(response, routes);
+    const solution: {
+      basketId: number;
+      rawSolution: Array<Array<number>>;
+      groceriesSolution: Array<Array<Grocery>>;
+      routesBetweenBasketGroceries: RoutesContext;
+      basketGroceriesAsMapDefinition: MapDefinition;
+    } = {
+      basketId: currentBasket.id,
+      rawSolution,
+      groceriesSolution,
+      routesBetweenBasketGroceries,
+      basketGroceriesAsMapDefinition,
+    };
 
-    storeMap.current?.canvas.forEachObject(o => (o.selectable = false));
-    setResult(productRoutes);
+    window.localStorage.setItem('solution', JSON.stringify(solution));
+    navigate('/shopping/basket/solution');
   }
 
   if (mapResponse.isValidating) {
@@ -76,29 +83,9 @@ export function SolveView() {
   }
 
   return (
-    <div className="flex flex-col items-center">
-      <Button onClick={solve}>Solve</Button>
-      <div className="overflow-hidden border-2 border-black">
-        <canvas ref={canvasElement} />
-      </div>
-      {result && (
-        <div className="flex justify-around space-x-2 p-2">
-          <div className="border-2 p-2">
-            {result[0].map((v, i) => (
-              <div key={v.name + i}>
-                {v?.name} - {v?.size}
-              </div>
-            ))}
-          </div>
-          <div className="border-2 p-2">
-            {result[1].map((v, i) => (
-              <div key={v.name + i}>
-                {v?.name} - {v?.size}
-              </div>
-            ))}
-          </div>
-        </div>
-      )}
+    <div className="flex h-full flex-col justify-center items-center space-y-2">
+      <Button onClick={solve}>🧠 Solve 👨‍🎓</Button>
+      <Button onClick={() => navigate('/shopping/basket/solution')}>📚️ View last solution</Button>
     </div>
   );
 }
