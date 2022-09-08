@@ -7,30 +7,49 @@ on:
       - 'common/types/**'
   workflow_dispatch:
 
+env:
+  appName: chorely
+
 jobs:
   deploy-api:
     runs-on: ubuntu-latest
-    environment: upcloud
+    environment: hetzner
     steps:
       - uses: actions/checkout@v3
-      - name: Setup PNPM
-        uses: pnpm/action-setup@v2.2.1
+      - name: Login to Docker Hub
+        uses: docker/login-action@v2
         with:
-          version: 6
-      - name: Use Node.js 16.x
-        uses: actions/setup-node@v2
+          username: ${{ secrets.DOCKERHUB_USERNAME }}
+          password: ${{ secrets.DOCKERHUB_TOKEN }}
+      - run: docker build -t ${{ secrets.DOCKER_IMAGE_NAME }}:${{ github.run_number }} .
+      - run: docker push ${{ secrets.DOCKER_IMAGE_NAME }}:${{ github.run_number }}
+      - name: executing remote ssh commands using password
+        uses: appleboy/ssh-action@v0.1.5
         with:
-          node-version: 16.x
-          cache: 'pnpm'
-      - run: pnpm --filter api i --prod
-      - run: pnpm --filter api build
-      - name: Deploy 🚀
-        uses: appleboy/scp-action@v0.1.2
-        with:
-          strip_components: 3
-          host: ${{ secrets.HOST }}
-          username: ${{ secrets.USERNAME }}
-          password: ${{ secrets.PASSWORD }}
-          port: ${{ secrets.PORT }}
-          source: "packages/api/dist/*"
-          target: "/home/chores/api"
+          host: ${{ secrets.SSH_HOST }}
+          username: ${{ secrets.SSH_USERNAME }}
+          password: ${{ secrets.SSH_PASSWORD }}
+          port: ${{ secrets.SSH_PORT }}
+          script: |
+            podman container kill ${{ env.appName }} 
+            podman container rm ${{ env.appName }}
+
+            podman image prune -af
+            podman image pull ${{ secrets.DOCKER_IMAGE_NAME }}:${{ github.run_number }}
+
+            mkdir -p ${{ env.appName }}
+            cd ${{ env.appName }}
+
+            podman run \
+              --name ${{ env.appName }} \
+              -p 3000:3000 \
+              --restart unless-stopped \
+              --env "NODE_ENV=production" \
+              --env "DB_DATABASE=${{ secrets.DB_DATABASE }}" \
+              --env "DB_HOST=${{ secrets.DB_HOST }}" \
+              --env "DB_MAX_CONNECTIONS=${{ secrets.DB_MAX_CONNECTIONS }}" \
+              --env "DB_PASSWORD=${{ secrets.DB_PASSWORD }}" \
+              --env "DB_PORT=${{ secrets.DB_PORT }}" \
+              --env "DB_USER=${{ secrets.DB_USER }}" \
+              --env "SENDGRID_API_KEY=${{ secrets.SENDGRID_API_KEY }}" \
+              -d ${{ secrets.DOCKER_IMAGE_NAME }}:${{ github.run_number }}

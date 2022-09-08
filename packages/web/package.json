@@ -6,7 +6,7 @@
   "scripts": {
     "esbuild": "node scripts/build/esbuild.mjs",
     "build": "npm-run-all -l build:*",
-    "build:web": "BACKEND_ORIGIN=https://api.3pounds.cyou/chorely NODE_ENV=production npm run esbuild",
+    "build:web": "BACKEND_ORIGIN=https://chorely-api.3pounds.cyou NODE_ENV=production npm run esbuild",
     "build:tailwind": "npx tailwindcss -i ./src/tailwind.css -o ./dist/tailwind.css --minify",
     "import-images": "npm-run-all -l -p magick:*",
     "magick:convert-webp": "magick mogrify -format webP -quality 60 -resize 200x -path 'static/images' 'static/images_prepare/*'",
